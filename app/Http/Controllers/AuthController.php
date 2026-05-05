@@ -8,38 +8,38 @@ use App\Models\User;
 
 class AuthController extends Controller
 {
-    // Menampilkan halaman login/register
     public function showLogin()
     {
-        return view('login');
+        return view('auth.login'); 
     }
 
-    // Memproses Pendaftaran (Register)
     public function register(Request $request)
     {
-        // Validasi data
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed', // Harus cocok dengan password_confirmation
-            'role' => 'required|in:pencari,tuan_kos',
+            'password' => 'required|string|min:8|confirmed',
+            // SESUAIKAN DENGAN DATABASE: Saat daftar, pilihannya hanya pencari atau tuan_kos
+            'role' => 'required|in:pencari,tuan_kos', 
         ]);
 
-        // Simpan ke database
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => bcrypt($request->password), // Enkripsi password
-            'role' => $request->role,
+            'password' => bcrypt($request->password),
+            'role' => $request->role, // Akan masuk sebagai 'pencari' atau 'tuan_kos'
         ]);
 
-        // Otomatis login setelah daftar
         Auth::login($user);
 
-        return redirect('/')->with('success', 'Pendaftaran berhasil! Selamat datang di GRAHA.');
+        if ($user->role === 'tuan_kos') {
+            return redirect('/')->with('success', 'Pendaftaran berhasil! Selamat datang Pemilik Kos.');
+        } else {
+            // Karena foldernya bernama customer, rutenya kita namakan customer.index
+            return redirect()->route('customer.index')->with('success', 'Berhasil mendaftar! Silakan cari kos impianmu.');
+        }
     }
 
-    // Memproses Masuk (Login)
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -51,9 +51,21 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
-            
-            // Arahkan berdasarkan role jika diperlukan (saat ini semua ke dashboard)
-            return redirect()->intended('/')->with('success', 'Berhasil masuk.');
+
+            $role = auth()->user()->role;
+
+            // PENGECEKAN 4 ROLE SESUAI DATABASE TUANKU
+            if ($role === 'admin') {
+                return redirect()->route('admin.dashboard');
+            } elseif ($role === 'tuan_kos') {
+                return redirect()->intended('/');
+            } elseif ($role === 'penghuni') {
+                // Penghuni diarahkan ke dashboard khusus penghuni (misal lihat tagihan)
+                return redirect()->intended(route('customer.dashboard'))->with('success', 'Selamat datang kembali, Penghuni!');
+            } else {
+                // Pencari diarahkan ke halaman cari kos
+                return redirect()->intended(route('customer.index'))->with('success', 'Selamat datang kembali!');
+            }
         }
 
         return back()->withErrors([
@@ -61,13 +73,17 @@ class AuthController extends Controller
         ]);
     }
 
-    // Menampilkan halaman Pengaturan Akun Global
     public function globalSettings()
     {
-        return view('global-settings');
+        $role = auth()->user()->role;
+
+        if ($role === 'tuan_kos') {
+            return view('landlord.global-settings'); 
+        } 
+        // Tuanku bisa tambahkan pengaturan untuk role lain di sini nantinya
+        return abort(404, 'Halaman pengaturan untuk role ini belum dibuat.');
     }
 
-    // Memproses Keluar (Logout)
     public function logout(Request $request)
     {
         Auth::logout();
@@ -76,5 +92,4 @@ class AuthController extends Controller
 
         return redirect('/login');
     }
-
 }

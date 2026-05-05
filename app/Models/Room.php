@@ -13,7 +13,6 @@ class Room extends Model
         'facilities' => 'array',
     ];
 
-    // Relasi: 1 Kamar hanya milik 1 Properti (BelongsTo)
     public function property()
     {
         return $this->belongsTo(Property::class);

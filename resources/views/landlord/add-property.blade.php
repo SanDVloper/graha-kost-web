@@ -9,7 +9,6 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- ... kode lainnya ... -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
@@ -41,7 +40,6 @@
     <main class="flex-1 overflow-y-auto pb-24">
         <div class="max-w-4xl mx-auto px-6">
             
-            <!-- PROGRESS BAR SECTION -->
             <div class="py-12 relative px-10">
                 <div class="absolute top-1/2 left-0 w-full h-1.5 bg-gray-200 -translate-y-4 rounded-full z-0"></div>
                 <div class="absolute top-1/2 left-0 w-1/3 h-1.5 bg-[#38a38e] -translate-y-4 rounded-full z-0"></div>
@@ -62,23 +60,18 @@
                 </div>
             </div>
 
-            <!-- FORM SECTIONS (DIBUNGKUS TAG FORM) -->
             <form action="{{ url('/add-property') }}" method="POST" enctype="multipart/form-data" class="space-y-8">
-                <!-- Wajib ada di Laravel untuk keamanan pengiriman data -->
                 @csrf 
                 
-                <!-- CARD 1: Basic Information -->
                 <div class="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
                     <h2 class="text-2xl font-bold text-[#1e3a5f] mb-8">New Property Registration</h2>
                     
                     <div class="space-y-6">
-                        <!-- Property Name -->
                         <div>
                             <label class="block text-sm font-bold text-[#1e3a5f] mb-2">Property Name <span class="text-red-500">*</span></label>
                             <input type="text" name="name" required class="w-full bg-[#f4f5f7] border border-transparent rounded-lg px-4 py-3 text-slate-700 focus:outline-none focus:border-[#38a38e] focus:bg-white transition-colors" placeholder="Contoh: Kos Graha Indah">
                         </div>
 
-                        <!-- Type & Year -->
                         <div class="grid grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-sm font-bold text-[#1e3a5f] mb-2">Property Type <span class="text-red-500">*</span></label>
@@ -95,7 +88,6 @@
                             </div>
                         </div>
 
-                        <!-- Description -->
                         <div>
                             <label class="block text-sm font-bold text-[#1e3a5f] mb-2">Description</label>
                             <textarea name="description" rows="4" class="w-full bg-[#f4f5f7] border border-transparent rounded-lg px-4 py-3 text-slate-700 focus:outline-none focus:border-[#38a38e] focus:bg-white transition-colors" placeholder="Ceritakan keunggulan kos Anda secara singkat..."></textarea>
@@ -103,14 +95,12 @@
                     </div>
                 </div>
 
-                <!-- CARD 2: Facilities -->
                 <div class="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
                     <div class="mb-6">
                         <h2 class="text-xl font-bold text-[#1e3a5f] mb-1">Facility</h2>
                         <p class="text-sm text-gray-500">Facilities that all residents can enjoy. Room amenities are arranged in the next step.</p>
                     </div>
 
-                    <!-- Facility Grid -->
                     <div class="grid grid-cols-4 gap-4">
                         <div class="facility-card cursor-pointer border-2 border-transparent bg-[#f4f5f7] hover:border-gray-300 rounded-xl p-5 flex flex-col items-center justify-center gap-3 transition-all relative">
                             <!-- Input hidden ditambahkan agar datanya terkirim -->
@@ -156,7 +146,6 @@
                     </div>
                 </div>
 
-                <!-- CARD 3: Building Photos -->
                 <div class="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
                     <div class="mb-6">
                         <h2 class="text-xl font-bold text-[#1e3a5f] mb-1">Building Photos</h2>
@@ -177,7 +166,6 @@
                     </div>
                 </div>
 
-                <!-- Tombol Next diubah menjadi type="submit" -->
                 <div class="flex justify-end pt-4">
                     <button type="submit" class="bg-[#38a38e] hover:bg-teal-700 text-white font-bold text-lg py-3 px-10 rounded-lg shadow-md transition-transform transform hover:-translate-y-0.5">
                         Next Step <i class="fa-solid fa-arrow-right ml-2"></i>
@@ -188,35 +176,27 @@
         </div>
     </main>
 
-    <!-- LOGIKA JQUERY -->
     <script type="module">
         $(document).ready(function() {
             
-            // Logika Klik Kotak Fasilitas (Disempurnakan untuk backend)
             $('.facility-card').click(function() {
                 let checkbox = $(this).find('.hidden-checkbox');
                 let isActive = $(this).hasClass('border-[#38a38e]');
                 
                 if (!isActive) {
-                    // Tampilan aktif
                     $(this).removeClass('border-transparent bg-[#f4f5f7] hover:border-gray-300').addClass('border-[#38a38e] bg-teal-50');
                     $(this).find('.facility-icon').removeClass('text-gray-400').addClass('text-[#38a38e]');
                     $(this).find('.facility-text').removeClass('text-gray-500').addClass('text-[#38a38e]');
-                    // Centang input tersembunyi
                     checkbox.prop('checked', true);
                 } else {
-                    // Tampilan pasif
                     $(this).removeClass('border-[#38a38e] bg-teal-50').addClass('border-transparent bg-[#f4f5f7] hover:border-gray-300');
                     $(this).find('.facility-icon').removeClass('text-[#38a38e]').addClass('text-gray-400');
                     $(this).find('.facility-text').removeClass('text-[#38a38e]').addClass('text-gray-500');
-                    // Hilangkan centang
                     checkbox.prop('checked', false);
                 }
             });
 
-            // 2. Logika Area Upload Foto & Preview
             $('#upload-area').click(function(e) {
-                // Mencegah "pantulan klik" (infinite loop) yang bikin macet
                 if (e.target.id !== 'file-input') {
                     $('#file-input').click();
                 }
@@ -225,7 +205,7 @@
             $('#file-input').change(function(e) {
                 let files = e.target.files;
                 let previewContainer = $('#preview-container');
-                previewContainer.empty(); // Bersihkan preview lama
+                previewContainer.empty(); 
 
                 if (files.length > 5) {
                     alert("Maksimal 5 foto saja, Tuanku!");
@@ -233,7 +213,6 @@
                     return;
                 }
 
-                // Loop untuk menampilkan setiap gambar yang dipilih
                 $.each(files, function(i, file) {
                     let reader = new FileReader();
                     reader.onload = function(event) {

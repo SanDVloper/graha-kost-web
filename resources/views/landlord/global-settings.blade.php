@@ -11,7 +11,6 @@
 </head>
 <body class="bg-slate-50 flex h-screen overflow-hidden text-slate-800">
 
-    <!-- SIDEBAR GLOBAL (Sama seperti Dashboard Utama) -->
     <aside id="sidebar" class="w-64 bg-white border-r border-gray-200 flex flex-col transition-[width] duration-300 relative z-20">
         <div class="h-20 flex items-center px-6 border-b border-gray-200 overflow-hidden whitespace-nowrap">
             <div class="mr-3 shrink-0 flex items-center justify-center w-10">
@@ -31,7 +30,6 @@
 
             <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 mt-6 px-4 sidebar-text whitespace-nowrap">System</div>
             
-            <!-- Menu Pengaturan Global (Active) -->
             <a href="{{ route('settings.global') }}" class="flex items-center px-4 py-3 bg-teal-50 text-teal-600 rounded-lg transition-colors whitespace-nowrap">
                 <div class="w-6 shrink-0 flex justify-center"><i class="fa-solid fa-gear"></i></div>
                 <span class="font-bold ml-3 sidebar-text">Settings</span>
@@ -49,7 +47,6 @@
         </div>
     </aside>
 
-    <!-- MAIN CONTENT AREA -->
     <main class="flex-1 flex flex-col h-screen overflow-hidden bg-slate-50">
         
         <header class="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-8 shrink-0">
@@ -73,14 +70,12 @@
         <div class="flex-1 overflow-y-auto p-8">
             <div class="max-w-4xl mx-auto space-y-8">
 
-                <!-- PROFIL PENGGUNA -->
                 <div class="bg-white rounded-xl border border-gray-200 p-8 shadow-sm">
                     <h3 class="text-lg font-bold text-[#1e3a5f] mb-6 flex items-center border-b border-gray-100 pb-3">
                         <i class="fa-regular fa-id-badge text-teal-600 mr-3"></i> Profil Pengguna
                     </h3>
                     
                     <div class="flex flex-col md:flex-row gap-8 items-start">
-                        <!-- Avatar Upload -->
                         <div class="flex flex-col items-center space-y-3">
                             <div class="w-24 h-24 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center text-3xl font-bold uppercase border-4 border-white shadow-md relative group cursor-pointer overflow-hidden">
                                 {{ substr(auth()->user()->name, 0, 2) }}
@@ -91,7 +86,6 @@
                             <button class="text-xs font-bold text-[#38a38e] hover:underline">Ubah Foto</button>
                         </div>
 
-                        <!-- Form Data Diri -->
                         <div class="flex-1 w-full grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-sm font-bold text-gray-700 mb-2">Nama Lengkap</label>
@@ -118,7 +112,6 @@
                     </div>
                 </div>
 
-                <!-- KEAMANAN (UBAH PASSWORD) -->
                 <div class="bg-white rounded-xl border border-gray-200 p-8 shadow-sm">
                     <h3 class="text-lg font-bold text-[#1e3a5f] mb-6 flex items-center border-b border-gray-100 pb-3">
                         <i class="fa-solid fa-shield-halved text-teal-600 mr-3"></i> Keamanan & Password

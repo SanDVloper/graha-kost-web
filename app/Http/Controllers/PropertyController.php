@@ -12,7 +12,7 @@ class PropertyController extends Controller
     {
         // GANTI angka 1 menjadi auth()->id()
         $properties = Property::with('rooms')->where('user_id', auth()->id())->latest()->get();
-        return view('welcome', compact('properties'));
+        return view('landlord.welcome', compact('properties'));
     }
 
     // Fungsi untuk halaman Manajemen Properti Spesifik
@@ -21,12 +21,13 @@ class PropertyController extends Controller
         // Ambil data properti beserta kamarnya, pastikan hanya milik user yang sedang login
         $property = Property::with('rooms')->where('id', $id)->where('user_id', auth()->id())->firstOrFail();
         
-        return view('manage-property', compact('property'));
+        return view('landlord.manage-property', compact('property'));
     }
+    
     // Fungsi untuk menampilkan halaman Step 1
     public function createStep1()
     {
-        return view('add-property');
+        return view('landlord.add-property');
     }
 
     // Fungsi untuk memproses data dari Step 1 dan menyimpannya ke database
@@ -66,15 +67,17 @@ class PropertyController extends Controller
         // Ambil properti beserta semua tipe kamar di dalamnya
         $property = Property::with('rooms')->where('id', $id)->where('user_id', auth()->id())->firstOrFail();
         
-        return view('property-rooms', compact('property'));
+        return view('landlord.property-rooms', compact('property'));
     }
+    
     public function occupantList($id)
     {
         // Ambil data properti untuk memastikan ini milik user yang login
         $property = Property::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
         
-        return view('property-occupants', compact('property'));
+        return view('landlord.property-occupants', compact('property'));
     }
+    
     // Fungsi untuk memproses data dari Step 2
     public function storeStep2(Request $request, $id)
     {
@@ -112,6 +115,7 @@ class PropertyController extends Controller
         // 4. Lanjut ke Step 3 (Pratinjau) dengan membawa ID properti tersebut
         return redirect('/property-publish/' . $property->id);
     }
+    
     // Fungsi untuk menampilkan halaman Step 3 (Pratinjau)
     public function publishStep3($id)
     {
@@ -119,7 +123,7 @@ class PropertyController extends Controller
         $property = Property::with('rooms')->findOrFail($id);
         
         // Kirim datanya ke halaman property-publish
-        return view('property-publish', compact('property'));
+        return view('landlord.property-publish', compact('property'));
     }
     
     public function billingList($id)
@@ -127,7 +131,7 @@ class PropertyController extends Controller
         // Ambil data properti untuk memastikan ini milik user yang login
         $property = Property::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
         
-        return view('property-billing', compact('property'));
+        return view('landlord.property-billing', compact('property'));
     }
 
     public function complainList($id)
@@ -135,7 +139,7 @@ class PropertyController extends Controller
         // Ambil data properti untuk memastikan ini milik user yang login
         $property = Property::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
         
-        return view('property-complains', compact('property'));
+        return view('landlord.property-complains', compact('property'));
     }
 
     public function settings($id)
@@ -143,7 +147,7 @@ class PropertyController extends Controller
         // Ambil data properti untuk memastikan ini milik user yang login
         $property = Property::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
         
-        return view('property-settings', compact('property'));
+        return view('landlord.property-settings', compact('property'));
     }
 
 }
