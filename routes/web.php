@@ -5,7 +5,10 @@ use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CustomerController;
+<<<<<<< HEAD
 use App\Http\Controllers\ComplaintController;
+=======
+>>>>>>> 49c3cf517adcd415cecc4e0f02dd1bb68627fd28
 
 // ==========================================
 // 1. RUTE AUTENTIKASI (Bebas diakses)
@@ -64,7 +67,12 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/enrollment', [AdminController::class, 'enrollment'])->name('enrollment');
     Route::get('/tagihan', [AdminController::class, 'tagihan'])->name('tagihan');
     Route::get('/pembayaran', [AdminController::class, 'pembayaran'])->name('pembayaran');
+<<<<<<< HEAD
    Route::get('/complaints', [AdminController::class, 'complaints'])
     ->name('complaints.index');
 });
 
+=======
+    
+});
+>>>>>>> 49c3cf517adcd415cecc4e0f02dd1bb68627fd28
