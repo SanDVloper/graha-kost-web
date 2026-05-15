@@ -5,10 +5,7 @@ use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CustomerController;
-<<<<<<< HEAD
 use App\Http\Controllers\ComplaintController;
-=======
->>>>>>> 49c3cf517adcd415cecc4e0f02dd1bb68627fd28
 
 // ==========================================
 // 1. RUTE AUTENTIKASI (Bebas diakses)
@@ -61,18 +58,27 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
- 
+
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
-    Route::get('/kost/detail', [AdminController::class, 'kostDetail'])->name('kost.detail');
+
+    Route::get('/kost/detail', [AdminController::class, 'kostDetail'])->name('detail');
+
     Route::get('/enrollment', [AdminController::class, 'enrollment'])->name('enrollment');
+
     Route::get('/tagihan', [AdminController::class, 'tagihan'])->name('tagihan');
+
     Route::get('/pembayaran', [AdminController::class, 'pembayaran'])->name('pembayaran');
-<<<<<<< HEAD
-   Route::get('/complaints', [AdminController::class, 'complaints'])
-    ->name('complaints.index');
+
+    // complaints list
+    Route::get('/complaints', [AdminController::class, 'complaints'])
+        ->name('complaints.index');
+
+    // ✅ UPDATE STATUS (INI YANG BENAR)
+    Route::put('/complaints/{id}', [AdminController::class, 'updateStatus'])
+        ->name('complaints.updateStatus');
+
+    Route::get('/kost/{id}', [KostController::class, 'show'])
+        ->name('kost.show');
+
 });
 
-=======
-    
-});
->>>>>>> 49c3cf517adcd415cecc4e0f02dd1bb68627fd28

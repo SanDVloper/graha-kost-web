@@ -3,20 +3,21 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-<<<<<<< HEAD
 use App\Models\Complaint;
-=======
->>>>>>> 49c3cf517adcd415cecc4e0f02dd1bb68627fd28
-
+use App\Models\Kost;
+use Illuminate\Support\Facades\DB;
 class AdminController extends Controller
 {
     public function dashboard() {
         return view('admin.dashboard'); // Mengarah ke file dashboard.blade.php
     }
+  public function kostDetail(Request $request)
+{
+    $kosts = DB::table('kosts')->get();
 
-    public function kostDetail() {
-        return view('admin.detail');
-    }
+     
+    return view('admin.detail', compact('kosts'));
+}
 
     public function enrollment() {
         return view('admin.enrollment');
@@ -29,15 +30,49 @@ class AdminController extends Controller
     public function pembayaran() {
         return view('admin.pembayaran');
     }
-<<<<<<< HEAD
 
-      public function complaints() {
+     public function complaints()
+{
+    $complaints = collect([
+        (object)[
+            'id' => 1,
+            'user' => (object)[
+                'name' => 'Budi Santoso',
+                'email' => 'budi@mail.com'
+            ],
+            'judul' => 'Cara bayar kost gimana?',
+            'status' => 'pending',
+            'priority' => 'high'
+        ],
+        (object)[
+            'id' => 2,
+            'user' => (object)[
+                'name' => 'Siti Aminah',
+                'email' => 'siti@mail.com'
+            ],
+            'judul' => 'Webnya error',
+            'status' => 'proses',
+            'priority' => 'medium'
+        ],
+        (object)[
+            'id' => 3,
+            'user' => (object)[
+                'name' => 'Andi',
+                'email' => 'andi@mail.com'
+            ],
+            'judul' => 'Tidak bisa chat tuan kost',
+            'status' => 'selesai',
+            'priority' => 'low'
+        ],
+    ]);
 
-        $complaints = Complaint::latest()->get();
+    return view('admin.complaints.index', compact('complaints'));
+}
 
-        return view('admin.complaints.index', compact('complaints'));
-    }
+public function updateStatus($id)
+{
+    // karena dummy, kita cuma return balik
+    return back()->with('success', 'Status berhasil diupdate (dummy mode)');
+}
      
-=======
->>>>>>> 49c3cf517adcd415cecc4e0f02dd1bb68627fd28
 }

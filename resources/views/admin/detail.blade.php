@@ -42,7 +42,7 @@
             </a>
 
             <!-- Menu Kost (Active) -->
-            <a href="{{ route('admin.kost.detail') }}" class="flex items-center px-4 py-3 bg-teal-50 text-[#38a38e] rounded-lg transition-colors">
+            <a href="{{ route('admin.detail') }}" class="flex items-center px-4 py-3 bg-teal-50 text-[#38a38e] rounded-lg transition-colors">
                 <div class="w-6 shrink-0 flex justify-center"><i class="fa-solid fa-building"></i></div>
                 <span class="font-bold ml-3">Kost</span>
             </a>
@@ -52,11 +52,7 @@
                 <span class="font-medium ml-3">Transaksi</span>
             </a>
 
-<<<<<<< HEAD
             <a href="{{ route('admin.complaints.index') }}" class="flex items-center justify-between px-4 py-2.5 text-gray-500 hover:bg-gray-50 hover:text-[#38a38e] rounded-lg transition-colors">
-=======
-            <a href="#" class="flex items-center justify-between px-4 py-2.5 text-gray-500 hover:bg-gray-50 hover:text-[#38a38e] rounded-lg transition-colors">
->>>>>>> 49c3cf517adcd415cecc4e0f02dd1bb68627fd28
                 <div class="flex items-center">
                     <div class="w-6 shrink-0 flex justify-center"><i class="fa-solid fa-triangle-exclamation"></i></div>
                     <span class="font-medium ml-3">Komplain</span>
@@ -89,170 +85,199 @@
     </aside>
 
     <!-- MAIN CONTENT -->
-    <main class="flex-1 flex flex-col h-screen overflow-hidden">
+    <!-- MAIN WRAPPER FULL SCREEN -->
+<div class="w-full h-full flex flex-col space-y-6">
 
-        <!-- TOPBAR -->
-        <header class="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-8 shrink-0">
-            <div class="flex items-center font-bold text-xl text-[#1e3a5f]">
-                <i class="fa-solid fa-building mr-3 text-[#38a38e]"></i> Detail Kost
+    <!-- HEADER -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+
+        <div class="flex items-center font-bold text-xl text-[#1e3a5f]">
+            <i class="fa-solid fa-building mr-3 text-[#38a38e]"></i>
+            Data Kost
+        </div>
+
+        <!-- SEARCH -->
+        <form method="GET" action="{{ route('admin.detail') }}" class="w-full md:w-80">
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+
+                <input type="text"
+                       name="search"
+                       value="{{ request('search') }}"
+                       placeholder="Cari nama kost..."
+                       class="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm
+                              focus:outline-none focus:border-[#38a38e] bg-white shadow-sm">
             </div>
+        </form>
 
-            <div class="flex items-center gap-6">
-                <!-- Tombol Kembali -->
-                <a href="{{ route('admin.dashboard') }}" class="text-gray-500 hover:text-[#38a38e] font-bold text-sm transition-colors flex items-center gap-2">
-                    <i class="fa-solid fa-arrow-left"></i> Kembali ke Daftar
-                </a>
-            </div>
-        </header>
+    </div>
 
-        <!-- SCROLLABLE CONTENT AREA -->
-        <div class="flex-1 overflow-y-auto p-8">
-            
-            <!-- INFO UTAMA CARD -->
-            <div class="bg-white rounded-xl border border-gray-200 p-8 shadow-sm mb-8">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    
-                    <!-- FOTO -->
-                    <div class="col-span-1">
-                        <div class="aspect-[4/3] rounded-xl overflow-hidden border border-gray-200 shadow-sm relative">
-                            <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Kost Profile" class="w-full h-full object-cover">
-                            <div class="absolute top-3 left-3">
-                                <span class="bg-green-100 text-green-700 font-bold px-3 py-1 rounded-full text-xs shadow-sm flex items-center gap-1.5">
-                                    <i class="fa-solid fa-circle text-[8px]"></i> Aktif
-                                </span>
-                            </div>
-                        </div>
-                    </div>
+    <!-- TABLE CARD -->
+    <div class="flex-1 bg-white border border-gray-200 shadow-sm rounded-xl overflow-hidden flex flex-col">
 
-                    <!-- DETAIL -->
-                    <div class="col-span-1 md:col-span-2 flex flex-col justify-center">
-                        <div class="flex items-center justify-between mb-2">
-                            <h3 class="text-2xl font-bold text-[#1e3a5f]">Kost Putra Sejahtera</h3>
-                            <button class="text-gray-400 hover:text-red-500 transition-colors" title="Banned/Nonaktifkan Kost"><i class="fa-solid fa-ban"></i></button>
-                        </div>
-                        
-                        <p class="text-gray-500 text-sm mb-6 flex items-center gap-2">
-                            <i class="fa-solid fa-location-dot text-red-500"></i> Jl. Mawar No. 10, Denpasar
-                        </p>
+        <!-- HEADER -->
+        <div class="px-6 py-4 bg-gray-50 border-b flex items-center justify-between">
 
-                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 p-5 bg-slate-50 rounded-xl border border-gray-100">
-                            <div>
-                                <p class="text-xs text-gray-400 font-semibold mb-1 uppercase tracking-wider">Harga Mulai</p>
-                                <p class="font-bold text-[#1e3a5f]">Rp 1.000.000<span class="text-xs text-gray-500 font-normal">/bln</span></p>
-                            </div>
-                            <div>
-                                <p class="text-xs text-gray-400 font-semibold mb-1 uppercase tracking-wider">Total Kamar</p>
-                                <p class="font-bold text-slate-700">20 Unit</p>
-                            </div>
-                            <div>
-                                <p class="text-xs text-gray-400 font-semibold mb-1 uppercase tracking-wider">Kamar Terisi</p>
-                                <p class="font-bold text-[#38a38e]">15 Unit</p>
-                            </div>
-                            <div>
-                                <p class="text-xs text-gray-400 font-semibold mb-1 uppercase tracking-wider">Kamar Kosong</p>
-                                <p class="font-bold text-red-500">5 Unit</p>
-                            </div>
-                        </div>
-                        
-                        <div class="mt-6 flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs">BP</div>
-                            <div class="text-sm">
-                                <p class="font-bold text-slate-700">Bapak Pemilik (Owner)</p>
-                                <p class="text-xs text-gray-500">0812-3456-7890</p>
-                            </div>
-                        </div>
-                    </div>
+            <h3 class="font-bold text-[#1e3a5f]">
+                List Kost Terdaftar
+            </h3>
 
-                </div>
-            </div>
-
-            <!-- FASILITAS CARD -->
-            <div class="bg-white rounded-xl border border-gray-200 p-8 shadow-sm mb-8">
-                <h3 class="font-bold text-lg text-[#1e3a5f] mb-6 flex items-center border-b border-gray-100 pb-3">
-                    <i class="fa-solid fa-list-check text-teal-600 mr-3"></i> Fasilitas Umum Kost
-                </h3>
-
-                <div class="flex flex-wrap gap-3 text-sm">
-                    <span class="bg-slate-100 text-slate-600 px-4 py-2 rounded-lg font-medium flex items-center gap-2 border border-gray-200">
-                        <i class="fa-solid fa-wifi text-gray-400"></i> WiFi
-                    </span>
-                    <span class="bg-slate-100 text-slate-600 px-4 py-2 rounded-lg font-medium flex items-center gap-2 border border-gray-200">
-                        <i class="fa-solid fa-wind text-gray-400"></i> AC
-                    </span>
-                    <span class="bg-slate-100 text-slate-600 px-4 py-2 rounded-lg font-medium flex items-center gap-2 border border-gray-200">
-                        <i class="fa-solid fa-shower text-gray-400"></i> Kamar Mandi Dalam
-                    </span>
-                    <span class="bg-slate-100 text-slate-600 px-4 py-2 rounded-lg font-medium flex items-center gap-2 border border-gray-200">
-                        <i class="fa-solid fa-motorcycle text-gray-400"></i> Parkir Motor
-                    </span>
-                    <span class="bg-slate-100 text-slate-600 px-4 py-2 rounded-lg font-medium flex items-center gap-2 border border-gray-200">
-                        <i class="fa-solid fa-kitchen-set text-gray-400"></i> Dapur Bersama
-                    </span>
-                </div>
-            </div>
-
-            <!-- LIST KAMAR TABLE -->
-            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
-                <div class="p-6 border-b border-gray-200 flex justify-between items-center bg-gray-50/50">
-                    <h3 class="font-bold text-lg text-[#1e3a5f]">Daftar Kamar</h3>
-                    <button class="bg-[#38a38e] hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors shadow-sm">
-                        <i class="fa-solid fa-plus mr-1"></i> Tambah Kamar
-                    </button>
-                </div>
-
-                <table class="w-full text-left text-sm">
-                    <thead class="bg-gray-50 border-b border-gray-200 text-gray-500">
-                        <tr>
-                            <th class="py-4 px-6 font-semibold w-16 text-center">No</th>
-                            <th class="py-4 px-6 font-semibold">Nama Kamar / Tipe</th>
-                            <th class="py-4 px-6 font-semibold text-center">Status</th>
-                            <th class="py-4 px-6 font-semibold">Penghuni Saat Ini</th>
-                            <th class="py-4 px-6 font-semibold text-center">Aksi</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                            <td class="py-4 px-6 text-center text-gray-500 font-medium">1</td>
-                            <td class="py-4 px-6 font-bold text-[#1e3a5f]">Kamar A1 <span class="block text-xs font-normal text-gray-500">Tipe Standar</span></td>
-                            <td class="py-4 px-6 text-center">
-                                <span class="bg-teal-100 text-[#38a38e] font-bold px-3 py-1 rounded-full text-[10px] uppercase tracking-wider">Terisi</span>
-                            </td>
-                            <td class="py-4 px-6 font-medium text-slate-700">Budi Santoso</td>
-                            <td class="py-4 px-6 text-center">
-                                <button class="text-gray-400 hover:text-[#38a38e] transition-colors"><i class="fa-solid fa-eye"></i></button>
-                            </td>
-                        </tr>
-
-                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                            <td class="py-4 px-6 text-center text-gray-500 font-medium">2</td>
-                            <td class="py-4 px-6 font-bold text-[#1e3a5f]">Kamar A2 <span class="block text-xs font-normal text-gray-500">Tipe Standar</span></td>
-                            <td class="py-4 px-6 text-center">
-                                <span class="bg-red-100 text-red-600 font-bold px-3 py-1 rounded-full text-[10px] uppercase tracking-wider">Kosong</span>
-                            </td>
-                            <td class="py-4 px-6 font-medium text-gray-400 italic">-</td>
-                            <td class="py-4 px-6 text-center">
-                                <button class="text-gray-400 hover:text-[#38a38e] transition-colors"><i class="fa-solid fa-eye"></i></button>
-                            </td>
-                        </tr>
-
-                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                            <td class="py-4 px-6 text-center text-gray-500 font-medium">3</td>
-                            <td class="py-4 px-6 font-bold text-[#1e3a5f]">Kamar A3 <span class="block text-xs font-normal text-gray-500">Tipe VIP</span></td>
-                            <td class="py-4 px-6 text-center">
-                                <span class="bg-teal-100 text-[#38a38e] font-bold px-3 py-1 rounded-full text-[10px] uppercase tracking-wider">Terisi</span>
-                            </td>
-                            <td class="py-4 px-6 font-medium text-slate-700">Andi Pratama</td>
-                            <td class="py-4 px-6 text-center">
-                                <button class="text-gray-400 hover:text-[#38a38e] transition-colors"><i class="fa-solid fa-eye"></i></button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            <span class="text-xs text-gray-500">
+                Total: {{ count($kosts) }} kost
+            </span>
 
         </div>
-    </main>
 
+        <!-- TABLE -->
+        <div class="flex-1 overflow-auto">
+
+            <table class="w-full text-sm">
+
+                <thead class="bg-white border-b sticky top-0 z-10 text-gray-500">
+                    <tr>
+                        <th class="px-6 py-4 text-left">Gambar</th>
+                        <th class="px-6 py-4 text-left">Nama Kost</th>
+                        <th class="px-6 py-4 text-left">Pemilik</th>
+                        <th class="px-6 py-4 text-left">Alamat</th>
+                        <th class="px-6 py-4 text-center">Denah</th>
+                        <th class="px-6 py-4 text-center">Status</th>
+                        <th class="px-6 py-4 text-center">Aksi</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                @forelse($kosts as $kost)
+
+                    <tr class="border-b hover:bg-gray-50 transition">
+
+                        <!-- GAMBAR -->
+                        <td class="px-6 py-4">
+                            <img src="{{ asset('images/kost/kost1.jpeg' . $kost->image) }}"
+                                 class="w-14 h-14 object-cover rounded-lg border"
+                                 alt="kost">
+                        </td>
+
+                        <!-- NAMA -->
+                        <td class="px-6 py-4">
+                            <div class="font-bold text-[#1e3a5f]">
+                                {{ $kost->nama_kost }}
+                            </div>
+                            <div class="text-xs text-gray-400">
+                                ID #{{ $kost->id }}
+                            </div>
+                        </td>
+
+                        <!-- PEMILIK -->
+                        <td class="px-6 py-4 text-gray-700">
+                            {{ $kost->owner->name ?? '-' }}
+                        </td>
+
+                        <!-- ALAMAT -->
+                        <td class="px-6 py-4 text-gray-500">
+                            {{ $kost->alamat }}
+                        </td>
+
+                        <!-- DENAH -->
+                        <td class="px-6 py-4 text-center">
+
+                            @if(isset($kost->map_link) && $kost->map_link)
+                                <button onclick="openMap('{{ $kost->map_link }}')"
+                                        class="px-3 py-1.5 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg text-xs font-bold hover:bg-blue-100 transition">
+                                    Lihat Denah
+                                </button>
+                            @else
+                                <span class="text-gray-400 text-xs">Tidak ada</span>
+                            @endif
+
+                        </td>
+
+                        <!-- STATUS -->
+                        <td class="px-6 py-4 text-center">
+                            <span class="inline-flex px-3 py-1 rounded-full text-[11px]
+                                         bg-green-50 text-green-600 border border-green-200 font-bold">
+                                AKTIF
+                            </span>
+                        </td>
+
+                        <!-- ACTION -->
+                        <td class="px-6 py-4 text-center">
+
+                            <a href="{{ route('admin.kost.show', $kost->id) }}"
+                               class="inline-flex items-center gap-2 px-4 py-2
+                                      bg-[#38a38e] hover:bg-teal-700 text-white
+                                      rounded-lg text-xs font-bold transition shadow-sm">
+
+                                <i class="fa-solid fa-eye"></i>
+                                Detail
+
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                @empty
+
+                    <tr>
+                        <td colspan="7" class="text-center py-16 text-gray-400">
+                            Belum ada data kost
+                        </td>
+                    </tr>
+
+                @endforelse
+
+                </tbody>
+
+            </table>
+
+        </div>
+    </div>
+</div>
+
+<!-- ===================== -->
+<!-- MAP MODAL -->
+<!-- ===================== -->
+
+<div id="mapModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+
+    <div class="bg-white w-full max-w-3xl rounded-xl overflow-hidden shadow-lg">
+
+        <div class="flex items-center justify-between px-5 py-4 border-b">
+            <h3 class="font-bold text-[#1e3a5f]">Denah Lokasi Kost</h3>
+
+            <button onclick="closeMap()" class="text-gray-500 hover:text-red-500">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
+
+        <div class="p-2">
+            <iframe id="mapFrame"
+                    class="w-full h-[450px] rounded-lg"
+                    loading="lazy">
+            </iframe>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    function openMap(url) {
+    let modal = document.getElementById('mapModal');
+    let frame = document.getElementById('mapFrame');
+
+    frame.src = url;
+    modal.classList.remove('hidden');
+}
+
+function closeMap() {
+    let modal = document.getElementById('mapModal');
+    let frame = document.getElementById('mapFrame');
+
+    frame.src = "";
+    modal.classList.add('hidden');
+}
+</script>
 </body>
 </html>

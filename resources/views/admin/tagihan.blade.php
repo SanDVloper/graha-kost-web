@@ -44,7 +44,7 @@
                 <span class="font-medium ml-3">Pengguna</span>
             </a>
 
-            <a href="{{ route('admin.kost.detail') }}" class="flex items-center px-4 py-2.5 text-gray-500 hover:bg-gray-50 hover:text-[#38a38e] rounded-lg transition-colors">
+            <a href="{{ route('admin.detail') }}" class="flex items-center px-4 py-2.5 text-gray-500 hover:bg-gray-50 hover:text-[#38a38e] rounded-lg transition-colors">
                 <div class="w-6 shrink-0 flex justify-center"><i class="fa-solid fa-building"></i></div>
                 <span class="font-medium ml-3">Kost</span>
             </a>
@@ -55,11 +55,7 @@
                 <span class="font-bold ml-3">Transaksi</span>
             </a>
 
-<<<<<<< HEAD
             <a href="{{ route('admin.complaints.index') }}" class="flex items-center justify-between px-4 py-2.5 text-gray-500 hover:bg-gray-50 hover:text-[#38a38e] rounded-lg transition-colors">
-=======
-            <a href="#" class="flex items-center justify-between px-4 py-2.5 text-gray-500 hover:bg-gray-50 hover:text-[#38a38e] rounded-lg transition-colors">
->>>>>>> 49c3cf517adcd415cecc4e0f02dd1bb68627fd28
                 <div class="flex items-center">
                     <div class="w-6 shrink-0 flex justify-center"><i class="fa-solid fa-triangle-exclamation"></i></div>
                     <span class="font-medium ml-3">Komplain</span>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pengajuan Enrollment - Admin GRAHA</title>
+    <title>Komplain User - Admin GRAHA</title>
     
     <!-- MENGGUNAKAN STANDAR GRAHA: Vite, FontAwesome, dan Font Inter -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -34,8 +34,8 @@
                 <span class="font-medium ml-3">Dashboard</span>
             </a>
             
-            <!-- Menu Enrollment/Verifikasi (Active) -->
-            <a href="{{ route('admin.enrollment') }}" class="flex items-center px-4 py-3 bg-teal-50 text-[#38a38e] rounded-lg transition-colors">
+           
+            <a href="{{ route('admin.enrollment') }}" class="flex items-center px-4 py-2.5 text-gray-500 hover:bg-gray-50 hover:text-[#38a38e] rounded-lg transition-colors">
                 <div class="w-6 shrink-0 flex justify-center"><i class="fa-solid fa-user-check"></i></div>
                 <span class="font-bold ml-3">Enrollment</span>
             </a>
@@ -44,8 +44,8 @@
                 <div class="w-6 shrink-0 flex justify-center"><i class="fa-solid fa-users"></i></div>
                 <span class="font-medium ml-3">Pengguna</span>
             </a>
-
-            <a href="{{ route('admin.kost.detail') }}" class="flex items-center px-4 py-2.5 text-gray-500 hover:bg-gray-50 hover:text-[#38a38e] rounded-lg transition-colors">
+           
+            <a href="{{ route('admin.detail') }}" class="flex items-center px-4 py-2.5 text-gray-500 hover:bg-gray-50 hover:text-[#38a38e] rounded-lg transition-colors">
                 <div class="w-6 shrink-0 flex justify-center"><i class="fa-solid fa-building"></i></div>
                 <span class="font-medium ml-3">Kost</span>
             </a>
@@ -55,7 +55,8 @@
                 <span class="font-medium ml-3">Transaksi</span>
             </a>
 
-            <a href="#" class="flex items-center justify-between px-4 py-2.5 text-gray-500 hover:bg-gray-50 hover:text-[#38a38e] rounded-lg transition-colors">
+              <!-- Menu Kost (Active) -->
+            <a href="#"  class="flex items-center px-4 py-3 bg-teal-50 text-[#38a38e] rounded-lg transition-colors">
                 <div class="flex items-center">
                     <div class="w-6 shrink-0 flex justify-center"><i class="fa-solid fa-triangle-exclamation"></i></div>
                     <span class="font-medium ml-3">Komplain</span>
@@ -88,194 +89,197 @@
     </aside>
 
     <!-- MAIN CONTENT -->
-    <!-- MAIN WRAPPER (biar konsisten kayak enrollment) -->
-<div class="flex-1 flex flex-col h-full overflow-hidden">
+  
+<div class="w-full h-screen flex flex-col bg-slate-50">
 
-    <!-- TOPBAR -->
-    <header class="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-8 shrink-0">
+    <!-- HEADER -->
+    <div class="px-6 py-4 border-b flex items-center justify-between bg-gray-50">
+        <h2 class="font-bold text-[#1e3a5f]">
+            Daftar Komplain
+        </h2>
 
-        <div class="flex items-center font-bold text-xl text-[#1e3a5f]">
-            <i class="fa-solid fa-triangle-exclamation mr-3 text-[#38a38e]"></i>
-            Data Komplain
-        </div>
-
-    </header>
-
-    <!-- SCROLLABLE CONTENT -->
-    <div class="flex-1 overflow-y-auto p-8">
-
-        <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
-
-            <!-- KOLOM KIRI -->
-            <div class="xl:col-span-1 space-y-6">
-
-                <!-- TOTAL -->
-                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                    <p class="text-sm text-gray-500">Total Komplain</p>
-                    <h2 class="text-3xl font-bold text-[#1e3a5f] mt-2">
-                        {{ count($complaints) }}
-                    </h2>
-                </div>
-
-                <!-- STATUS -->
-                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-3">
-
-                    <h3 class="font-bold text-[#1e3a5f] mb-2">Status Komplain</h3>
-
-                    <div class="flex justify-between text-sm">
-                        <span>Pending</span>
-                        <span class="font-bold text-yellow-600">
-                            {{ $complaints->where('status','pending')->count() }}
-                        </span>
-                    </div>
-
-                    <div class="flex justify-between text-sm">
-                        <span>Proses</span>
-                        <span class="font-bold text-blue-600">
-                            {{ $complaints->where('status','proses')->count() }}
-                        </span>
-                    </div>
-
-                    <div class="flex justify-between text-sm">
-                        <span>Selesai</span>
-                        <span class="font-bold text-green-600">
-                            {{ $complaints->where('status','selesai')->count() }}
-                        </span>
-                    </div>
-
-                </div>
-
-            </div>
-
-            <!-- KOLOM KANAN -->
-            <div class="xl:col-span-2">
-
-                <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-
-                    <!-- HEADER TABLE -->
-                    <div class="p-6 border-b border-gray-200 flex justify-between items-center bg-gray-50/50">
-
-                        <h3 class="font-bold text-lg text-[#1e3a5f]">
-                            Daftar Komplain
-                        </h3>
-
-                        <input type="text"
-                               placeholder="Cari komplain..."
-                               class="px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#38a38e]">
-
-                    </div>
-
-                    <!-- TABLE -->
-                    <div class="overflow-x-auto">
-
-                        <table class="w-full text-sm">
-
-                            <thead class="bg-white border-b text-gray-500">
-                                <tr>
-                                    <th class="py-4 px-6 text-left">User</th>
-                                    <th class="py-4 px-6 text-left">Judul</th>
-                                    <th class="py-4 px-6 text-left">Status</th>
-                                    <th class="py-4 px-6 text-center">Aksi</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-
-                                @forelse($complaints as $complaint)
-
-                                <tr class="border-b hover:bg-gray-50 transition">
-
-                                    <td class="py-4 px-6">
-                                        <div class="font-bold text-[#1e3a5f]">
-                                            {{ $complaint->user->name }}
-                                        </div>
-                                        <div class="text-xs text-gray-500">
-                                            {{ $complaint->user->email }}
-                                        </div>
-                                    </td>
-
-                                    <td class="py-4 px-6 text-gray-700">
-                                        {{ $complaint->judul }}
-                                    </td>
-
-                                    <td class="py-4 px-6">
-
-                                        @if($complaint->status == 'pending')
-                                            <span class="bg-yellow-50 text-yellow-600 border border-yellow-200 px-3 py-1 rounded-full text-xs font-bold">
-                                                Pending
-                                            </span>
-
-                                        @elseif($complaint->status == 'proses')
-                                            <span class="bg-blue-50 text-blue-600 border border-blue-200 px-3 py-1 rounded-full text-xs font-bold">
-                                                Proses
-                                            </span>
-
-                                        @else
-                                            <span class="bg-green-50 text-green-600 border border-green-200 px-3 py-1 rounded-full text-xs font-bold">
-                                                Selesai
-                                            </span>
-                                        @endif
-
-                                    </td>
-
-                                    <td class="py-4 px-6 text-center">
-
-                                        <form action="{{ route('complaints.updateStatus', $complaint->id) }}"
-                                              method="POST"
-                                              class="flex justify-center gap-2">
-
-                                            @csrf
-                                            @method('PUT')
-
-                                            <select name="status"
-                                                    class="border rounded-lg px-2 py-1 text-sm">
-
-                                                <option value="pending">Pending</option>
-                                                <option value="proses">Proses</option>
-                                                <option value="selesai">Selesai</option>
-
-                                            </select>
-
-                                            <button type="submit"
-                                                    class="bg-[#38a38e] hover:bg-teal-700 text-white px-3 py-1 rounded text-xs font-bold">
-                                                Update
-                                            </button>
-
-                                        </form>
-
-                                    </td>
-
-                                </tr>
-
-                                @empty
-
-                                <tr>
-                                    <td colspan="4" class="text-center py-10 text-gray-500">
-                                        Belum ada komplain
-                                    </td>
-                                </tr>
-
-                                @endforelse
-
-                            </tbody>
-
-                        </table>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
+        <span class="text-xs text-gray-500">
+            Total: {{ count($complaints) }}
+        </span>
     </div>
 
+    <!-- TABLE WRAPPER -->
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+
+            <thead class="bg-white border-b text-gray-500 sticky top-0 z-10">
+                <tr>
+                    <th class="text-left px-6 py-4">User</th>
+                    <th class="text-left px-6 py-4">Keluhan</th>
+                    <th class="text-left px-6 py-4">Priority</th>
+                    <th class="text-left px-6 py-4">Status</th>
+                    <th class="text-center px-6 py-4">Aksi</th>
+                </tr>
+            </thead>
+
+            <tbody class="divide-y divide-gray-100">
+
+            @forelse($complaints as $complaint)
+
+                <tr class="hover:bg-gray-50 transition">
+
+                    <!-- USER -->
+                    <td class="px-6 py-4">
+                        <div class="font-bold text-[#1e3a5f]">
+                            {{ $complaint->user->name }}
+                        </div>
+                        <div class="text-xs text-gray-400">
+                            {{ $complaint->user->email }}
+                        </div>
+                    </td>
+
+                    <!-- JUDUL -->
+                    <td class="px-6 py-4 text-gray-700">
+                        {{ $complaint->judul }}
+                    </td>
+
+                    <!-- PRIORITY -->
+                    <td class="px-6 py-4">
+
+                        @if($complaint->priority == 'high')
+                            <span class="px-3 py-1 text-xs font-bold rounded-full bg-red-50 text-red-600 border border-red-200">
+                                High
+                            </span>
+
+                        @elseif($complaint->priority == 'medium')
+                            <span class="px-3 py-1 text-xs font-bold rounded-full bg-yellow-50 text-yellow-600 border border-yellow-200">
+                                Medium
+                            </span>
+
+                        @else
+                            <span class="px-3 py-1 text-xs font-bold rounded-full bg-green-50 text-green-600 border border-green-200">
+                                Low
+                            </span>
+                        @endif
+
+                    </td>
+
+                    <!-- STATUS -->
+                    <td class="px-6 py-4">
+
+                        @if($complaint->status == 'pending')
+                            <span class="px-3 py-1 text-xs font-bold rounded-full bg-yellow-50 text-yellow-600 border border-yellow-200">
+                                Pending
+                            </span>
+
+                        @elseif($complaint->status == 'proses')
+                            <span class="px-3 py-1 text-xs font-bold rounded-full bg-blue-50 text-blue-600 border border-blue-200">
+                                Proses
+                            </span>
+
+                        @else
+                            <span class="px-3 py-1 text-xs font-bold rounded-full bg-green-50 text-green-600 border border-green-200">
+                                Selesai
+                            </span>
+                        @endif
+
+                    </td>
+
+                    <!-- ACTION -->
+                    <td class="px-6 py-4">
+
+                        <div class="flex items-center justify-center gap-2">
+
+                            <!-- DETAIL -->
+                            <button type="button"
+                                onclick="showDetail(
+                                    '{{ $complaint->user->name }}',
+                                    '{{ $complaint->judul }}',
+                                    '{{ $complaint->priority }}',
+                                    '{{ $complaint->status }}'
+                                )"
+                                class="px-3 py-1 text-xs bg-[#1e3a5f] text-white rounded hover:bg-[#16324a]">
+                                Detail
+                            </button>
+
+                            <!-- UPDATE -->
+                            <form action="{{ route('admin.complaints.updateStatus', $complaint->id) }}" method="POST">
+                                @csrf
+                                @method('PUT')
+
+                                <select name="status"
+                                    class="border border-gray-200 rounded px-2 py-1 text-xs focus:outline-none">
+
+                                    <option value="pending">Pending</option>
+                                    <option value="proses">Proses</option>
+                                    <option value="selesai">Selesai</option>
+
+                                </select>
+
+                                <button class="ml-1 bg-[#38a38e] hover:bg-teal-700 text-white px-2 py-1 rounded text-xs font-bold">
+                                    Save
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+            @empty
+
+                <tr>
+                    <td colspan="5" class="text-center py-10 text-gray-400">
+                        Belum ada komplain
+                    </td>
+                </tr>
+
+            @endforelse
+
+            </tbody>
+
+        </table>
+    </div>
 </div>
 
+<!-- MODAL -->
+<div id="modal"
+     class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
 
+    <div class="bg-white w-[420px] rounded-xl shadow-lg p-6">
+
+        <h2 class="text-lg font-bold text-[#1e3a5f] mb-4">
+            Detail Komplain
+        </h2>
+
+        <div class="space-y-2 text-sm">
+
+            <p><b>User:</b> <span id="m-user"></span></p>
+            <p><b>Judul:</b> <span id="m-judul"></span></p>
+            <p><b>Priority:</b> <span id="m-priority"></span></p>
+            <p><b>Status:</b> <span id="m-status"></span></p>
+
+        </div>
+
+        <button onclick="closeModal()"
+                class="mt-5 w-full bg-[#38a38e] hover:bg-teal-700 text-white py-2 rounded-lg">
+            Tutup
+        </button>
+
+    </div>
+</div>
 <script>
+<script>
+function showDetail(user, judul, priority, status) {
+    document.getElementById('m-user').innerText = user;
+    document.getElementById('m-judul').innerText = judul;
+    document.getElementById('m-priority').innerText = priority;
+    document.getElementById('m-status').innerText = status;
 
+    document.getElementById('modal').classList.remove('hidden');
+}
+
+function closeModal() {
+    document.getElementById('modal').classList.add('hidden');
+}
+</script>
 </script>
 
 </body>
