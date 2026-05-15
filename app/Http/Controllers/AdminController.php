@@ -74,5 +74,35 @@ public function updateStatus($id)
     // karena dummy, kita cuma return balik
     return back()->with('success', 'Status berhasil diupdate (dummy mode)');
 }
+
+public function users()
+{
+    $users = collect([
+
+        (object)[
+            'name' => 'Guntur Putra',
+            'email' => 'guntur@mail.com',
+            'role' => 'owner',
+            'status' => 'aktif',
+        ],
+
+        (object)[
+            'name' => 'Siti Aminah',
+            'email' => 'siti@mail.com',
+            'role' => 'penghuni',
+            'status' => 'aktif',
+        ],
+
+        (object)[
+            'name' => 'Budi Santoso',
+            'email' => 'budi@mail.com',
+            'role' => 'user',
+            'status' => 'pending',
+        ],
+
+    ]);
+
+    return view('admin.users', compact('users'));
+}
      
 }

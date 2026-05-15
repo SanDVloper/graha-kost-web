@@ -80,5 +80,8 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/kost/{id}', [KostController::class, 'show'])
         ->name('kost.show');
 
+    Route::get('/users', [AdminController::class, 'users'])
+        ->name('users');
+
 });
 

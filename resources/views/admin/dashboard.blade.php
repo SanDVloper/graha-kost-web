@@ -38,7 +38,7 @@
                 <span class="font-medium ml-3">Verifikasi Akun</span>
             </a>
 
-            <a href="#" class="flex items-center px-4 py-2.5 text-gray-500 hover:bg-gray-50 hover:text-[#38a38e] rounded-lg transition-colors">
+            <a href="{{ route('admin.users') }}" class="flex items-center px-4 py-2.5 text-gray-500 hover:bg-gray-50 hover:text-[#38a38e] rounded-lg transition-colors">
                 <div class="w-6 shrink-0 flex justify-center"><i class="fa-solid fa-users"></i></div>
                 <span class="font-medium ml-3">Pengguna</span>
             </a>
