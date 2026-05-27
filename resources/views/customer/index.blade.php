@@ -18,7 +18,7 @@
     <div class="container mx-auto px-6 -mt-10 relative z-20">
         <!-- RUTE DIUBAH KE customer.index -->
         <form action="{{ route('customer.index') }}" method="GET" class="bg-white p-5 rounded-2xl shadow-xl flex flex-wrap gap-4 items-center border border-gray-100">
-            
+
             <div class="flex-1 min-w-[280px] relative">
                 <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
                     <i class="fa-solid fa-magnifying-glass"></i>
@@ -65,80 +65,71 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <!-- LOOPING MENGGUNAKAN $properties -->
             @forelse($properties as $item)
-            <div class="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 border border-gray-100 group flex flex-col">
-                
-                <!-- Foto Kos (Dengan Fallback Aman) -->
-                <div class="relative h-56 overflow-hidden bg-gray-200 shrink-0">
-                    @php
-                        // Logika untuk mengambil foto pertama dari array JSON, jika kosong pakai gambar default
-                        $fotoUtama = 'https://via.placeholder.com/400x300?text=Graha+Kos';
-                        if(!empty($item->photos) && is_array($item->photos) && count($item->photos) > 0) {
-                            $fotoUtama = asset('storage/' . $item->photos[0]);
-                        }
-                    @endphp
-                    <img src="{{ $fotoUtama }}" alt="{{ $item->name }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
-                    
-                    <div class="absolute top-4 left-4">
-                        <span class="bg-white/90 backdrop-blur px-3 py-1.5 rounded-full text-[10px] font-black text-teal-700 uppercase tracking-widest shadow-sm">
-                            Kos {{ ucfirst($item->type ?? 'Umum') }}
-                        </span>
-                    </div>
-                </div>
+                <div class="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 border border-gray-100 group flex flex-col">
 
-                <!-- Detail Kos -->
-                <div class="p-7 flex-1 flex flex-col">
-                    <div class="flex justify-between items-start mb-2">
-                        <!-- NAMA KOLOM DIUBAH MENJADI name -->
-                        <h3 class="font-bold text-xl text-gray-800 leading-tight group-hover:text-teal-600 transition-colors">{{ $item->name }}</h3>
-                    </div>
-                    
-                    <!-- ALAMAT (Dengan nilai default jika kolom belum ada) -->
-                    <p class="text-gray-400 text-sm mb-5 flex items-center">
-                        <i class="fa-solid fa-location-dot mr-2 text-red-400"></i> {{ $item->address ?? 'Singaraja, Bali' }}
-                    </p>
+                    <div class="relative h-56 overflow-hidden bg-gray-200 shrink-0">
+                        @php
+                // Menentukan foto utama: cek kolom photos (JSON), jika kosong cek kolom image (string)
+                            $fotoUtama = 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=500&q=80';
+                            if(!empty($item->photos) && is_array($item->photos) && count($item->photos) > 0) {
+                                $fotoUtama = asset('storage/' . $item->photos[0]);
+                            } elseif(!empty($item->image)) {
+                                $fotoUtama = asset('images/' . $item->image);
+                            }
+                        @endphp
+                        <img src="{{ $fotoUtama }}" alt="{{ $item->name }}" class="w-full h-full object-cover group-hover:scale-110 transition duration duration-700">
 
-                    <div class="flex gap-3 mb-6">
-                        <span class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 text-xs" title="WiFi"><i class="fa-solid fa-wifi"></i></span>
-                        <span class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 text-xs" title="Kamar Mandi"><i class="fa-solid fa-bath"></i></span>
-                        <span class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 text-xs" title="Kasur"><i class="fa-solid fa-bed"></i></span>
-                    </div>
-
-                    <div class="flex justify-between items-end pt-5 border-t border-gray-50 mt-auto">
-                        <div>
-                            <span class="block text-xs text-gray-400 uppercase font-bold tracking-tighter mb-1">Mulai Dari</span>
-                            <!-- MENGAMBIL HARGA KAMAR TERENDAH ATAU DEFAULT 500rb -->
-                            <span class="text-teal-600 font-extrabold text-xl">
-                                Rp {{ number_format($item->rooms->min('price_monthly') ?? 500000, 0, ',', '.') }}
+                        <div class="absolute top-4 left-4">
+                            <span class="bg-white/90 backdrop-blur px-3 py-1.5 rounded-full text-[10px] font-black text-teal-700 uppercase tracking-widest shadow-sm">
+                                Kos {{ ucfirst($item->type ?? 'Umum') }}
                             </span>
-                            <span class="text-gray-400 text-xs">/bln</span>
                         </div>
-                        
-                        <!-- RUTE DIUBAH KE customer.show -->
-                        <a href="{{ route('customer.show', $item->id) }}" class="bg-[#1E3A8A] text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-blue-900 transition-all shadow-md">
-                            Lihat Detail
-                        </a>
                     </div>
-                </div>
-            </div>
-            
-            @empty
-            <div class="col-span-full bg-white rounded-3xl p-20 text-center border-2 border-dashed border-gray-100">
-                <div class="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <i class="fa-solid fa-house-circle-exclamation text-3xl text-gray-300"></i>
-                </div>
-                <h3 class="text-xl font-bold text-gray-800 mb-2">Kos Tidak Ditemukan</h3>
-                <p class="text-gray-400 max-w-sm mx-auto">Coba gunakan kata kunci lain atau ubah filter harga untuk menemukan hunian yang pas.</p>
-                <a href="{{ route('customer.index') }}" class="mt-6 inline-block text-teal-600 font-bold hover:underline">Reset Semua Filter</a>
-            </div>
-            @endforelse
-        </div>
-    </div>
 
-    <!-- BAGIAN 4: NAVIGASI PAGINATION -->
-    <div class="container mx-auto px-6 mt-16 flex justify-center">
-        @if($properties instanceof \Illuminate\Pagination\LengthAwarePaginator)
-            {{ $properties->appends(request()->query())->links() }}
-        @endif
-    </div>
-</div>
-@endsection
+                        <div class="p-7 flex-1 flex flex-col">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-bold text-xl text-gray-800 leading-tight group-hover:text-teal-600 transition-colors">{{ $item->name }}</h3>
+                            </div>
+
+                        <p class="text-gray-400 text-sm mb-2 flex items-center">
+                            <i class="fa-solid fa-location-dot mr-2 text-red-400"></i> {{ $item->location ?? $item->address ?? 'Kota Malang' }}
+                        </p>
+                        <p class="text-teal-600 text-xs font-bold mb-5 flex items-center">
+                            <i class="fa-solid fa-walking mr-2"></i> {{ $item->distance ?? 'Dekat Kampus' }}
+                        </p>
+
+                        <div class="flex gap-3 mb-6">
+                            <span class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 text-xs" title="WiFi"><i class="fa-solid fa-wifi"></i></span>
+                            <span class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 text-xs" title="Kamar Mandi"><i class="fa-solid fa-bath"></i></span>
+                            <span class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 text-xs" title="Kasur"><i class="fa-solid fa-bed"></i></span>
+                        </div>
+
+                        <div class="flex justify-between items-end pt-5 border-t border-gray-50 mt-auto">
+                            <div>
+                                <span class="block text-xs text-gray-400 uppercase font-bold tracking-tighter mb-1">Mulai Dari</span>
+                                <span class="text-teal-600 font-extrabold text-xl">
+                                    Rp {{ number_format($item->price ?? ($item->rooms->min('price_monthly') ?? 500000), 0, ',', '.') }}
+                                </span>
+                                <span class="text-gray-400 text-xs">/bln</span>
+                            </div>
+
+                            <a href="{{ route('customer.show', $item->id) }}" class="bg-[#1E3A8A] text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-blue-900 transition-all shadow-md">
+                                Lihat Detail
+                            </a>
+                            </div>
+                        </div>
+
+                    </div>
+                @empty
+                    @endforelse
+                </div>
+            </div>
+
+            <!-- BAGIAN 4: NAVIGASI PAGINATION -->
+            <div class="container mx-auto px-6 mt-16 flex justify-center">
+                @if($properties instanceof \Illuminate\Pagination\LengthAwarePaginator)
+                    {{ $properties->appends(request()->query())->links() }}
+                @endif
+            </div>
+        </div>
+        @endsection

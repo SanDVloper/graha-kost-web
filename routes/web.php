@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\PropertyController; 
+use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CustomerController;
@@ -22,11 +22,11 @@ Route::get('/cari-kos', [CustomerController::class, 'index'])->name('customer.in
 Route::get('/detail-kos/{id}', [CustomerController::class, 'show'])->name('customer.show');
 
 Route::middleware(['auth'])->group(function () {
-    
+
     Route::get('/settings', [AuthController::class, 'globalSettings'])->name('settings.global');
 
     Route::get('/', [PropertyController::class, 'index']);
-    
+
     Route::get('/add-property', [PropertyController::class, 'createStep1']);
     Route::post('/add-property', [PropertyController::class, 'storeStep1']);
 
@@ -44,11 +44,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/property/{id}/settings', [PropertyController::class, 'settings'])->name('property.settings');
 
     Route::post('/enroll-kos', [CustomerController::class, 'enroll'])->name('customer.enroll');
-    
+
     Route::get('/tagihan-saya', [CustomerController::class, 'billing'])->name('customer.billing');
     Route::post('/bayar-tagihan/{id}', [CustomerController::class, 'pay'])->name('customer.pay');
     Route::post('/kirim-komplain', [CustomerController::class, 'complain'])->name('customer.complain');
-    
+
     Route::get('/beri-ulasan/{id}', function($id) {
         $property = \App\Models\Property::findOrFail($id);
         return view('customer.ulasan', compact('property'));
