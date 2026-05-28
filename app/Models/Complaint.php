@@ -7,11 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class Complaint extends Model
 {
+    use HasFactory;
+
+    // Disamakan persis dengan isi tabel di migration kamu
     protected $fillable = [
         'user_id',
         'judul',
-        'isi_komplain',
-        'status'
+        'isi_komplain'
     ];
 
     public function user()

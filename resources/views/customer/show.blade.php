@@ -1,22 +1,26 @@
 @extends('layouts.app')
 
 @section('content')
+@php
+    // Hitung nominal manual berdasarkan kecocokan tipe kosan tim kamu
+    $hargaFallback = 600000;
+    if($property->type == 'putri') $hargaFallback = 850000;
+    if($property->type == 'putra') $hargaFallback = 750000;
+    if(str_contains(strtolower($property->name), 'premium') || str_contains(strtolower($property->name), 'luxury')) {
+        $hargaFallback = 1800000;
+    } elseif($property->type == 'campur' && $hargaFallback == 600000) {
+        $hargaFallback = 1200000;
+    }
+
+    // Mengambil foto utama berdasarkan ID kosan
+    $mainPhoto = asset('image/kos' . $property->id . '.jpg');
+@endphp
+
 <div class="bg-gray-50 min-h-screen pb-20">
 
-    @php
-        // Logika aman untuk mengambil foto (Mendukung data JSON tim & data dummy string)
-        $photos = (!empty($property->photos) && is_array($property->photos)) ? $property->photos : [];
-        $mainPhoto = 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=1200&q=50';
-
-        if (count($photos) > 0) {
-            $mainPhoto = asset('storage/' . $photos[0]);
-        } elseif (!empty($property->image)) {
-            $mainPhoto = asset('images/' . $property->image);
-        }
-    @endphp
-
+    <!-- Banner Foto Utama -->
     <div class="w-full h-[40vh] md:h-[50vh] relative">
-        <img src="{{ $mainPhoto }}" alt="{{ $property->name }}" class="w-full h-full object-cover">
+        <img src="{{ $mainPhoto }}" alt="{{ $property->name }}" class="w-full h-full object-cover" onerror="this.src='https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=1200&q=50'">
         <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
 
         <a href="{{ route('customer.index') }}" class="absolute top-6 left-6 bg-white/20 backdrop-blur-md hover:bg-white/40 text-white p-3 rounded-full transition-all">
@@ -27,8 +31,21 @@
     <div class="container mx-auto px-6 -mt-20 relative z-10">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
+            <!-- Kolom Kiri: Detail Informasi Kos -->
             <div class="lg:col-span-2 space-y-6">
                 <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+
+                    <!-- ALERT NOTIFIKASI SUKSES -->
+                    @if(session('success'))
+                        <div class="mb-6 p-4 bg-emerald-50 border-l-4 border-emerald-500 rounded-r-xl text-emerald-800 font-medium shadow-sm flex items-center">
+                            <i class="fa-solid fa-circle-check mr-3 text-emerald-500 text-lg"></i>
+                            <div class="text-sm">
+                                {{ session('success') }}
+                            </div>
+                        </div>
+                    @endif
+
+                    <!-- Badge Kategori -->
                     <div class="flex flex-wrap gap-2 mb-4">
                         <span class="bg-teal-50 text-teal-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
                             Kos {{ ucfirst($property->type ?? 'Umum') }}
@@ -38,6 +55,7 @@
                         </span>
                     </div>
 
+                    <!-- Judul dan Alamat -->
                     <h1 class="text-3xl font-bold text-[#1E3A8A] mb-2">{{ $property->name }}</h1>
                     <p class="text-gray-500 flex items-center mb-6">
                         <i class="fa-solid fa-location-dot mr-2 text-red-400"></i>
@@ -50,6 +68,7 @@
                     </p>
                 </div>
 
+                <!-- Komponen Fasilitas Umum -->
                 <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
                     <h3 class="text-lg font-bold text-[#1E3A8A] mb-4 flex items-center">
                         <i class="fa-solid fa-couch mr-2 text-teal-500"></i> Fasilitas Umum
@@ -71,6 +90,7 @@
                     </div>
                 </div>
 
+                <!-- Komponen Tipe Kamar Tersedia -->
                 <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
                     <h3 class="text-lg font-bold text-[#1E3A8A] mb-6 flex items-center">
                         <i class="fa-solid fa-bed mr-2 text-teal-500"></i> Tipe Kamar Tersedia
@@ -94,6 +114,7 @@
                             </div>
                         </div>
                         @empty
+                        <!-- FIX HARGA: Membaca variabel hitungan manual agar sinkron dengan halaman pencarian -->
                         <div class="border border-gray-100 rounded-2xl p-5 bg-gray-50/50">
                             <div class="flex justify-between items-center flex-wrap gap-4">
                                 <div>
@@ -104,7 +125,7 @@
                                 </div>
                                 <div class="text-right">
                                     <span class="block text-xs text-gray-400 uppercase font-bold">Harga Per Bulan</span>
-                                    <span class="text-xl font-extrabold text-teal-600">Rp {{ number_format($property->price ?? 0, 0, ',', '.') }}</span>
+                                    <span class="text-xl font-extrabold text-teal-600">Rp {{ number_format($hargaFallback, 0, ',', '.') }}</span>
                                 </div>
                             </div>
                         </div>
@@ -113,16 +134,24 @@
                 </div>
             </div>
 
+            <!-- Kolom Kanan: Card Aksi & Harga Dinamis -->
             <div class="lg:col-span-1">
                 <div class="bg-white p-6 rounded-3xl shadow-xl shadow-blue-900/5 border border-gray-100 sticky top-24">
                     <div class="text-center mb-6 pb-6 border-b border-gray-100">
                         <span class="block text-sm text-gray-500 mb-1">Mulai dari</span>
+
+                        <!-- FIX HARGA: Membaca variabel hitungan manual agar sinkron dengan halaman pencarian -->
                         <h2 class="text-3xl font-extrabold text-[#1E3A8A]">
-                            Rp {{ number_format(($property->rooms && $property->rooms->count() > 0) ? $property->rooms->min('price_monthly') : ($property->price ?? 0), 0, ',', '.') }}
+                            @if($property->rooms && $property->rooms->count() > 0)
+                                Rp {{ number_format($property->rooms->first()->price_monthly, 0, ',', '.') }}
+                            @else
+                                Rp {{ number_format($hargaFallback, 0, ',', '.') }}
+                            @endif
                         </h2>
                         <span class="text-sm text-gray-400">/ bulan</span>
                     </div>
 
+                    <!-- Aturan Properti -->
                     <div class="space-y-3 text-sm text-gray-600 mb-8">
                         <div class="flex justify-between">
                             <span>Aturan Listrik</span>
@@ -140,6 +169,7 @@
                         @endif
                     </div>
 
+                    <!-- Form Ajukan Sewa -->
                     <form action="{{ route('customer.enroll') }}" method="POST">
                         @csrf
                         <input type="hidden" name="property_id" value="{{ $property->id }}">
