@@ -15,25 +15,27 @@ class CustomerController extends Controller
      * Fitur 1: Jelajah (Eksplorasi & Pencarian)
      */
     public function index(Request $request)
-    {
-        $query = Property::query();
+{
+    $query = Property::query();
 
-        if ($request->filled('search')) {
-            $query->where(function($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%')
-                  ->orWhere('description', 'like', '%' . $request->search . '%');
-            });
-        }
-
-        if ($request->filled('kategori')) {
-            $query->where('type', strtolower($request->kategori));
-        }
-
-        $properties = $query->latest()->get();
-
-        return view('customer.index', compact('properties'));
+    // JIKA USER MENGETIK SESUATU DI SEARCH BAR (Misal: Tabanan, Singaraja, Jimbaran)
+    if ($request->filled('search')) {
+        $query->where(function($q) use ($request) {
+            // Mencari kata kunci di dalam kolom 'name' atau 'description' yang ada di DB
+            $q->where('name', 'like', '%' . $request->search . '%')
+              ->orWhere('description', 'like', '%' . $request->search . '%');
+        });
     }
 
+    // Filter kategori tipe kos (Putra/Putri/Campur)
+    if ($request->filled('kategori')) {
+        $query->where('type', strtolower($request->kategori));
+    }
+
+    $properties = $query->latest()->get();
+
+    return view('customer.index', compact('properties'));
+}
     /**
      * Fitur 2: Ajukan Sewa (Enroll)
      */
