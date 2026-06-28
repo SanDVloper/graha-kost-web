@@ -25,8 +25,8 @@ class DatabaseSeeder extends Seeder
         // 4. BUAT DATA USER UTAMA (ADMIN) DENGAN ID = 1
         DB::table('users')->insert([
             'id' => 1,
-            'name' => 'Adiwidya Admin',
-            'email' => 'admin@graha.com',
+            'name' => 'Adiwidya',
+            'email' => 'customer@graha.com',
             'password' => Hash::make('password123'),
             'created_at' => now(),
             'updated_at' => now(),

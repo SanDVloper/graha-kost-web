@@ -60,6 +60,11 @@ Route::middleware(['auth'])->group(function () {
     // 2. Rute POST (Bawaan timmu) untuk memproses data komplain ke database
     Route::post('/kirim-komplain', [CustomerController::class, 'complain'])->name('customer.complain');
 
+    // 🟢 3. RUTE BARU: Halaman khusus kos yang disewa oleh Penghuni Kos (Dasbor Hunian)
+    Route::get('/kos-saya', function() {
+        return view('customer.my-kos');
+    })->name('customer.myKos');
+
     Route::get('/beri-ulasan/{id}', function($id) {
         $property = \App\Models\Property::findOrFail($id);
         return view('customer.ulasan', compact('property'));
