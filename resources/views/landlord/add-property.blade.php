@@ -9,7 +9,6 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
         ::-webkit-scrollbar { width: 8px; }
@@ -20,7 +19,6 @@
 </head>
 <body class="bg-[#f4f7f6] text-slate-800 min-h-screen flex flex-col">
 
-    <!-- TOP NAVIGATION BAR -->
     <header class="bg-white border-b border-gray-200 px-8 py-5 flex items-center justify-between sticky top-0 z-50 shadow-sm">
         <div class="flex items-center gap-6">
             <a href="{{ url('/') }}" class="text-gray-500 hover:text-teal-600 transition-colors text-xl">
@@ -36,7 +34,6 @@
         </a>
     </header>
 
-    <!-- MAIN CONTENT SCROLLABLE AREA -->
     <main class="flex-1 overflow-y-auto pb-24">
         <div class="max-w-4xl mx-auto px-6">
             
@@ -103,7 +100,6 @@
 
                     <div class="grid grid-cols-4 gap-4">
                         <div class="facility-card cursor-pointer border-2 border-transparent bg-[#f4f5f7] hover:border-gray-300 rounded-xl p-5 flex flex-col items-center justify-center gap-3 transition-all relative">
-                            <!-- Input hidden ditambahkan agar datanya terkirim -->
                             <input type="checkbox" name="facilities[]" value="WiFi" class="hidden hidden-checkbox">
                             <i class="fa-solid fa-wifi text-3xl text-gray-400 facility-icon"></i>
                             <span class="text-sm font-semibold text-gray-500 facility-text">WiFi / Internet</span>
@@ -151,9 +147,7 @@
                         <h2 class="text-xl font-bold text-[#1e3a5f] mb-1">Building Photos</h2>
                         <p class="text-sm text-gray-500">Upload photos of the front and common areas. (Format: JPG/PNG, Max. 5MB)</p>
                     </div>
-                    <div id="preview-container" class="grid grid-cols-5 gap-4 mt-6">
-
-                    </div>
+                    <div id="preview-container" class="grid grid-cols-5 gap-4 mt-6"></div>
 
                     <div id="upload-area" class="cursor-pointer border-2 border-dashed border-gray-300 bg-[#f4f5f7] hover:bg-gray-50 hover:border-[#38a38e] rounded-xl p-12 flex flex-col items-center justify-center transition-colors">
                         <div class="w-16 h-16 rounded-full bg-teal-100 flex items-center justify-center mb-4">
@@ -161,8 +155,26 @@
                         </div>
                         <h3 class="text-[#1e3a5f] font-bold text-lg">Click or drag images here to upload</h3>
                         <p class="text-sm text-gray-400 mt-2">Maximum 5 photos allowed</p>
-                        <!-- Atribut name ditambahkan pada input file -->
                         <input type="file" name="photos[]" id="file-input" class="hidden" multiple accept="image/png, image/jpeg">
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
+                    <div class="mb-6">
+                        <h2 class="text-xl font-bold text-[#1e3a5f] mb-1">Floor Plan (Denah Kos)</h2>
+                        <p class="text-sm text-gray-500">Upload an image of your property's layout/floor plan to help tenants visualize the space.</p>
+                    </div>
+                    
+                    <div id="denah-preview-container" class="mb-6 hidden">
+                        </div>
+
+                    <div id="denah-upload-area" class="cursor-pointer border-2 border-dashed border-gray-300 bg-[#f4f5f7] hover:bg-gray-50 hover:border-[#38a38e] rounded-xl p-10 flex flex-col items-center justify-center transition-colors">
+                        <div class="w-14 h-14 rounded-full bg-teal-100 flex items-center justify-center mb-4">
+                            <i class="fa-solid fa-map text-xl text-[#38a38e]"></i>
+                        </div>
+                        <h3 class="text-[#1e3a5f] font-bold text-base">Click here to upload floor plan</h3>
+                        <p class="text-sm text-gray-400 mt-2">Format: JPG/PNG (1 Photo)</p>
+                        <input type="file" name="floor_plan" id="denah-file-input" class="hidden" accept="image/png, image/jpeg">
                     </div>
                 </div>
 
@@ -179,6 +191,7 @@
     <script type="module">
         $(document).ready(function() {
             
+            // Logic untuk Facility
             $('.facility-card').click(function() {
                 let checkbox = $(this).find('.hidden-checkbox');
                 let isActive = $(this).hasClass('border-[#38a38e]');
@@ -196,6 +209,7 @@
                 }
             });
 
+            // Logic untuk Upload Building Photos (Multiple)
             $('#upload-area').click(function(e) {
                 if (e.target.id !== 'file-input') {
                     $('#file-input').click();
@@ -217,7 +231,7 @@
                     let reader = new FileReader();
                     reader.onload = function(event) {
                         let html = `
-                            <div class="relative group aspect-square rounded-xl overflow-hidden border border-gray-200">
+                            <div class="relative group aspect-square rounded-xl overflow-hidden border border-gray-200 shadow-sm">
                                 <img src="${event.target.result}" class="w-full h-full object-cover">
                                 <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
                                     <span class="text-white text-xs font-bold">Image ${i+1}</span>
@@ -228,6 +242,36 @@
                     };
                     reader.readAsDataURL(file);
                 });
+            });
+
+            // Logic untuk Upload Denah Kos (Single Photo)
+            $('#denah-upload-area').click(function(e) {
+                if (e.target.id !== 'denah-file-input') {
+                    $('#denah-file-input').click();
+                }
+            });
+
+            $('#denah-file-input').change(function(e) {
+                let file = e.target.files[0];
+                let previewContainer = $('#denah-preview-container');
+                
+                if (file) {
+                    let reader = new FileReader();
+                    reader.onload = function(event) {
+                        let html = `
+                            <div class="relative group w-1/3 aspect-video rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+                                <img src="${event.target.result}" class="w-full h-full object-cover">
+                                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                    <span class="text-white text-xs font-bold"><i class="fa-solid fa-map mr-1"></i> Preview Denah</span>
+                                </div>
+                            </div>
+                        `;
+                        previewContainer.html(html).removeClass('hidden');
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    previewContainer.empty().addClass('hidden');
+                }
             });
 
         });

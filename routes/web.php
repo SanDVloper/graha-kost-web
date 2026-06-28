@@ -48,16 +48,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/tagihan-saya', [CustomerController::class, 'billing'])->name('customer.billing');
     Route::post('/bayar-tagihan/{id}', [CustomerController::class, 'pay'])->name('customer.pay');
 
-    // ✅ RUTE BARU: Menampilkan lembar kuitansi resmi setelah pembayaran lunas
     Route::get('/kuitansi-saya/{id}', [CustomerController::class, 'invoice'])->name('customer.invoice');
 
-    // ✅ PERBAIKAN FITUR KOMPLAIN CUSTOMER
-    // 1. Rute GET untuk menampilkan halaman form komplain
     Route::get('/komplain-saya', function() {
         return view('customer.complain');
     })->name('customer.complain.view');
 
-    // 2. Rute POST (Bawaan timmu) untuk memproses data komplain ke database
     Route::post('/kirim-komplain', [CustomerController::class, 'complain'])->name('customer.complain');
 
     Route::get('/beri-ulasan/{id}', function($id) {
@@ -80,11 +76,10 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
     Route::get('/pembayaran', [AdminController::class, 'pembayaran'])->name('pembayaran');
 
-    // complaints list
     Route::get('/complaints', [AdminController::class, 'complaints'])
         ->name('complaints.index');
 
-    // ✅ UPDATE STATUS (INI YANG BENAR)
+    // ✅ UPDATE STATUS (INI YANG BENAR)  ini data penghuni kost nggak mau masuk ke database Rlasinya tabelny berantakan banget. udah dibilang dari awal samain dulu idnya
     Route::put('/complaints/{id}', [AdminController::class, 'updateStatus'])
         ->name('complaints.updateStatus');
 
