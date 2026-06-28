@@ -10,6 +10,7 @@
 </head>
 <body class="bg-gray-50 font-sans antialiased text-gray-900 flex flex-col min-h-screen">
 
+    <!-- ==================== NAVIGATION BAR ATAS ==================== -->
     <nav class="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50">
         <div class="container mx-auto px-6 py-4 flex justify-between items-center">
             <a href="{{ url('/') }}" class="text-2xl font-extrabold text-[#1E3A8A] flex items-center">
@@ -19,42 +20,51 @@
             <div class="flex items-center gap-6">
                 <a href="{{ route('customer.index') }}" class="text-gray-600 hover:text-teal-600 font-bold transition">Cari Kos</a>
 
-                @guest
-                    <a href="{{ route('login') }}" class="bg-teal-50 text-teal-700 px-6 py-2 rounded-xl font-bold hover:bg-teal-100 transition border border-teal-100">Masuk</a>
-                @else
+                <!-- 🔐 KONDISI A: JIKA SUDAH LOGIN (AKUN SUDAH TERTAUT) -->
+                @if(Auth::check())
 
-                    @if(Auth::user()->role == 'penghuni')
-                        <a href="{{ route('customer.billing') }}" class="text-gray-600 hover:text-teal-600 font-bold transition flex items-center">
-                            <i class="fa-solid fa-wallet mr-1.5 text-sm"></i> Billing
-                        </a>
-
-                        <a href="{{ route('customer.complain.view') }}" class="text-gray-600 hover:text-teal-600 font-bold transition flex items-center">
-                            <i class="fa-solid fa-circle-exclamation mr-1.5 text-sm"></i> Komplain
-                        </a>
-
+                    <!-- Jika user berada di halaman kos-saya, munculkan menu khusus Penghuni -->
+                    @if(Request::is('kos-saya*'))
+                        @if(Auth::user()->role == 'penghuni')
+                            <a href="{{ route('customer.billing') }}" class="text-gray-600 hover:text-teal-600 font-bold transition flex items-center">
+                                <i class="fa-solid fa-wallet mr-1.5 text-sm"></i> Billing
+                            </a>
+                            <a href="{{ route('customer.complain.view') }}" class="text-gray-600 hover:text-teal-600 font-bold transition flex items-center">
+                                <i class="fa-solid fa-circle-exclamation mr-1.5 text-sm"></i> Komplain
+                            </a>
+                        @endif
                     @else
-                        <button type="button" onclick="bukaModalNotifikasi()" class="text-gray-600 hover:text-blue-600 font-bold transition flex items-center relative py-1">
-                            <i class="fa-solid fa-bell text-lg"></i>
-                            <span class="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white animate-ping"></span>
-                            <span class="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
-                        </button>
+                        <!-- 🏠 Jika masih di halaman Cari Kos tapi SUDAH login, munculkan tombol akses ke Kos Saya -->
+                        <a href="{{ route('customer.myKos') }}" class="bg-[#1E3A8A] text-white px-4 py-2 rounded-xl text-xs font-black hover:bg-blue-900 transition flex items-center gap-1 shadow-sm">
+                            <i class="fa-solid fa-house-user"></i> Halaman Kos Saya
+                        </a>
                     @endif
 
+                    <!-- Identitas Akun Terdaftar (Nama Dinamis) -->
                     <span class="text-gray-800 font-medium border-l pl-4 border-gray-200">Halo, {{ Auth::user()->name }}!</span>
 
+                    <!-- Form Logout Resmi -->
                     <form action="{{ route('logout') }}" method="POST" class="inline">
                         @csrf
-                        <button type="submit" class="text-red-500 font-bold hover:text-red-700 transition">Logout</button>
+                        <button type="submit" class="text-red-500 font-bold hover:text-red-700 transition text-xs">Logout</button>
                     </form>
-                @endguest
+
+                @else
+                    <!-- 🔓 KONDISI B: JIKA BELUM LOGIN (GUEST / AKUN BELUM TERTAUT) -->
+                    <a href="{{ route('login') }}" class="bg-teal-50 text-teal-700 px-6 py-2 rounded-xl font-bold hover:bg-teal-100 transition border border-teal-100 flex items-center gap-1.5 text-xs">
+                        <i class="fa-solid fa-right-to-bracket"></i> Masuk / Daftar
+                    </a>
+                @endif
             </div>
         </div>
     </nav>
 
+    <!-- ==================== KONTEN UTAMA HALAMAN BERSANGKUTAN ==================== -->
     <main class="flex-grow">
         @yield('content')
     </main>
 
+    <!-- ==================== MODAL NOTIFIKASI ACC ==================== -->
     @auth
         <div id="modal-notifikasi-acc" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] hidden items-center justify-center p-4 flex">
             <div class="bg-white rounded-3xl p-6 max-w-sm w-full text-center shadow-2xl border border-gray-100 relative">
@@ -70,7 +80,7 @@
                         <span class="bg-emerald-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-md uppercase tracking-wider">Approved</span>
                     </div>
                     <p class="text-[11px] text-emerald-700 leading-relaxed">
-                        Selamat! Pengajuan sewa Anda untuk <strong>Kos Graha Dewata</strong> telah disetujui oleh pemilik kos. Silakan masuk ke halaman kos sewaan Anda untuk mengelola hunian secara penuh.
+                        Selamat! Pengajuan sewa Anda telah disetujui oleh pemilik kos. Silakan masuk ke halaman kos sewaan Anda untuk mengelola hunian secara penuh.
                     </p>
                 </div>
 
@@ -79,31 +89,30 @@
                 </button>
             </div>
         </div>
-
-        <script>
-            function bukaModalNotifikasi() {
-                document.getElementById('modal-notifikasi-acc').classList.remove('hidden');
-            }
-            function tutupModalNotifikasi() {
-                document.getElementById('modal-notifikasi-acc').classList.add('hidden');
-            }
-
-            // 🟢 EDIT: Mengubah fungsi redirect agar mengarah ke halaman khusus kos sewaan miliknya
-            function masukHalamanKosSewa() {
-                tutupModalNotifikasi();
-                alert('Simulasi Sukses!\nStatus Anda kini aktif sebagai "Penghuni Kos". Menu Billing & Komplain otomatis tersedia di dalam halaman hunian Anda!');
-
-                // Dialihkan ke rute halaman khusus kos yang disewa sesuai skenariomu
-                window.location.href = "/kos-saya";
-            }
-        </script>
     @endauth
 
+    <!-- ==================== FOOTER KAKI HALAMAN ==================== -->
     <footer class="bg-white border-t border-gray-100 py-8 mt-auto">
         <div class="container mx-auto px-6 text-center text-gray-400 text-sm">
             <p>&copy; 2026 GRAHA - Manajemen Kos Modern. Dibuat dengan <i class="fa-solid fa-heart text-red-500 mx-1"></i> oleh Tuanku.</p>
         </div>
     </footer>
+
+    <!-- ==================== JAVASCRIPT LOGIC INTERACTION ==================== -->
+    <script>
+        function bukaModalNotifikasi() {
+            var modal = document.getElementById('modal-notifikasi-acc');
+            if(modal) modal.classList.remove('hidden');
+        }
+        function tutupModalNotifikasi() {
+            var modal = document.getElementById('modal-notifikasi-acc');
+            if(modal) modal.classList.add('hidden');
+        }
+        function masukHalamanKosSewa() {
+            tutupModalNotifikasi();
+            window.location.href = "{{ route('customer.myKos') }}";
+        }
+    </script>
 
 </body>
 </html>

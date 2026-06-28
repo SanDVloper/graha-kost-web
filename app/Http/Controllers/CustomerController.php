@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Property;
 use App\Models\Billing;
 use App\Models\Complaint;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -15,27 +16,62 @@ class CustomerController extends Controller
      * Fitur 1: Jelajah (Eksplorasi & Pencarian)
      */
     public function index(Request $request)
-{
-    $query = Property::query();
+    {
+        // 🟢 KEMBALI NORMAL: Menghapus auto-redirect agar halaman katalog cari-kos bisa diakses kembali oleh publik/guest
+        $query = Property::query();
 
-    // JIKA USER MENGETIK SESUATU DI SEARCH BAR (Misal: Tabanan, Singaraja, Jimbaran)
-    if ($request->filled('search')) {
-        $query->where(function($q) use ($request) {
-            // Mencari kata kunci di dalam kolom 'name' atau 'description' yang ada di DB
-            $q->where('name', 'like', '%' . $request->search . '%')
-              ->orWhere('description', 'like', '%' . $request->search . '%');
-        });
+        if ($request->filled('search')) {
+            $query->where(function($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%')
+                  ->orWhere('description', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        if ($request->filled('kategori')) {
+            $query->where('type', strtolower($request->kategori));
+        }
+
+        $properties = $query->latest()->get();
+
+        return view('customer.index', compact('properties'));
     }
 
-    // Filter kategori tipe kos (Putra/Putri/Campur)
-    if ($request->filled('kategori')) {
-        $query->where('type', strtolower($request->kategori));
+    /**
+     * Fitur Baru: Menampilkan detail kosan yang dihuni, tagihan, dan tetangga kamar
+     */
+    public function myKos()
+    {
+        $userId = Auth::id();
+
+        // Cari transaksi sewa aktif terakhir milik user
+        $currentBilling = Billing::where('user_id', $userId)
+            ->with('property')
+            ->latest()
+            ->first();
+
+        // Jika user belum pernah nge-enroll kosan sama sekali, kembalikan ke welcome catalog dengan parameter bypass agar tidak loop redirect
+        if (!$currentBilling) {
+            return redirect()->route('customer.index', ['bypass' => true])->with('success', 'Anda belum terdaftar di kos manapun. Silakan pilih salah satu kos di bawah untuk mengajukan sewa!');
+        }
+
+        $property = $currentBilling->property;
+
+        // Ambil semua tagihan khusus properti ini milik user
+        $myBillings = Billing::where('user_id', $userId)
+            ->where('property_id', $property->id)
+            ->latest()
+            ->get();
+
+        // Cari data tetangga: ambil user lain yang nge-kos di properti bangunan yang sama
+        $neighbors = Billing::where('property_id', $property->id)
+            ->where('user_id', '!=', $userId)
+            ->with('user')
+            ->get()
+            ->unique('user_id');
+
+        return view('customer.my-kos', compact('property', 'myBillings', 'neighbors', 'currentBilling'));
     }
 
-    $properties = $query->latest()->get();
-
-    return view('customer.index', compact('properties'));
-}
     /**
      * Fitur 2: Ajukan Sewa (Enroll)
      */
@@ -44,7 +80,6 @@ class CustomerController extends Controller
         $propertyId = $request->input('property_id');
         $property = Property::with('rooms')->findOrFail($propertyId);
 
-        // MATCHING LOGIC: Disamakan persis dengan rumus hitungan halaman depan kelompokmu
         if ($property->rooms && $property->rooms->count() > 0) {
             $hargaSewa = $property->rooms->first()->price_monthly;
         } else {
@@ -58,7 +93,6 @@ class CustomerController extends Controller
             }
         }
 
-        // Simpan data pengajuan sewa ke tabel billings
         Billing::create([
             'user_id'     => Auth::id(),
             'property_id' => $propertyId,
@@ -83,28 +117,26 @@ class CustomerController extends Controller
      * Fitur 5: Proses Bayar
      */
     public function pay(Request $request, $id)
-{
-    $billing = Billing::findOrFail($id);
-    $billing->update(['status' => 'paid']);
+    {
+        $billing = Billing::findOrFail($id);
+        $billing->update(['status' => 'paid']);
 
-    $user = \App\Models\User::find(Auth::id());
-    if ($user && $user->role !== 'admin') {
-        $user->update(['role' => 'penghuni']);
+        $user = User::find(Auth::id());
+        if ($user && $user->role !== 'admin') {
+            $user->update(['role' => 'penghuni']);
+        }
+
+        return back()->with([
+            'success' => 'Pembayaran berhasil dikonfirmasi. Selamat! Status Akun Anda kini aktif sebagai Penghuni Kos.',
+            'invoice_id' => $id
+        ]);
     }
 
-    // PERBAIKAN: Sertakan id billing ke session agar tombol kuitansi otomatis muncul
-    return back()->with([
-        'success' => 'Pembayaran berhasil dikonfirmasi. Selamat! Status Akun Anda kini aktif sebagai Penghuni Kos.',
-        'invoice_id' => $id
-    ]);
-}
-public function invoice($id)
-{
-    // Mengambil data tagihan lunas beserta properti kos yang bersangkutan
-    $billing = Billing::with('property')->findOrFail($id);
-
-    return view('customer.invoice', compact('billing'));
-}
+    public function invoice($id)
+    {
+        $billing = Billing::with('property')->findOrFail($id);
+        return view('customer.invoice', compact('billing'));
+    }
 
     /**
      * Fitur 6: Komplain

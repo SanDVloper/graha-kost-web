@@ -16,16 +16,20 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // ==========================================
-// 2. RUTE PUBLIK (Bebas diakses tanpa login)
+// 2. RUTE PUBLIK (Bebas diakses tanpa login - Landing Page / Katalog)
 // ==========================================
+Route::get('/', [CustomerController::class, 'index'])->name('welcome');
 Route::get('/cari-kos', [CustomerController::class, 'index'])->name('customer.index');
 Route::get('/detail-kos/{id}', [CustomerController::class, 'show'])->name('customer.show');
 
+// ==========================================
+// 3. RUTE PRIVATE (Harus Login Terlebih Dahulu)
+// ==========================================
 Route::middleware(['auth'])->group(function () {
 
     Route::get('/settings', [AuthController::class, 'globalSettings'])->name('settings.global');
 
-    Route::get('/', [PropertyController::class, 'index']);
+    Route::get('/dashboard-landlord', [PropertyController::class, 'index'])->name('landlord.dashboard');
 
     Route::get('/add-property', [PropertyController::class, 'createStep1']);
     Route::post('/add-property', [PropertyController::class, 'storeStep1']);
@@ -56,10 +60,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/kirim-komplain', [CustomerController::class, 'complain'])->name('customer.complain');
 
-    // 🟢 3. RUTE BARU: Halaman khusus kos yang disewa oleh Penghuni Kos (Dasbor Hunian)
-    Route::get('/kos-saya', function() {
-        return view('customer.my-kos');
-    })->name('customer.myKos');
+    // 🟢 PERBAIKAN: Mengarahkan rute kos-saya ke method myKos di CustomerController
+    Route::get('/kos-saya', [CustomerController::class, 'myKos'])->name('customer.myKos');
 
     Route::get('/beri-ulasan/{id}', function($id) {
         $property = \App\Models\Property::findOrFail($id);
@@ -69,29 +71,17 @@ Route::middleware(['auth'])->group(function () {
 
 });
 
+// ==========================================
+// 4. RUTE MIDDLEWARE ADMIN
+// ==========================================
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
-
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
-
     Route::get('/kost/detail', [AdminController::class, 'kostDetail'])->name('detail');
-
     Route::get('/enrollment', [AdminController::class, 'enrollment'])->name('enrollment');
-
     Route::get('/tagihan', [AdminController::class, 'tagihan'])->name('tagihan');
-
     Route::get('/pembayaran', [AdminController::class, 'pembayaran'])->name('pembayaran');
-
-    Route::get('/complaints', [AdminController::class, 'complaints'])
-        ->name('complaints.index');
-
-    // ✅ UPDATE STATUS (INI YANG BENAR)  ini data penghuni kost nggak mau masuk ke database Rlasinya tabelny berantakan banget. udah dibilang dari awal samain dulu idnya
-    Route::put('/complaints/{id}', [AdminController::class, 'updateStatus'])
-        ->name('complaints.updateStatus');
-
-    Route::get('/kost/{id}', [KostController::class, 'show'])
-        ->name('kost.show');
-
-    Route::get('/users', [AdminController::class, 'users'])
-        ->name('users');
-
+    Route::get('/complaints', [AdminController::class, 'complaints'])->name('complaints.index');
+    Route::put('/complaints/{id}', [AdminController::class, 'updateStatus'])->name('complaints.updateStatus');
+    Route::get('/kost/{id}', [KostController::class, 'show'])->name('kost.show');
+    Route::get('/users', [AdminController::class, 'users'])->name('users');
 });

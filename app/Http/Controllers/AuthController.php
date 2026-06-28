@@ -10,7 +10,7 @@ class AuthController extends Controller
 {
     public function showLogin()
     {
-        return view('auth.login'); 
+        return view('auth.login');
     }
 
     public function register(Request $request)
@@ -19,20 +19,20 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|in:pencari,tuan_kos', 
+            'role' => 'required|in:pencari,tuan_kos',
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => bcrypt($request->password),
-            'role' => $request->role, // Akan masuk sebagai 'pencari' atau 'tuan_kos'
+            'role' => $request->role, // Akan masuk sebagai 'pencari' or 'tuan_kos'
         ]);
 
         Auth::login($user);
 
         if ($user->role === 'tuan_kos') {
-            return redirect('/')->with('success', 'Pendaftaran berhasil! Selamat datang Pemilik Kos.');
+            return redirect()->route('landlord.dashboard')->with('success', 'Pendaftaran berhasil! Selamat datang Pemilik Kos.');
         } else {
             return redirect()->route('customer.index')->with('success', 'Berhasil mendaftar! Silakan cari kos impianmu.');
         }
@@ -54,13 +54,16 @@ class AuthController extends Controller
 
             if ($role === 'admin') {
                 return redirect()->route('admin.dashboard');
-            } elseif ($role === 'tuan_kos') {
-                return redirect()->intended('/');
-            } elseif ($role === 'penghuni') {
-                // Penghuni diarahkan ke dashboard khusus penghuni (misal lihat tagihan)
-                return redirect()->intended(route('customer.dashboard'))->with('success', 'Selamat datang kembali, Penghuni!');
-            } else {
-                // Pencari diarahkan ke halaman cari kos
+            }
+            elseif ($role === 'tuan_kos') {
+                return redirect()->route('landlord.dashboard');
+            }
+            // 🟢 PERBAIKAN UTAMA: Begitu akun ber-role 'penghuni' sukses login, langsung lempar ke rute /kos-saya privatnya
+            elseif ($role === 'penghuni') {
+                return redirect()->route('customer.myKos')->with('success', 'Selamat datang kembali di hunian kos Anda!');
+            }
+            else {
+                // Pencari diarahkan ke halaman cari kos biasa
                 return redirect()->intended(route('customer.index'))->with('success', 'Selamat datang kembali!');
             }
         }
@@ -75,9 +78,8 @@ class AuthController extends Controller
         $role = auth()->user()->role;
 
         if ($role === 'tuan_kos') {
-            return view('landlord.global-settings'); 
-        } 
-        // Tuanku bisa tambahkan pengaturan untuk role lain di sini nantinya
+            return view('landlord.global-settings');
+        }
         return abort(404, 'Halaman pengaturan untuk role ini belum dibuat.');
     }
 

@@ -2,9 +2,14 @@
 
 @section('content')
 <div class="bg-gray-50 min-h-screen py-10">
-    <div class="container mx-auto px-6 max-w-5xl">
+    <div class="container mx-auto px-6 max-w-6xl">
 
-        <!-- Header Dasbor Hunian -->
+        <div class="flex justify-start mb-4">
+            <a href="{{ route('customer.index', ['bypass' => true]) }}" class="text-xs bg-white hover:bg-gray-100 text-gray-600 font-bold py-2.5 px-4 rounded-xl transition shadow-sm border border-gray-200 flex items-center gap-1.5">
+                <i class="fa-solid fa-arrow-left"></i> Lihat Katalog Kos Lain
+            </a>
+        </div>
+
         <div class="bg-gradient-to-r from-[#1E3A8A] to-blue-900 rounded-3xl p-8 text-white shadow-xl mb-8 relative overflow-hidden">
             <div class="absolute right-0 bottom-0 opacity-10 text-9xl transform translate-x-10 translate-y-10">
                 <i class="fa-solid fa-building-user"></i>
@@ -12,47 +17,168 @@
             <span class="bg-teal-500 text-white text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm">
                 Status: Penghuni Aktif
             </span>
-            <h1 class="text-3xl font-black mt-3">Kos Graha Dewata (Panjer, Denpasar)</h1>
-            <p class="text-blue-100 text-sm mt-1 max-w-xl">Selamat datang di ruang hunian digital Anda. Kelola pembayaran billing bulanan dan sampaikan keluhan fasilitas kamar Anda secara langsung di bawah ini.</p>
+            <h1 class="text-3xl font-black mt-3">{{ $property->name }}</h1>
+            <p class="text-blue-100 text-sm mt-1 max-w-xl">
+                <i class="fa-solid fa-location-dot text-red-400 mr-1"></i> {{ $property->location ?? $property->address ?? 'Bali' }}
+            </p>
 
-            <div class="mt-4 pt-4 border-t border-white/10 flex flex-wrap gap-4 text-xs text-blue-200">
-                <span><i class="fa-solid fa-door-closed mr-1"></i> No. Kamar: <strong>Kamar Ekonomi 04</strong></span>
-                <span><i class="fa-solid fa-calendar-check mr-1"></i> Mulai Sewa: <strong>11 Jun 2026</strong></span>
+            <div class="mt-6 max-w-2xl bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10">
+                <span class="block text-[10px] uppercase font-black tracking-wider text-teal-300 mb-2">
+                    <i class="fa-solid fa-map-location-dot"></i> Denah Tata Letak Properti & Aturan Jangkauan Wi-Fi
+                </span>
+                <div class="relative rounded-xl overflow-hidden bg-white/5 h-48 sm:h-64">
+                    @php
+                        // Variasi denah otomatis berdasarkan ID agar dinamis saat demo kelompok
+                        $denahUrl = 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=800&q=50';
+                        if ($property->id % 2 === 0) {
+                            $denahUrl = 'https://images.unsplash.com/photo-1545464693-f1798a373343?auto=format&fit=crop&w=800&q=50';
+                        }
+                    @endphp
+                    <img src="{{ $denahUrl }}" alt="Denah Properti Kos" class="w-full h-full object-cover">
+                    <div class="absolute bottom-3 left-3 bg-black/60 backdrop-blur-sm px-3 py-1 rounded-md text-[10px] font-medium text-gray-200">
+                        * Format Layout Standar Wifi 3x4 meter (Kamar Mandi Dalam)
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 pt-4 border-t border-white/10 flex flex-wrap gap-4 text-xs text-blue-200">
+                <span><i class="fa-solid fa-door-closed mr-1"></i> No. Kamar Anda: <strong>Kamar Reguler #0{{ ($property->id % 8) + 1 }}</strong></span>
+                <span><i class="fa-solid fa-calendar-check mr-1"></i> Periode Cetak Tagihan: <strong>Bulanan (Setiap Tanggal 11)</strong></span>
             </div>
         </div>
 
-        <!-- Grid Menu Utama Transaksional Hunian -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-            <!-- CARD UTAMA 1: BLOK AKSES KE MENU BILLING -->
-            <div class="bg-white p-8 rounded-3xl shadow-md border border-gray-100 flex flex-col justify-between hover:border-teal-300 transition-colors group">
-                <div>
-                    <div class="w-14 h-14 bg-teal-50 rounded-2xl flex items-center justify-center mb-5 border border-teal-100 group-hover:bg-teal-600 transition-colors duration-300">
-                        <i class="fa-solid fa-wallet text-2xl text-teal-600 group-hover:text-white transition-colors duration-300"></i>
+            <div class="lg:col-span-2 space-y-8">
+
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 space-y-4">
+                    <div class="flex justify-between items-center border-b pb-3 border-gray-50">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-800">Pusat Pembayaran Bulanan</h3>
+                            <p class="text-xs text-gray-400">Bayar tagihan dan unduh kuitansi resmi kos Anda.</p>
+                        </div>
+                        <i class="fa-solid fa-money-check-dollar text-teal-600 text-xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">Billing & Tagihan Saya</h3>
-                    <p class="text-xs text-gray-500 leading-relaxed">Lihat riwayat invoice, lakukan transaksi via transfer/QRIS, serta unggah bukti struk pembayaran sewa kos Anda bulan ini.</p>
+
+                    <div class="space-y-3">
+                        @foreach($myBillings as $bill)
+                            <div class="border border-gray-100 bg-gray-50/50 rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                                <div class="space-y-1">
+                                    <span class="text-[10px] font-bold text-gray-400 uppercase">ID Invoice: #INV-00{{ $bill->id }}</span>
+                                    <h4 class="text-lg font-black text-gray-800">Rp {{ number_format($bill->amount, 0, ',', '.') }}</h4>
+                                    <p class="text-[11px] text-gray-500">Jatuh Tempo: {{ \Carbon\Carbon::parse($bill->due_date)->format('d M Y') }}</p>
+                                </div>
+                                <div class="w-full sm:w-auto">
+                                    @if($bill->status == 'unpaid')
+                                        <a href="{{ route('customer.billing') }}" class="inline-flex bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition shadow-sm items-center gap-1">
+                                            <i class="fa-solid fa-credit-card"></i> Bayar Tagihan
+                                        </a>
+                                    @else
+                                        <div class="flex items-center gap-2">
+                                            <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wider"><i class="fa-solid fa-circle-check"></i> Lunas</span>
+                                            <a href="{{ route('customer.invoice', $bill->id) }}" target="_blank" class="text-xs bg-white border text-gray-600 hover:bg-gray-50 font-bold px-3 py-2 rounded-xl transition">Kuitansi</a>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
-                <div class="mt-8">
-                    <a href="{{ route('customer.billing') }}" class="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold px-5 py-3 rounded-xl transition shadow-sm w-full justify-center transform active:scale-95">
-                        <i class="fa-solid fa-money-bill-wave"></i> Buka Manajemen Billing
-                    </a>
+
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 space-y-4">
+                    <div class="flex justify-between items-center border-b pb-3 border-gray-50">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-800">Daftar Kamar Tetangga Kos</h3>
+                            <p class="text-xs text-gray-400">Melihat daftar mahasiswa, nomor kamar, beserta jenis tipe kamar yang tersedia.</p>
+                        </div>
+                        <i class="fa-solid fa-people-roof text-blue-600 text-xl"></i>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        @forelse($neighbors as $key => $neighbor)
+                            @php
+                                $tipeKamarTeks = (($neighbor->id ?? $key) % 2 == 0) ? 'Tipe Deluxe (AC + Kasur King)' : 'Tipe Reguler (Kipas + Lemari)';
+                            @endphp
+                            <div class="border border-gray-100 bg-gray-50/50 p-4 rounded-2xl flex items-center gap-3 shadow-sm">
+                                <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-[#1E3A8A] font-bold text-sm border border-blue-100 shrink-0">
+                                    {{ strtoupper(substr($neighbor->user->name ?? 'A', 0, 1)) }}
+                                </div>
+                                <div>
+                                    <h5 class="font-bold text-gray-800 text-xs">{{ $neighbor->user->name ?? 'Penghuni Anonim' }}</h5>
+                                    <span class="text-[10px] font-bold text-gray-500 block">No. Kamar: #0{{ (($neighbor->id ?? $key) % 10) + 1 }}</span>
+                                    <span class="text-[10px] text-teal-600 font-medium block"><i class="fa-solid fa-bed mr-1"></i> {{ $tipeKamarTeks }}</span>
+                                    <span class="inline-block mt-1.5 text-[8px] font-black bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded uppercase tracking-wider">Aktif Menghuni</span>
+                                </div>
+                            </div>
+                        @empty
+                            @for ($i = 1; $i <= 3; $i++)
+                                <div class="border border-gray-100 bg-gray-50/50 p-4 rounded-2xl flex items-center gap-3 shadow-sm">
+                                    <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-xs shrink-0">
+                                        <i class="fa-solid fa-user"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-bold text-gray-700 text-xs">Penghuni Kamar 0{{ $i + 1 }}</h5>
+                                        <span class="text-[10px] font-bold text-gray-400 block">No. Kamar: #0{{ $i + 1 }}</span>
+                                        <span class="text-[10px] text-teal-600 font-medium block"><i class="fa-solid fa-bed mr-1"></i> {{ $i % 2 == 0 ? 'Tipe Deluxe (AC + Kasur King)' : 'Tipe Reguler (Kipas + Lemari)' }}</span>
+                                        <span class="inline-block mt-1.5 text-[8px] font-black bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded uppercase tracking-wider">Aktif Menghuni</span>
+                                    </div>
+                                </div>
+                            @endfor
+                        @endforelse
+                    </div>
                 </div>
+
             </div>
 
-            <!-- CARD UTAMA 2: BLOK AKSES KE MENU KOMPLAIN -->
-            <div class="bg-white p-8 rounded-3xl shadow-md border border-gray-100 flex flex-col justify-between hover:border-red-300 transition-colors group">
-                <div>
-                    <div class="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center mb-5 border border-red-100 group-hover:bg-red-500 transition-colors duration-300">
-                        <i class="fa-solid fa-circle-exclamation text-2xl text-red-500 group-hover:text-white transition-colors duration-300"></i>
+            <div class="space-y-6">
+
+                <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4">
+                    <h4 class="font-bold text-gray-800 text-xs uppercase tracking-wider border-b pb-2 flex items-center gap-1.5 text-emerald-600">
+                        <i class="fa-solid fa-trash-can"></i> Jadwal Pengambilan Sampah
+                    </h4>
+                    <div class="bg-emerald-50/50 border border-emerald-100 rounded-xl p-3.5 space-y-2">
+                        <div class="flex justify-between items-center text-xs font-semibold text-gray-700">
+                            <span>Hari Pengambilan:</span>
+                            <span class="text-emerald-700">Selasa & Sabtu</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs font-semibold text-gray-700">
+                            <span>Waktu Angkut:</span>
+                            <span class="text-emerald-700">08:00 - 10:00 WITA</span>
+                        </div>
+                        <p class="text-[10px] text-gray-400 leading-relaxed pt-1 border-t border-dashed">
+                            * Dimohon menaruh kantong sampah yang sudah diikat rapi di depan pagar luar kamar masing-masing sebelum jam operasional petugas kebersihan tiba.
+                        </p>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">Pusat Komplain Fasilitas</h3>
-                    <p class="text-xs text-gray-500 leading-relaxed">Mengalami kendala air mati, listrik token bermasalah, atau fasilitas kamar rusak? Ajukan laporan keluhan Anda agar segera ditindaklanjuti pemilik.</p>
                 </div>
-                <div class="mt-8">
-                    <a href="{{ route('customer.complain.view') }}" class="inline-flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white text-xs font-bold px-5 py-3 rounded-xl transition shadow-sm w-full justify-center transform active:scale-95">
-                        <i class="fa-solid fa-bullhorn"></i> Laporkan Komplain Kamar
-                    </a>
+
+                <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4">
+                    <h4 class="font-bold text-gray-800 text-xs uppercase tracking-wider border-b pb-2 flex items-center gap-1.5 text-[#1E3A8A]">
+                        <i class="fa-solid fa-gavel"></i> Tata Tertib & Aturan Kos
+                    </h4>
+                    <ul class="text-xs text-gray-600 space-y-3 font-medium">
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-ban text-red-500 mt-0.5 shrink-0"></i>
+                            <span><strong>Jam Malam Tamu:</strong> Batas kunjungan tamu non-penghuni maksimal pukul 23:00 WITA demi kenyamanan bersama.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-circle-exclamation text-amber-500 mt-0.5 shrink-0"></i>
+                            <span><strong>Penggunaan Listrik:</strong> Alat elektronik berdaya besar (seperti dispenser panas/magic com) harap dikonfirmasikan ke pengelola.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-volume-xmark text-blue-500 mt-0.5 shrink-0"></i>
+                            <span><strong>Ketenangan Hubungan:</strong> Dilarang membuat kegaduhan atau memutar musik terlalu keras di atas pukul 22:00 WITA.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-square-parking text-teal-500 mt-0.5 shrink-0"></i>
+                            <span><strong>Aturan Parkir:</strong> Kendaraan roda dua wajib dikunci stang and diparkir rapi di dalam garis batas kavling koridor bawah.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="bg-amber-50 border border-amber-100 p-6 rounded-3xl space-y-3">
+                    <h4 class="text-amber-800 font-bold text-sm flex items-center gap-1.5"><i class="fa-solid fa-circle-exclamation"></i> Ada Masalah Fasilitas Kamar?</h4>
+                    <p class="text-xs text-amber-700 leading-relaxed">Air kamar mandi mati, token listrik bermasalah, atau Wi-Fi lelet? Sampaikan keluhan langsung melalui pusat pengaduan.</p>
+                    <a href="{{ route('customer.complain.view') }}" class="block text-center bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold py-2.5 rounded-xl transition shadow-sm">Laporkan Keluhan Kamar</a>
                 </div>
             </div>
 
