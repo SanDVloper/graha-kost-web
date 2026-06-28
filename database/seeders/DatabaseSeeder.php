@@ -22,36 +22,14 @@ class DatabaseSeeder extends Seeder
         // 3. Hidupkan kembali pengecekan
         Schema::enableForeignKeyConstraints();
 
-        // 4. BUAT DATA AKUN (USERNAME & PASSWORD)
-        // Semua password diseragamkan menjadi: password123
-        DB::table('users')->insert([
-            [
-                'name' => 'Tuan Kos Dummy',
-                'email' => 'tuan@graha.com',
-                'password' => Hash::make('password123'), 
-                'role' => 'tuan_kos',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Super Admin',
-                'email' => 'admin@graha.com',
-                'password' => Hash::make('password123'),
-                'role' => 'admin',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Budi Customer',
-                'email' => 'customer@graha.com',
-                'password' => Hash::make('password123'),
-                'role' => 'pencari',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]
+        // 4. BUAT DATA USER DARI USER SEEDER
+        // (Tuan Kos akan otomatis mendapat ID 1, Admin ID 2, dan Customer ID 3)
+        $this->call([
+            UserSeeder::class,
         ]);
 
         // 5. MASUKKAN 30 DATA KOS ASLI BALI 
+        // (Karena user_id = 1, semua kos ini otomatis menjadi milik "Tuan Kos Dummy")
         DB::table('properties')->insert([
             // --- DENPASAR ---
             ['user_id' => 1, 'name' => 'Kos Graha Muslimah (Renon, Denpasar)', 'type' => 'putri', 'year_established' => 2022, 'description' => 'Lokasi: Jl. Tukad Barito No. 10, Renon, Denpasar. Kamar mandi dalam, kasur, lemari, dekat kawasan kampus.', 'created_at' => now(), 'updated_at' => now()],
@@ -94,7 +72,8 @@ class DatabaseSeeder extends Seeder
             ['user_id' => 1, 'name' => 'Kos Graha Nirwana (Amlapura, Karangasem)', 'type' => 'putri', 'year_established' => 2021, 'description' => 'Lokasi: Jl. Bhayangkara, Amlapura, Karangasem. Khusus wanita, dekat dengan pusat kuliner kota.', 'created_at' => now(), 'updated_at' => now()],
         ]);
         
-        // 6. KAMAR DUMMY 
+        // 6. OPSIONAL NAMUN SANGAT DISARANKAN: Buatkan 1 kamar dummy untuk setiap kos 
+        // agar saat diklik "Lihat Detail", harganya tidak Rp 0
         $rooms = [];
         for ($i = 1; $i <= 30; $i++) {
             $rooms[] = [
