@@ -19,7 +19,6 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            // SESUAIKAN DENGAN DATABASE: Saat daftar, pilihannya hanya pencari atau tuan_kos
             'role' => 'required|in:pencari,tuan_kos', 
         ]);
 
@@ -35,7 +34,6 @@ class AuthController extends Controller
         if ($user->role === 'tuan_kos') {
             return redirect('/')->with('success', 'Pendaftaran berhasil! Selamat datang Pemilik Kos.');
         } else {
-            // Karena foldernya bernama customer, rutenya kita namakan customer.index
             return redirect()->route('customer.index')->with('success', 'Berhasil mendaftar! Silakan cari kos impianmu.');
         }
     }
@@ -54,7 +52,6 @@ class AuthController extends Controller
 
             $role = auth()->user()->role;
 
-            // PENGECEKAN 4 ROLE SESUAI DATABASE TUANKU
             if ($role === 'admin') {
                 return redirect()->route('admin.dashboard');
             } elseif ($role === 'tuan_kos') {
