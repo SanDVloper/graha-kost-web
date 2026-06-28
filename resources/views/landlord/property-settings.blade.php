@@ -44,6 +44,9 @@
             <a href="{{ route('property.complains', $property->id) }}" class="flex items-center px-4 py-2.5 text-gray-500 hover:bg-gray-50 rounded-lg mt-1">
                 <i class="fa-regular fa-envelope w-6 text-center"></i><span class="ml-3 sidebar-text font-medium">Keluhan</span>
             </a>
+            <a href="{{ route('property.applications', $property->id) }}" class="flex items-center px-4 py-2.5 text-gray-500 hover:bg-gray-50 rounded-lg mt-1">
+                <i class="fa-solid fa-bell w-6 text-center"></i><span class="ml-3 sidebar-text font-medium">Pengajuan Masuk</span>
+            </a>
 
             <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 mt-6 px-4 sidebar-text whitespace-nowrap">System</div>
             
@@ -62,15 +65,22 @@
                 <i class="fa-solid fa-gear mr-3 text-[#38a38e]"></i> Pengaturan Properti
             </div>
             
-            <button class="bg-[#38a38e] hover:bg-teal-700 text-white px-5 py-2 rounded-lg font-bold text-sm transition-all shadow-md">
+            <button type="submit" form="settings-form" class="bg-[#38a38e] hover:bg-teal-700 text-white px-5 py-2 rounded-lg font-bold text-sm transition-all shadow-md">
                 <i class="fa-solid fa-floppy-disk mr-2"></i> Simpan Perubahan
             </button>
         </header>
 
         <div class="flex-1 overflow-y-auto p-8 max-w-5xl mx-auto w-full">
             
+            @if(session('success'))
+                <div class="mb-6 p-4 bg-green-100 text-green-700 rounded-lg">
+                    {{ session('success') }}
+                </div>
+            @endif
+
             <!-- FORM PENGATURAN -->
-            <div class="space-y-8">
+            <form id="settings-form" action="{{ route('property.settings.update', $property->id) }}" method="POST" class="space-y-8">
+                @csrf
                 
                 <!-- Card 1: Informasi Dasar -->
                 <div class="bg-white rounded-xl border border-gray-200 p-8 shadow-sm">
@@ -81,11 +91,11 @@
                     <div class="grid grid-cols-2 gap-6">
                         <div class="col-span-2 md:col-span-1">
                             <label class="block text-sm font-bold text-gray-700 mb-2">Nama Kos</label>
-                            <input type="text" value="{{ $property->name }}" class="w-full bg-slate-50 border border-gray-200 rounded-lg px-4 py-2.5 text-slate-700 focus:outline-none focus:border-[#38a38e] focus:bg-white transition-colors">
+                            <input type="text" name="name" value="{{ $property->name }}" required class="w-full bg-slate-50 border border-gray-200 rounded-lg px-4 py-2.5 text-slate-700 focus:outline-none focus:border-[#38a38e] focus:bg-white transition-colors">
                         </div>
                         <div class="col-span-2 md:col-span-1">
                             <label class="block text-sm font-bold text-gray-700 mb-2">Tipe Kos</label>
-                            <select class="w-full bg-slate-50 border border-gray-200 rounded-lg px-4 py-2.5 text-slate-700 focus:outline-none focus:border-[#38a38e] focus:bg-white transition-colors appearance-none">
+                            <select name="type" required class="w-full bg-slate-50 border border-gray-200 rounded-lg px-4 py-2.5 text-slate-700 focus:outline-none focus:border-[#38a38e] focus:bg-white transition-colors appearance-none">
                                 <option value="putra" {{ $property->type == 'putra' ? 'selected' : '' }}>Kos Putra</option>
                                 <option value="putri" {{ $property->type == 'putri' ? 'selected' : '' }}>Kos Putri</option>
                                 <option value="campur" {{ $property->type == 'campur' ? 'selected' : '' }}>Kos Campur</option>
@@ -93,8 +103,36 @@
                         </div>
                         <div class="col-span-2">
                             <label class="block text-sm font-bold text-gray-700 mb-2">Deskripsi Properti</label>
-                            <textarea rows="3" class="w-full bg-slate-50 border border-gray-200 rounded-lg px-4 py-2.5 text-slate-700 focus:outline-none focus:border-[#38a38e] focus:bg-white transition-colors">{{ $property->description }}</textarea>
+                            <textarea name="description" rows="3" class="w-full bg-slate-50 border border-gray-200 rounded-lg px-4 py-2.5 text-slate-700 focus:outline-none focus:border-[#38a38e] focus:bg-white transition-colors">{{ $property->description }}</textarea>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Card 1.5: Aturan Kos -->
+                <div class="bg-white rounded-xl border border-gray-200 p-8 shadow-sm">
+                    <h3 class="text-lg font-bold text-[#1e3a5f] mb-6 flex items-center border-b border-gray-100 pb-3">
+                        <i class="fa-solid fa-list-check text-teal-600 mr-3"></i> Aturan Kos
+                    </h3>
+                    
+                    @php
+                        $activeRules = $property->rules ?? [];
+                    @endphp
+
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        @foreach([
+                            'Dilarang Bawa Hewan' => 'fa-ban',
+                            'Akses 24 Jam' => 'fa-key',
+                            'Tamu Menginap Dikenakan Biaya' => 'fa-users-slash',
+                            'Dilarang Merokok di Kamar' => 'fa-smoking-ban',
+                            'Dilarang Bawa Anak' => 'fa-child-reaching',
+                            'Dilarang Bawa Lawan Jenis' => 'fa-person-half-dress'
+                        ] as $rule => $icon)
+                        <label class="cursor-pointer border-2 {{ in_array($rule, $activeRules) ? 'border-[#38a38e] bg-teal-50' : 'border-gray-200 bg-slate-50' }} hover:border-[#38a38e] rounded-xl p-4 flex items-center gap-3 transition-all">
+                            <input type="checkbox" name="rules[]" value="{{ $rule }}" class="hidden peer" {{ in_array($rule, $activeRules) ? 'checked' : '' }} onchange="this.parentElement.classList.toggle('border-[#38a38e]'); this.parentElement.classList.toggle('bg-teal-50'); this.parentElement.classList.toggle('border-gray-200'); this.parentElement.classList.toggle('bg-slate-50'); this.nextElementSibling.classList.toggle('text-[#38a38e]'); this.nextElementSibling.classList.toggle('text-gray-400'); this.nextElementSibling.nextElementSibling.classList.toggle('text-[#38a38e]'); this.nextElementSibling.nextElementSibling.classList.toggle('text-gray-700');">
+                            <i class="fa-solid {{ $icon }} text-xl {{ in_array($rule, $activeRules) ? 'text-[#38a38e]' : 'text-gray-400' }}"></i>
+                            <span class="text-sm font-semibold {{ in_array($rule, $activeRules) ? 'text-[#38a38e]' : 'text-gray-700' }}">{{ $rule === 'Dilarang Bawa Lawan Jenis' ? 'Bukan Muhrim Dilarang Ke Kamar' : $rule }}</span>
+                        </label>
+                        @endforeach
                     </div>
                 </div>
 
@@ -148,11 +186,11 @@
                             <h4 class="font-bold text-red-600">Hapus Properti Permanen</h4>
                             <p class="text-xs text-gray-500 mt-1">Menghapus seluruh data properti, kamar, tagihan, dan histori penghuni.</p>
                         </div>
-                        <button class="px-4 py-2 bg-red-50 hover:bg-red-500 text-red-600 hover:text-white font-bold text-sm rounded-lg transition-colors border border-red-200 hover:border-red-500">Hapus Properti</button>
+                        <button type="button" class="px-4 py-2 bg-red-50 hover:bg-red-500 text-red-600 hover:text-white font-bold text-sm rounded-lg transition-colors border border-red-200 hover:border-red-500">Hapus Properti</button>
                     </div>
                 </div>
 
-            </div>
+            </form>
         </div>
     </main>
 

@@ -21,6 +21,11 @@ return new class extends Migration
         $table->string('type'); 
         $table->year('year_established')->nullable();
         $table->text('description')->nullable();
+        
+        // 🟢 ATRIBUT BARU DITAMBAHKAN DI SINI
+        $table->json('photos')->nullable();       // Untuk menyimpan array foto bangunan
+        $table->string('floor_plan')->nullable(); // Untuk menyimpan 1 gambar denah kos
+        
         $table->json('facilities')->nullable(); 
         
         $table->string('electricity_rule')->default('token'); 

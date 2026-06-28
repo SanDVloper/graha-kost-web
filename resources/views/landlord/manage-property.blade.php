@@ -73,6 +73,12 @@
                         <span class="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-2 sidebar-text">2</span>
                     </div>
                 </a>
+                <a href="{{ route('property.applications', $property->id) }}" class="flex items-center justify-between px-4 py-2.5 text-gray-500 hover:bg-gray-50 hover:text-teal-600 rounded-lg transition-colors whitespace-nowrap">
+                    <div class="flex items-center">
+                        <div class="w-6 shrink-0 flex justify-center"><i class="fa-solid fa-bell"></i></div>
+                        <span class="ml-3 sidebar-text">Pengajuan Masuk</span>
+                    </div>
+                </a>
             </div>
 
             <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 mt-6 px-4 sidebar-text whitespace-nowrap">System</div>

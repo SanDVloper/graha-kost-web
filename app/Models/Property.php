@@ -15,6 +15,7 @@ class Property extends Model
     protected $casts = [
         'facilities' => 'array',
         'photos' => 'array',
+        'rules' => 'array',
     ];
 
     public function rooms()

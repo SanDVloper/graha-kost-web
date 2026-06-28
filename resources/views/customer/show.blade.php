@@ -142,6 +142,21 @@
                     </div>
                 </div>
 
+                @if(!empty($property->rules))
+                <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+                    <h3 class="text-lg font-bold text-[#1E3A8A] mb-4 flex items-center">
+                        <i class="fa-solid fa-list-check mr-2 text-teal-500"></i> Aturan Kos
+                    </h3>
+                    <div class="flex flex-wrap gap-3 mt-2">
+                        @foreach($property->rules as $rule)
+                            <span class="flex items-center bg-red-50 text-red-700 px-4 py-2 rounded-xl text-sm font-bold border border-red-100">
+                                <i class="fa-solid fa-circle-exclamation mr-2 text-red-400"></i> {{ $rule === 'Dilarang Bawa Lawan Jenis' ? 'Bukan Muhrim Dilarang Ke Kamar' : $rule }}
+                            </span>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+
                 <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
                     <h3 class="text-lg font-bold text-[#1E3A8A] mb-6 flex items-center">
                         <i class="fa-solid fa-bed mr-2 text-teal-500"></i> Tipe Kamar Tersedia

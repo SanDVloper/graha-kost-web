@@ -144,6 +144,46 @@
 
                 <div class="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
                     <div class="mb-6">
+                        <h2 class="text-xl font-bold text-[#1e3a5f] mb-1">Aturan Kos</h2>
+                        <p class="text-sm text-gray-500">Pilih aturan yang berlaku di kos Anda. Aturan ini akan ditampilkan kepada calon penghuni.</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="rule-card cursor-pointer border-2 border-transparent bg-[#f4f5f7] hover:border-gray-300 rounded-xl p-5 flex flex-col items-center justify-center gap-3 transition-all relative">
+                            <input type="checkbox" name="rules[]" value="Dilarang Bawa Hewan" class="hidden hidden-checkbox">
+                            <i class="fa-solid fa-ban text-3xl text-gray-400 rule-icon"></i>
+                            <span class="text-sm font-semibold text-gray-500 text-center rule-text">Dilarang Bawa Hewan</span>
+                        </div>
+                        <div class="rule-card cursor-pointer border-2 border-transparent bg-[#f4f5f7] hover:border-gray-300 rounded-xl p-5 flex flex-col items-center justify-center gap-3 transition-all relative">
+                            <input type="checkbox" name="rules[]" value="Akses 24 Jam" class="hidden hidden-checkbox">
+                            <i class="fa-solid fa-key text-3xl text-gray-400 rule-icon"></i>
+                            <span class="text-sm font-semibold text-gray-500 text-center rule-text">Akses 24 Jam</span>
+                        </div>
+                        <div class="rule-card cursor-pointer border-2 border-transparent bg-[#f4f5f7] hover:border-gray-300 rounded-xl p-5 flex flex-col items-center justify-center gap-3 transition-all relative">
+                            <input type="checkbox" name="rules[]" value="Tamu Menginap Dikenakan Biaya" class="hidden hidden-checkbox">
+                            <i class="fa-solid fa-users-slash text-3xl text-gray-400 rule-icon"></i>
+                            <span class="text-sm font-semibold text-gray-500 text-center rule-text">Tamu Nginap Berbayar</span>
+                        </div>
+                        <div class="rule-card cursor-pointer border-2 border-transparent bg-[#f4f5f7] hover:border-gray-300 rounded-xl p-5 flex flex-col items-center justify-center gap-3 transition-all relative">
+                            <input type="checkbox" name="rules[]" value="Dilarang Merokok di Kamar" class="hidden hidden-checkbox">
+                            <i class="fa-solid fa-smoking-ban text-3xl text-gray-400 rule-icon"></i>
+                            <span class="text-sm font-semibold text-gray-500 text-center rule-text">Bebas Asap Rokok</span>
+                        </div>
+                        <div class="rule-card cursor-pointer border-2 border-transparent bg-[#f4f5f7] hover:border-gray-300 rounded-xl p-5 flex flex-col items-center justify-center gap-3 transition-all relative">
+                            <input type="checkbox" name="rules[]" value="Dilarang Bawa Anak" class="hidden hidden-checkbox">
+                            <i class="fa-solid fa-child-reaching text-3xl text-gray-400 rule-icon"></i>
+                            <span class="text-sm font-semibold text-gray-500 text-center rule-text">Dilarang Bawa Anak</span>
+                        </div>
+                        <div class="rule-card cursor-pointer border-2 border-transparent bg-[#f4f5f7] hover:border-gray-300 rounded-xl p-5 flex flex-col items-center justify-center gap-3 transition-all relative">
+                            <input type="checkbox" name="rules[]" value="Dilarang Bawa Lawan Jenis" class="hidden hidden-checkbox">
+                            <i class="fa-solid fa-person-half-dress text-3xl text-gray-400 rule-icon"></i>
+                            <span class="text-sm font-semibold text-gray-500 text-center rule-text">Bukan Muhrim Dilarang Ke Kamar</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
+                    <div class="mb-6">
                         <h2 class="text-xl font-bold text-[#1e3a5f] mb-1">Building Photos</h2>
                         <p class="text-sm text-gray-500">Upload photos of the front and common areas. (Format: JPG/PNG, Max. 5MB)</p>
                     </div>
@@ -205,6 +245,24 @@
                     $(this).removeClass('border-[#38a38e] bg-teal-50').addClass('border-transparent bg-[#f4f5f7] hover:border-gray-300');
                     $(this).find('.facility-icon').removeClass('text-[#38a38e]').addClass('text-gray-400');
                     $(this).find('.facility-text').removeClass('text-[#38a38e]').addClass('text-gray-500');
+                    checkbox.prop('checked', false);
+                }
+            });
+
+            // Logic untuk Aturan Kos
+            $('.rule-card').click(function() {
+                let checkbox = $(this).find('.hidden-checkbox');
+                let isActive = $(this).hasClass('border-[#38a38e]');
+                
+                if (!isActive) {
+                    $(this).removeClass('border-transparent bg-[#f4f5f7] hover:border-gray-300').addClass('border-[#38a38e] bg-teal-50');
+                    $(this).find('.rule-icon').removeClass('text-gray-400').addClass('text-[#38a38e]');
+                    $(this).find('.rule-text').removeClass('text-gray-500').addClass('text-[#38a38e]');
+                    checkbox.prop('checked', true);
+                } else {
+                    $(this).removeClass('border-[#38a38e] bg-teal-50').addClass('border-transparent bg-[#f4f5f7] hover:border-gray-300');
+                    $(this).find('.rule-icon').removeClass('text-[#38a38e]').addClass('text-gray-400');
+                    $(this).find('.rule-text').removeClass('text-[#38a38e]').addClass('text-gray-500');
                     checkbox.prop('checked', false);
                 }
             });

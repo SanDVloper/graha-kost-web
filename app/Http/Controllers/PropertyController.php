@@ -46,6 +46,7 @@ class PropertyController extends Controller
         $property->year_established = $request->year_established;
         $property->description = $request->description;
         $property->facilities = $request->facilities;
+        $property->rules = $request->rules;
 
         // LOGIKA UNGGAH FOTO
         if ($request->hasFile('photos')) {
@@ -150,4 +151,110 @@ class PropertyController extends Controller
         return view('landlord.property-settings', compact('property'));
     }
 
+    public function updateSettings(Request $request, $id)
+    {
+        $property = Property::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+        
+        $request->validate([
+            'name' => 'required',
+            'type' => 'required',
+        ]);
+
+        $property->name = $request->name;
+        $property->type = $request->type;
+        $property->description = $request->description;
+        $property->rules = $request->rules;
+        
+        $property->save();
+
+        return redirect()->back()->with('success', 'Pengaturan properti berhasil diperbarui!');
+    }
+    public function applications($id)
+    {
+        $property = Property::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+        
+        $applications = \App\Models\Billing::with('user')
+            ->where('property_id', $id)
+            ->where('status', 'pending_approval')
+            ->latest()
+            ->get();
+            
+        return view('landlord.property-applications', compact('property', 'applications'));
+    }
+
+    public function acceptApplication(Request $request, $id, $billing_id)
+    {
+        $property = Property::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+        $billing = \App\Models\Billing::where('id', $billing_id)->where('property_id', $id)->firstOrFail();
+        
+        $billing->update(['status' => 'unpaid']);
+        
+        return redirect()->back()->with('success', 'Pengajuan sewa berhasil diterima! Tagihan telah diteruskan ke calon tenant.');
+    }
+
+    public function rejectApplication(Request $request, $id, $billing_id)
+    {
+        $property = Property::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+        $billing = \App\Models\Billing::where('id', $billing_id)->where('property_id', $id)->firstOrFail();
+        
+        $billing->update(['status' => 'rejected']);
+        
+        return redirect()->back()->with('success', 'Pengajuan sewa telah ditolak.');
+    }
+    
+    public function storeRoom(Request $request, $id)
+    {
+        $property = Property::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+        
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'size' => 'required|string|max:255',
+            'quantity' => 'required|integer|min:1',
+            'price_monthly' => 'nullable|numeric|min:0',
+            'price_daily' => 'nullable|numeric|min:0',
+            'price_yearly' => 'nullable|numeric|min:0',
+            'facilities' => 'nullable|array'
+        ]);
+        
+        $validated['property_id'] = $property->id;
+        
+        \App\Models\Room::create($validated);
+        
+        return redirect()->back()->with('success', 'Tipe kamar berhasil ditambahkan.');
+    }
+
+    public function updateRoom(Request $request, $id, $room_id)
+    {
+        $property = Property::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+        $room = \App\Models\Room::where('id', $room_id)->where('property_id', $property->id)->firstOrFail();
+        
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'size' => 'required|string|max:255',
+            'quantity' => 'required|integer|min:1',
+            'price_monthly' => 'nullable|numeric|min:0',
+            'price_daily' => 'nullable|numeric|min:0',
+            'price_yearly' => 'nullable|numeric|min:0',
+            'facilities' => 'nullable|array'
+        ]);
+        
+        // Ensure facilities is always an array even if unchecked all
+        if (!isset($validated['facilities'])) {
+            $validated['facilities'] = [];
+        }
+        
+        $room->update($validated);
+        
+        return redirect()->back()->with('success', 'Tipe kamar berhasil diperbarui.');
+    }
+
+    public function deleteRoom($id, $room_id)
+    {
+        $property = Property::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+        $room = \App\Models\Room::where('id', $room_id)->where('property_id', $property->id)->firstOrFail();
+        
+        $room->delete();
+        
+        return redirect()->back()->with('success', 'Tipe kamar berhasil dihapus.');
+    }
 }

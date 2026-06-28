@@ -5,30 +5,53 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Hash; // Tambahkan Hash untuk password
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Matikan pengecekan foreign key agar bisa dibersihkan
+        // 1. Matikan pengecekan foreign key
         Schema::disableForeignKeyConstraints();
 
-        // 2. Bersihkan tabel-tabel utama (Otomatis reset ID kembali ke 1)
+        // 2. Bersihkan tabel
         DB::table('users')->truncate();
         DB::table('properties')->truncate();
         DB::table('rooms')->truncate();
 
-        // 3. Hidupkan kembali pengecekan foreign key
+        // 3. Hidupkan kembali pengecekan
         Schema::enableForeignKeyConstraints();
 
-        // 4. BUAT DATA USER DARI USER SEEDER
-        // (Tuan Kos akan otomatis mendapat ID 1, Admin ID 2, dan Customer ID 3)
-        $this->call([
-            UserSeeder::class,
+        // 4. BUAT DATA AKUN (USERNAME & PASSWORD)
+        // Semua password diseragamkan menjadi: password123
+        DB::table('users')->insert([
+            [
+                'name' => 'Tuan Kos Dummy',
+                'email' => 'tuan@graha.com',
+                'password' => Hash::make('password123'), 
+                'role' => 'tuan_kos',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Super Admin',
+                'email' => 'admin@graha.com',
+                'password' => Hash::make('password123'),
+                'role' => 'admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Budi Customer',
+                'email' => 'customer@graha.com',
+                'password' => Hash::make('password123'),
+                'role' => 'pencari',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
         ]);
 
         // 5. MASUKKAN 30 DATA KOS ASLI BALI 
-        // (Karena user_id = 1, semua kos ini otomatis menjadi milik "Tuan Kos Dummy")
         DB::table('properties')->insert([
             // --- DENPASAR ---
             ['user_id' => 1, 'name' => 'Kos Graha Muslimah (Renon, Denpasar)', 'type' => 'putri', 'year_established' => 2022, 'description' => 'Lokasi: Jl. Tukad Barito No. 10, Renon, Denpasar. Kamar mandi dalam, kasur, lemari, dekat kawasan kampus.', 'created_at' => now(), 'updated_at' => now()],
@@ -71,8 +94,7 @@ class DatabaseSeeder extends Seeder
             ['user_id' => 1, 'name' => 'Kos Graha Nirwana (Amlapura, Karangasem)', 'type' => 'putri', 'year_established' => 2021, 'description' => 'Lokasi: Jl. Bhayangkara, Amlapura, Karangasem. Khusus wanita, dekat dengan pusat kuliner kota.', 'created_at' => now(), 'updated_at' => now()],
         ]);
         
-        // 6. OPSIONAL NAMUN SANGAT DISARANKAN: Buatkan 1 kamar dummy untuk setiap kos 
-        // agar saat diklik "Lihat Detail", harganya tidak Rp 0
+        // 6. KAMAR DUMMY 
         $rooms = [];
         for ($i = 1; $i <= 30; $i++) {
             $rooms[] = [
@@ -80,7 +102,7 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Kamar Standar',
                 'size' => '3x4',
                 'quantity' => rand(3, 10),
-                'price_monthly' => rand(5, 15) * 100000, // Harga acak antara 500rb - 1.5jt
+                'price_monthly' => rand(5, 15) * 100000, 
                 'created_at' => now(),
                 'updated_at' => now(),
             ];

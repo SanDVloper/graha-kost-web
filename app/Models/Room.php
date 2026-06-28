@@ -9,6 +9,17 @@ class Room extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'property_id',
+        'name',
+        'size',
+        'quantity',
+        'facilities',
+        'price_monthly',
+        'price_daily',
+        'price_yearly'
+    ];
+
     protected $casts = [
         'facilities' => 'array',
     ];

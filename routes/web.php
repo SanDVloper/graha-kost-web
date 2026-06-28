@@ -38,10 +38,17 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/property/{id}/manage', [PropertyController::class, 'manage'])->name('property.manage');
     Route::get('/property/{id}/rooms', [PropertyController::class, 'roomList'])->name('property.rooms');
+    Route::post('/property/{id}/rooms', [PropertyController::class, 'storeRoom'])->name('property.rooms.store');
+    Route::put('/property/{id}/rooms/{room_id}', [PropertyController::class, 'updateRoom'])->name('property.rooms.update');
+    Route::delete('/property/{id}/rooms/{room_id}', [PropertyController::class, 'deleteRoom'])->name('property.rooms.destroy');
     Route::get('/property/{id}/occupants', [PropertyController::class, 'occupantList'])->name('property.occupants');
     Route::get('/property/{id}/billing', [PropertyController::class, 'billingList'])->name('property.billing');
     Route::get('/property/{id}/complains', [PropertyController::class, 'complainList'])->name('property.complains');
+    Route::get('/property/{id}/applications', [PropertyController::class, 'applications'])->name('property.applications');
+    Route::post('/property/{id}/applications/{billing_id}/accept', [PropertyController::class, 'acceptApplication'])->name('property.applications.accept');
+    Route::post('/property/{id}/applications/{billing_id}/reject', [PropertyController::class, 'rejectApplication'])->name('property.applications.reject');
     Route::get('/property/{id}/settings', [PropertyController::class, 'settings'])->name('property.settings');
+    Route::post('/property/{id}/settings', [PropertyController::class, 'updateSettings'])->name('property.settings.update');
 
     Route::post('/enroll-kos', [CustomerController::class, 'enroll'])->name('customer.enroll');
 
