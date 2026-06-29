@@ -71,25 +71,31 @@
                                     <i class="fa-solid fa-clock mr-1.5 text-amber-500"></i> Belum Dibayar
                                 </span>
 
-                                <!-- Form Pilihan Metode Pembayaran Interaktif -->
-                                <div class="w-full sm:w-48 text-left space-y-2">
-                                    <select id="select-method-{{ $billing->id }}" required class="w-full bg-gray-50 border border-gray-200 text-[11px] rounded-xl px-2.5 py-1.5 outline-none focus:ring-2 focus:ring-teal-500 text-gray-700 font-medium">
-                                        <option value="" disabled selected>-- Pilih Metode Pembayaran --</option>
-                                        <option value="qris">QRIS (Scan via E-Wallet / m-Banking)</option>
-                                        <option value="bri">Transfer Bank BRI</option>
-                                        <option value="bca">Transfer Bank BCA</option>
-                                        <option value="mandiri">Transfer Bank Mandiri</option>
-                                    </select>
-
-                                    <button type="button" onclick="prosesBayarSimulasi({{ $billing->id }}, '{{ number_format($billing->amount, 0, ',', '.') }}')" class="w-full bg-[#1E3A8A] hover:bg-blue-900 text-white text-xs font-bold py-2 px-4 rounded-xl shadow-md transition transform hover:-translate-y-0.5 flex items-center justify-center">
-                                        <i class="fa-solid fa-credit-card mr-1.5"></i> Bayar Sekarang
+                                <!-- Aksi Pembayaran -->
+                                <div class="w-full sm:w-64 flex flex-col gap-2 mt-2">
+                                    <button type="button" onclick="openQrisModal({{ $billing->id }}, {{ $billing->amount }})" class="w-full bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold py-2 px-4 rounded-xl shadow-md transition transform hover:-translate-y-0.5 flex items-center justify-center">
+                                        <i class="fa-solid fa-qrcode mr-1.5"></i> Bayar Instan (QRIS)
                                     </button>
-                                </div>
+                                    
+                                    <div class="relative flex items-center py-1">
+                                        <div class="flex-grow border-t border-gray-200"></div>
+                                        <span class="flex-shrink-0 mx-2 text-[10px] text-gray-400 font-bold uppercase">atau</span>
+                                        <div class="flex-grow border-t border-gray-200"></div>
+                                    </div>
 
-                                <!-- Form Hidden Asli yang Akan di-Submit oleh JavaScript -->
-                                <form id="form-bayar-{{ $billing->id }}" action="{{ route('customer.pay', $billing->id) }}" method="POST" class="hidden">
-                                    @csrf
-                                </form>
+                                    <!-- Form Upload Bukti Pembayaran (Manual) -->
+                                    <form id="form-bayar-{{ $billing->id }}" action="{{ route('customer.pay', $billing->id) }}" method="POST" enctype="multipart/form-data" class="text-left space-y-2">
+                                        @csrf
+                                        <div class="mt-1">
+                                            <label class="block text-[10px] font-bold text-gray-500 mb-1">Upload Bukti Transfer Manual</label>
+                                            <input type="file" name="bukti_transfer" required accept="image/*" class="w-full bg-white border border-gray-200 text-[11px] rounded-xl p-1.5 outline-none file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-[10px] file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer">
+                                            @error('bukti_transfer') <span class="text-red-500 text-[10px] mt-1">{{ $message }}</span> @enderror
+                                        </div>
+                                        <button type="submit" class="w-full bg-[#1E3A8A] hover:bg-blue-900 text-white text-xs font-bold py-2 px-4 rounded-xl shadow-md transition transform hover:-translate-y-0.5 flex items-center justify-center mt-2">
+                                            <i class="fa-solid fa-cloud-arrow-up mr-1.5"></i> Kirim Bukti
+                                        </button>
+                                    </form>
+                                </div>>
                             @endif
                         </div>
                     </div>
@@ -420,5 +426,63 @@
     function tutupModal(idModal) {
         document.getElementById(idModal).classList.add('hidden');
     }
+</script><!-- Modal QRIS -->
+<div id="modal-qris" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl border border-gray-100 animate-fade-in relative">
+        <!-- Close Button -->
+        <button onclick="closeQrisModal()" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition">
+            <i class="fa-solid fa-times text-xl"></i>
+        </button>
+
+        <div class="mb-4">
+            <img src="{{ asset('assets/logograha.png') }}" class="h-10 mx-auto" alt="Logo">
+        </div>
+        
+        <h3 class="font-extrabold text-[#1E3A8A] text-xl mb-1">Scan QRIS</h3>
+        <p class="text-xs text-gray-500 mb-6">Gunakan m-Banking atau E-Wallet untuk membayar.</p>
+
+        <!-- Container for QR Code -->
+        <div class="bg-white p-2 rounded-xl shadow-sm border border-gray-100 inline-block mb-4">
+            <img id="qris-image" src="" class="w-48 h-48 mx-auto" alt="QRIS Code">
+        </div>
+
+        <p class="text-xs text-gray-400 font-bold uppercase tracking-wider mb-1">Total Pembayaran</p>
+        <p id="qris-amount" class="text-2xl font-extrabold text-teal-600 mb-6">Rp 0</p>
+
+        <!-- Form Simulasi Sukses -->
+        <form id="form-qris" method="POST" action="">
+            @csrf
+            <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold py-3 px-4 rounded-xl shadow-md transition transform hover:-translate-y-0.5 flex items-center justify-center">
+                <i class="fa-solid fa-check-circle mr-2"></i> Simulasikan Pembayaran Berhasil
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+function openQrisModal(billingId, amount) {
+    const modal = document.getElementById('modal-qris');
+    const form = document.getElementById('form-qris');
+    const amountEl = document.getElementById('qris-amount');
+    const imgEl = document.getElementById('qris-image');
+    
+    // Format amount
+    const formattedAmount = new Intl.NumberFormat('id-ID').format(amount);
+    amountEl.innerText = 'Rp ' + formattedAmount;
+    
+    // Set Action URL
+    form.action = `/bayar-qris/${billingId}`;
+    
+    // Generate QR Code using QuickChart API
+    const qrData = encodeURIComponent(`GRAHA KOS - Pembayaran ID: ${billingId} - Total: Rp${formattedAmount}`);
+    imgEl.src = `https://quickchart.io/qr?text=${qrData}&size=300&margin=2`;
+    
+    modal.classList.remove('hidden');
+}
+
+function closeQrisModal() {
+    document.getElementById('modal-qris').classList.add('hidden');
+}
 </script>
+
 @endsection

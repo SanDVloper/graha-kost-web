@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\Hash; // Tambahkan Hash untuk password
 
 class DatabaseSeeder extends Seeder
 {
@@ -18,74 +17,117 @@ class DatabaseSeeder extends Seeder
         DB::table('users')->truncate();
         DB::table('properties')->truncate();
         DB::table('rooms')->truncate();
+        DB::table('billings')->truncate();
+        DB::table('complaints')->truncate();
 
         // 3. Hidupkan kembali pengecekan
         Schema::enableForeignKeyConstraints();
 
         // 4. BUAT DATA USER DARI USER SEEDER
-        // (Tuan Kos akan otomatis mendapat ID 1, Admin ID 2, dan Customer ID 3)
         $this->call([
             UserSeeder::class,
         ]);
 
-        // 5. MASUKKAN 30 DATA KOS ASLI BALI 
-        // (Karena user_id = 1, semua kos ini otomatis menjadi milik "Tuan Kos Dummy")
-        DB::table('properties')->insert([
-            // --- DENPASAR ---
-            ['user_id' => 1, 'name' => 'Kos Graha Muslimah (Renon, Denpasar)', 'type' => 'putri', 'year_established' => 2022, 'description' => 'Lokasi: Jl. Tukad Barito No. 10, Renon, Denpasar. Kamar mandi dalam, kasur, lemari, dekat kawasan kampus.', 'created_at' => now(), 'updated_at' => now()],
-            ['user_id' => 1, 'name' => 'Kos Graha Dewata (Panjer, Denpasar)', 'type' => 'putra', 'year_established' => 2021, 'description' => 'Lokasi: Jl. Tukad Pakerisan No. 85, Panjer, Denpasar. Fasilitas lengkap dengan Wi-Fi kencang, cocok untuk mahasiswa.', 'created_at' => now(), 'updated_at' => now()],
-            ['user_id' => 1, 'name' => 'Graha Sanur Residence (Sanur, Denpasar)', 'type' => 'campur', 'year_established' => 2023, 'description' => 'Lokasi: Jl. Danau Buyan No. 14, Sanur, Denpasar. Dekat Bypass Ngurah Rai dan Pantai Sanur. AC, parkir mobil aman.', 'created_at' => now(), 'updated_at' => now()],
-            ['user_id' => 1, 'name' => 'Kos Graha Melati (Kesiman, Denpasar)', 'type' => 'putri', 'year_established' => 2020, 'description' => 'Lokasi: Jl. Katrangan No. 45, Kesiman, Denpasar Timur. Lingkungan asri, include air, dekat kampus Warmadewa.', 'created_at' => now(), 'updated_at' => now()],
-            // --- BADUNG ---
-            ['user_id' => 1, 'name' => 'Graha Kost Putra Mandiri (Jimbaran, Kuta Selatan)', 'type' => 'putra', 'year_established' => 2020, 'description' => 'Lokasi: Jl. Kampus Unud, Jimbaran, Kuta Selatan. Free Wi-Fi, AC, parkir luas, dekat gerbang utama UNUD.', 'created_at' => now(), 'updated_at' => now()],
-            ['user_id' => 1, 'name' => 'Graha Premium Residence (Seminyak, Badung)', 'type' => 'campur', 'year_established' => 2024, 'description' => 'Lokasi: Jl. Sunset Road No. 88, Seminyak, Badung. Fasilitas eksklusif: AC, Water Heater, TV LED, kasur king-size.', 'created_at' => now(), 'updated_at' => now()],
-            ['user_id' => 1, 'name' => 'Graha Backpacker Room (Kuta, Badung)', 'type' => 'campur', 'year_established' => 2018, 'description' => 'Lokasi: Jl. Raya Kuta Gg. Kubu, Kuta, Badung. Strategis di pusat pariwisata, dekat Bandara Ngurah Rai.', 'created_at' => now(), 'updated_at' => now()],
-            ['user_id' => 1, 'name' => 'Graha Canggu Pavilion (Canggu, Badung)', 'type' => 'campur', 'year_established' => 2025, 'description' => 'Lokasi: Jl. Batu Bolong No. 102, Canggu, Badung. Konsep studio room premium dengan dapur pribadi, kulkas, AC.', 'created_at' => now(), 'updated_at' => now()],
-            ['user_id' => 1, 'name' => 'Kos Graha anyar (Dalung, Badung)', 'type' => 'putri', 'year_established' => 2022, 'description' => 'Lokasi: Jl. Raya Dalung No. 12, Kuta Utara, Badung. Include kasur, lemari, listrik meteran mandiri.', 'created_at' => now(), 'updated_at' => now()],
-            // --- GIANYAR ---
-            ['user_id' => 1, 'name' => 'Kos Graha Wijaya Luxury (Ubud, Gianyar)', 'type' => 'campur', 'year_established' => 2023, 'description' => 'Lokasi: Jl. Raya Pengosekan, Ubud, Gianyar. Bernuansa asri tradisional Bali, Wi-Fi kencang, AC.', 'created_at' => now(), 'updated_at' => now()],
-            ['user_id' => 1, 'name' => 'Kos Graha Asri (Kec. Gianyar, Gianyar)', 'type' => 'putri', 'year_established' => 2019, 'description' => 'Lokasi: Jl. Abianbase No. 15, Kec. Gianyar, Gianyar. Kamar minimalis ekonomis, aman dengan gerbang gembok.', 'created_at' => now(), 'updated_at' => now()],
-            ['user_id' => 1, 'name' => 'Kos Graha Tirta (Melinggih, Payangan)', 'type' => 'campur', 'year_established' => 2023, 'description' => 'Lokasi: Jl. Raya Payangan, Melinggih, Gianyar. Udara sejuk perbukitan, cocok untuk pekerja perhotelan.', 'created_at' => now(), 'updated_at' => now()],
-            ['user_id' => 1, 'name' => 'Kos Graha Lotus (Sukawati, Gianyar)', 'type' => 'putri', 'year_established' => 2021, 'description' => 'Lokasi: Jl. Raya Batubulan, Sukawati, Gianyar. Dekat Pasar Seni Sukawati, fasilitas kamar mandi dalam.', 'created_at' => now(), 'updated_at' => now()],
-            // --- BULELENG ---
-            ['user_id' => 1, 'name' => 'Kos Graha Safira (Singaraja, Buleleng)', 'type' => 'putri', 'year_established' => 2021, 'description' => 'Lokasi: Jl. Udayana Gg. 2B, Kaliuntu, Buleleng. Jarak sangat dekat ke area kampus Undiksha.', 'created_at' => now(), 'updated_at' => now()],
-            ['user_id' => 1, 'name' => 'Kos Graha Cendana (Kampung Kajanan, Singaraja)', 'type' => 'putra', 'year_established' => 2024, 'description' => 'Lokasi: Jl. Erlangga, Kampung Kajanan, Singaraja. Kamar mandi dalam, kasur busa tebal, dekat pelabuhan tua.', 'created_at' => now(), 'updated_at' => now()],
-            ['user_id' => 1, 'name' => 'Graha Banyuasri Residence (Banyuasri, Singaraja)', 'type' => 'campur', 'year_established' => 2022, 'description' => 'Lokasi: Jl. Ahmad Yani No. 140, Banyuasri, Singaraja. Fasilitas AC, Wi-Fi gratis, parkir beratap.', 'created_at' => now(), 'updated_at' => now()],
-            ['user_id' => 1, 'name' => 'Kos Graha Penarukan (Penarukan, Buleleng)', 'type' => 'putra', 'year_established' => 2020, 'description' => 'Lokasi: Jl. Pantai Penarukan, Buleleng. Kamar kosongan ekonomis, ukuran luas 4x4 meter.', 'created_at' => now(), 'updated_at' => now()],
-            // --- TABANAN ---
-            ['user_id' => 1, 'name' => 'Kos Graha Lavender (Delod Peken, Tabanan)', 'type' => 'putri', 'year_established' => 2022, 'description' => 'Lokasi: Jl. Gajah Mada No. 42, Delod Peken, Tabanan. Kasur, lemari pakaian, token listrik mandiri.', 'created_at' => now(), 'updated_at' => now()],
-            ['user_id' => 1, 'name' => 'Kos Graha Kenanga (Dajan Peken, Tabanan)', 'type' => 'campur', 'year_established' => 2023, 'description' => 'Lokasi: Jl. Ngurah Rai No. 18, Dajan Peken, Tabanan. Tepat di pusat kota Tabanan, dekat RSUD.', 'created_at' => now(), 'updated_at' => now()],
-            ['user_id' => 1, 'name' => 'Graha Kediri Kost (Kediri, Tabanan)', 'type' => 'putra', 'year_established' => 2021, 'description' => 'Lokasi: Jl. Raya Kediri - Tanah Lot, Kediri, Tabanan. Akses jalan lebar, dekat kawasan bisnis.', 'created_at' => now(), 'updated_at' => now()],
-            // --- JEMBRANA ---
-            ['user_id' => 1, 'name' => 'Kos Graha Perkasa (Banjar Tengah, Jembrana)', 'type' => 'putra', 'year_established' => 2021, 'description' => 'Lokasi: Jl. Ngurah Rai No. 102, Banjar Tengah, Jembrana. Khusus pria, aman dipantau CCTV 24 jam.', 'created_at' => now(), 'updated_at' => now()],
-            ['user_id' => 1, 'name' => 'Kos Graha Bahari (Negara, Jembrana)', 'type' => 'campur', 'year_established' => 2022, 'description' => 'Lokasi: Jl. Putu Diah, Negara, Jembrana. Bangunan baru bersih, sewa bulanan terjangkau.', 'created_at' => now(), 'updated_at' => now()],
-            // --- KLUNGKUNG ---
-            ['user_id' => 1, 'name' => 'Graha Premium Suites (Semarapura, Klungkung)', 'type' => 'campur', 'year_established' => 2025, 'description' => 'Lokasi: Jl. Puputan No. 5, Semarapura Klod. Desain modern minimalis, AC, kasur springbed.', 'created_at' => now(), 'updated_at' => now()],
-            ['user_id' => 1, 'name' => 'Kos Graha Kertagosa (Semarapura Tengah, Klungkung)', 'type' => 'putri', 'year_established' => 2022, 'description' => 'Lokasi: Jl. Untung Surapati, Klungkung. Dekat objek wisata Kertagosa, khusus wanita.', 'created_at' => now(), 'updated_at' => now()],
-            // --- BANGLI ---
-            ['user_id' => 1, 'name' => 'Graha Kost Bukit Kintamani (Kintamani, Bangli)', 'type' => 'campur', 'year_established' => 2024, 'description' => 'Lokasi: Jl. Raya Penelokan, Kintamani, Bangli. Kamar eksklusif dengan Water Heater, view Gunung Batur.', 'created_at' => now(), 'updated_at' => now()],
-            ['user_id' => 1, 'name' => 'Kos Graha Cempaka (Kawan, Bangli)', 'type' => 'putri', 'year_established' => 2021, 'description' => 'Lokasi: Jl. Nusantara, Kelurahan Kawan, Bangli. Dekat pusat perkantoran daerah Bangli.', 'created_at' => now(), 'updated_at' => now()],
-            ['user_id' => 1, 'name' => 'Kos Graha Tirta Indah (Kubutambahan, Bangli)', 'type' => 'putra', 'year_established' => 2020, 'description' => 'Lokasi: Jl. Brigjen Ngurah Rai, Bangli. Kamar mandi dalam, parkir motor luas berpagar.', 'created_at' => now(), 'updated_at' => now()],
-            // --- KARANGASEM ---
-            ['user_id' => 1, 'name' => 'Graha Kost Gajah Mada (Subagan, Karangasem)', 'type' => 'campur', 'year_established' => 2023, 'description' => 'Lokasi: Jl. Gajah Mada, Subagan, Karangasem. Dekat pusat pertokoan, fasilitas AC, lemari.', 'created_at' => now(), 'updated_at' => now()],
-            ['user_id' => 1, 'name' => 'Kos Graha Jempiring (Padangbai, Karangasem)', 'type' => 'putra', 'year_established' => 2022, 'description' => 'Lokasi: Jl. Silayukti, Padangbai. Sangat dekat dengan area pelabuhan penyeberangan.', 'created_at' => now(), 'updated_at' => now()],
-            ['user_id' => 1, 'name' => 'Kos Graha Nirwana (Amlapura, Karangasem)', 'type' => 'putri', 'year_established' => 2021, 'description' => 'Lokasi: Jl. Bhayangkara, Amlapura, Karangasem. Khusus wanita, dekat dengan pusat kuliner kota.', 'created_at' => now(), 'updated_at' => now()],
-        ]);
+        // 5. MASUKKAN DATA KOS ASLI BALI
+        $defaultFacilities = json_encode(['Wi-Fi', 'Parkir Motor', 'Dapur Bersama']);
+        $defaultRules = json_encode(['Dilarang Membawa Narkoba', 'Dilarang Bawa Lawan Jenis', 'Jaga Kebersihan']);
+
+        $properties = [
+            ['user_id' => 1, 'name' => 'Kos Graha Muslimah (Renon, Denpasar)', 'type' => 'putri', 'year_established' => 2022, 'description' => 'Lokasi: Jl. Tukad Barito No. 10, Renon, Denpasar. Kamar mandi dalam, kasur, lemari, dekat kawasan kampus.', 'facilities' => json_encode(['Dapur Bersama', 'Parkir Motor', 'CCTV']), 'rules' => json_encode(['Dilarang Bawa Lawan Jenis', 'Jam Malam 22:00']), 'created_at' => now(), 'updated_at' => now()],
+            ['user_id' => 1, 'name' => 'Kos Graha Dewata (Panjer, Denpasar)', 'type' => 'putra', 'year_established' => 2021, 'description' => 'Lokasi: Jl. Tukad Pakerisan No. 85, Panjer, Denpasar. Fasilitas lengkap dengan Wi-Fi kencang, cocok untuk mahasiswa.', 'facilities' => json_encode(['Wi-Fi', 'Dapur', 'Parkir Luas']), 'rules' => json_encode(['Dilarang Bawa Hewan', 'Tamu Lapor 1x24 Jam']), 'created_at' => now(), 'updated_at' => now()],
+            ['user_id' => 1, 'name' => 'Graha Sanur Residence (Sanur, Denpasar)', 'type' => 'campur', 'year_established' => 2023, 'description' => 'Lokasi: Jl. Danau Buyan No. 14, Sanur, Denpasar. Dekat Bypass Ngurah Rai dan Pantai Sanur. AC, parkir mobil aman.', 'facilities' => json_encode(['Kolam Renang', 'Parkir Mobil', 'Keamanan 24 Jam']), 'rules' => json_encode(['Dilarang Pesta', 'Akses 24 Jam']), 'created_at' => now(), 'updated_at' => now()],
+            ['user_id' => 1, 'name' => 'Kos Graha Melati (Kesiman, Denpasar)', 'type' => 'putri', 'year_established' => 2020, 'description' => 'Lokasi: Jl. Katrangan No. 45, Kesiman, Denpasar Timur. Lingkungan asri, include air, dekat kampus Warmadewa.', 'facilities' => json_encode(['Laundry', 'Ruang Santai', 'Dapur Mini']), 'rules' => json_encode(['Dilarang Merokok di Kamar', 'Tamu Maks 21:00']), 'created_at' => now(), 'updated_at' => now()],
+            ['user_id' => 1, 'name' => 'Graha Kost Putra Mandiri (Jimbaran, Kuta Selatan)', 'type' => 'putra', 'year_established' => 2020, 'description' => 'Lokasi: Jl. Kampus Unud, Jimbaran, Kuta Selatan. Free Wi-Fi, AC, parkir luas, dekat gerbang utama UNUD.', 'facilities' => json_encode(['Parkir Luas', 'Dekat Kampus']), 'rules' => $defaultRules, 'created_at' => now(), 'updated_at' => now()],
+            ['user_id' => 1, 'name' => 'Graha Premium Residence (Seminyak, Badung)', 'type' => 'campur', 'year_established' => 2024, 'description' => 'Lokasi: Jl. Sunset Road No. 88, Seminyak, Badung. Fasilitas eksklusif: AC, Water Heater, TV LED, kasur king-size.', 'facilities' => json_encode(['Kolam Renang', 'Gym', 'Layanan Kebersihan']), 'rules' => json_encode(['Dilarang Bawa Hewan', 'Deposit 1 Bulan']), 'created_at' => now(), 'updated_at' => now()],
+            ['user_id' => 1, 'name' => 'Graha Backpacker Room (Kuta, Badung)', 'type' => 'campur', 'year_established' => 2018, 'description' => 'Lokasi: Jl. Raya Kuta Gg. Kubu, Kuta, Badung. Strategis di pusat pariwisata, dekat Bandara Ngurah Rai.', 'facilities' => $defaultFacilities, 'rules' => $defaultRules, 'created_at' => now(), 'updated_at' => now()],
+            ['user_id' => 1, 'name' => 'Graha Canggu Pavilion (Canggu, Badung)', 'type' => 'campur', 'year_established' => 2025, 'description' => 'Lokasi: Jl. Batu Bolong No. 102, Canggu, Badung. Konsep studio room premium dengan dapur pribadi, kulkas, AC.', 'facilities' => json_encode(['Taman', 'Rooftop', 'Security']), 'rules' => $defaultRules, 'created_at' => now(), 'updated_at' => now()],
+            ['user_id' => 1, 'name' => 'Kos Graha anyar (Dalung, Badung)', 'type' => 'putri', 'year_established' => 2022, 'description' => 'Lokasi: Jl. Raya Dalung No. 12, Kuta Utara, Badung. Include kasur, lemari, listrik meteran mandiri.', 'facilities' => $defaultFacilities, 'rules' => $defaultRules, 'created_at' => now(), 'updated_at' => now()],
+            ['user_id' => 1, 'name' => 'Kos Graha Wijaya Luxury (Ubud, Gianyar)', 'type' => 'campur', 'year_established' => 2023, 'description' => 'Lokasi: Jl. Raya Pengosekan, Ubud, Gianyar. Bernuansa asri tradisional Bali, Wi-Fi kencang, AC.', 'facilities' => $defaultFacilities, 'rules' => $defaultRules, 'created_at' => now(), 'updated_at' => now()],
+        ];
+
+        // Tambahkan dummy sisanya sampai 30
+        for ($i = 11; $i <= 30; $i++) {
+            $properties[] = [
+                'user_id' => 1, 
+                'name' => "Kos Graha Cabang $i (Area Bali)", 
+                'type' => (['putra', 'putri', 'campur'])[array_rand(['putra', 'putri', 'campur'])], 
+                'year_established' => rand(2018, 2025), 
+                'description' => 'Deskripsi dummy kos ke-' . $i . '. Lingkungan aman dan nyaman.', 
+                'facilities' => $defaultFacilities, 
+                'rules' => $defaultRules,
+                'created_at' => now(), 
+                'updated_at' => now()
+            ];
+        }
+
+        DB::table('properties')->insert($properties);
         
-        // 6. OPSIONAL NAMUN SANGAT DISARANKAN: Buatkan 1 kamar dummy untuk setiap kos 
-        // agar saat diklik "Lihat Detail", harganya tidak Rp 0
+        // 6. Buat beberapa Tipe Kamar secara acak untuk setiap kos
         $rooms = [];
         for ($i = 1; $i <= 30; $i++) {
+            // Tipe Standar
             $rooms[] = [
                 'property_id' => $i,
-                'name' => 'Kamar Standar',
-                'size' => '3x4',
-                'quantity' => rand(3, 10),
-                'price_monthly' => rand(5, 15) * 100000, 
+                'name' => 'Kamar Standar Non-AC',
+                'size' => '3x3',
+                'quantity' => rand(2, 5),
+                'price_monthly' => 600000,
+                'price_daily' => 50000,
+                'price_yearly' => 6500000,
+                'facilities' => json_encode(['Kasur', 'Lemari', 'Kipas Angin', 'Kamar Mandi Luar']),
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
+            
+            // Tipe VIP
+            $rooms[] = [
+                'property_id' => $i,
+                'name' => 'Kamar VIP AC & Kamar Mandi Dalam',
+                'size' => '4x4',
+                'quantity' => rand(1, 3),
+                'price_monthly' => 1200000,
+                'price_daily' => 100000,
+                'price_yearly' => 13000000,
+                'facilities' => json_encode(['Kasur Springbed', 'Lemari', 'AC', 'Kamar Mandi Dalam', 'Meja Belajar']),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+            
+            // Khusus property tertentu (tiap kelipatan 3) ada tipe Suite
+            if ($i % 3 === 0) {
+                $rooms[] = [
+                    'property_id' => $i,
+                    'name' => 'Executive Suite Room',
+                    'size' => '5x5',
+                    'quantity' => rand(0, 2),
+                    'price_monthly' => 2500000,
+                    'price_daily' => 200000,
+                    'price_yearly' => 28000000,
+                    'facilities' => json_encode(['King Bed', 'AC', 'Water Heater', 'TV LED', 'Kulkas Mini', 'Sofa']),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
         }
         DB::table('rooms')->insert($rooms);
+
+        // 7. Tambahkan dummy data Billings untuk Admin/Landlord (Misal yang pesan user_id=3)
+        $billings = [
+            // property_id = 1, room_id = 1 (Kamar Standar) & 2 (Kamar VIP)
+            ['user_id' => 3, 'property_id' => 1, 'room_id' => 2, 'duration' => 'bulanan', 'amount' => 1200000, 'status' => 'pending_approval', 'due_date' => now()->addDays(3), 'created_at' => now()->subHours(2), 'updated_at' => now()->subHours(2)],
+            // property_id = 2, room_id = 4 (Kamar VIP properti ke-2)
+            ['user_id' => 3, 'property_id' => 2, 'room_id' => 4, 'duration' => 'harian', 'amount' => 100000, 'status' => 'unpaid', 'due_date' => now()->addDays(1), 'created_at' => now()->subHours(5), 'updated_at' => now()->subHours(5)],
+            // property_id = 3, room_id = 7 (Executive Suite properti ke-3)
+            ['user_id' => 3, 'property_id' => 3, 'room_id' => 7, 'duration' => 'tahunan', 'amount' => 28000000, 'status' => 'paid', 'due_date' => now()->subDays(5), 'created_at' => now()->subDays(10), 'updated_at' => now()->subDays(5)],
+        ];
+        DB::table('billings')->insert($billings);
+
+        // 8. Tambahkan dummy data Complaints untuk Admin
+        $complaints = [
+            ['user_id' => 3, 'judul' => 'Cara bayar kos?', 'isi_komplain' => 'Apakah bisa lewat transfer bank BCA?', 'status' => 'pending', 'created_at' => now(), 'updated_at' => now()],
+            ['user_id' => 3, 'judul' => 'Web lambat', 'isi_komplain' => 'Saat memuat gambar terasa agak lama', 'status' => 'proses', 'created_at' => now(), 'updated_at' => now()],
+            ['user_id' => 3, 'judul' => 'Salah kamar', 'isi_komplain' => 'Tadi saya kepencet pilih kamar standar, padahal mau VIP. Tolong cancelkan', 'status' => 'selesai', 'created_at' => now()->subDays(2), 'updated_at' => now()->subDays(2)],
+        ];
+        DB::table('complaints')->insert($complaints);
     }
 }

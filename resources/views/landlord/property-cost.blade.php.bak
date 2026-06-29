@@ -65,22 +65,17 @@
         
         <div class="flex items-center justify-between mb-6 mt-4">
             <div>
-                <h2 class="text-2xl font-bold text-[#1e3a5f]">Informasi Jenis Kamar</h2>
+                <h2 class="text-2xl font-bold text-[#1e3a5f]">Tipe Kamar Pertama</h2>
                 <p class="text-gray-500 text-sm mt-1">Anda dapat menambahkan tipe kamar lainnya (misal: VIP) nanti.</p>
             </div>
-            
+            <span class="px-4 py-1.5 bg-teal-50 text-[#38a38e] text-xs font-bold rounded-full border border-teal-100">TIPE 1</span>
         </div>
 
         <!-- FORM DIMULAI DI SINI -->
         <form action="{{ url('/property-cost/' . $id) }}" method="POST">
             @csrf <!-- Wajib -->
 
-            <div id="rooms-container">
-    <div class="room-entry relative" data-index="0">
-        <div class="absolute right-0 top-0 mt-4 mr-4 z-10">
-            <button type="button" class="remove-room-btn hidden text-red-500 hover:text-red-700 bg-red-50 px-4 py-2 rounded-lg font-bold text-sm border border-red-200 transition-colors"><i class="fa-solid fa-trash mr-1"></i> Hapus Kamar Ini</button>
-        </div>
-<!-- Card 1: Detail Kamar -->
+            <!-- Card 1: Detail Kamar -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 relative overflow-hidden">
                 <div class="absolute top-0 left-0 w-1.5 h-full bg-[#38a38e]"></div>
                 <h3 class="text-xl font-bold text-[#1e3a5f] mb-6">A. Spesifikasi Fisik</h3>
@@ -88,64 +83,64 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-sm font-bold text-[#1e3a5f] mb-2">Nama Tipe Kamar <span class="text-red-500">*</span></label>
-                        <input type="text" name="rooms[0][name]" class="w-full bg-[#f4f5f7] border border-transparent rounded-lg px-4 py-3 text-slate-700 focus:outline-none focus:border-[#38a38e] focus:bg-white transition-colors" placeholder="Misal: Standard Non-AC, Kamar VIP..." required>
+                        <input type="text" name="room_name" class="w-full bg-[#f4f5f7] border border-transparent rounded-lg px-4 py-3 text-slate-700 focus:outline-none focus:border-[#38a38e] focus:bg-white transition-colors" placeholder="Misal: Standard Non-AC, Kamar VIP..." required>
                     </div>
 
                     <div class="flex gap-4">
                         <div class="flex-1">
                             <label class="block text-sm font-bold text-[#1e3a5f] mb-2">Ukuran <span class="text-red-500">*</span></label>
                             <div class="relative">
-                                <input type="text" name="rooms[0][size]" class="w-full bg-[#f4f5f7] border border-transparent rounded-lg px-4 py-3 pr-10 text-slate-700 focus:outline-none focus:border-[#38a38e] focus:bg-white transition-colors" placeholder="3 x 4" required>
+                                <input type="text" name="room_size" class="w-full bg-[#f4f5f7] border border-transparent rounded-lg px-4 py-3 pr-10 text-slate-700 focus:outline-none focus:border-[#38a38e] focus:bg-white transition-colors" placeholder="3 x 4" required>
                                 <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm">m²</span>
                             </div>
                         </div>
                         <div class="w-24">
                             <label class="block text-sm font-bold text-[#1e3a5f] mb-2">Jumlah</label>
-                            <input type="number" name="rooms[0][quantity]" class="w-full bg-[#f4f5f7] border border-transparent rounded-lg px-4 py-3 text-center text-slate-700 focus:outline-none focus:border-[#38a38e] focus:bg-white transition-colors" value="1" min="1" required>
+                            <input type="number" name="room_quantity" class="w-full bg-[#f4f5f7] border border-transparent rounded-lg px-4 py-3 text-center text-slate-700 focus:outline-none focus:border-[#38a38e] focus:bg-white transition-colors" value="1" min="1" required>
                         </div>
                     </div>
 
                     <div class="col-span-1 md:col-span-2 mt-2">
                         <label class="block text-sm font-bold text-[#1e3a5f] mb-3">Fasilitas Dalam Kamar</label>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <!-- Array checkbox dengan name="rooms[0][facilities][]" -->
+                            <!-- Array checkbox dengan name="room_facilities[]" -->
                             <label class="cursor-pointer room-facility">
-                                <input type="checkbox" name="rooms[0][facilities][]" value="Kasur" class="sr-only peer hidden-checkbox">
+                                <input type="checkbox" name="room_facilities[]" value="Kasur" class="sr-only peer hidden-checkbox">
                                 <div class="facility-box rounded-xl border-2 border-transparent bg-[#f4f5f7] p-4 flex items-center transition-all peer-checked:border-[#38a38e] peer-checked:bg-teal-50">
                                     <i class="fa-solid fa-bed text-gray-400 w-6 text-center text-lg icon-fac"></i>
                                     <span class="text-sm font-semibold text-gray-500 ml-2 text-fac">Kasur</span>
                                 </div>
                             </label>
                             <label class="cursor-pointer room-facility">
-                                <input type="checkbox" name="rooms[0][facilities][]" value="K. Mandi Dalam" class="sr-only peer hidden-checkbox">
+                                <input type="checkbox" name="room_facilities[]" value="K. Mandi Dalam" class="sr-only peer hidden-checkbox">
                                 <div class="facility-box rounded-xl border-2 border-transparent bg-[#f4f5f7] p-4 flex items-center transition-all peer-checked:border-[#38a38e] peer-checked:bg-teal-50">
                                     <i class="fa-solid fa-bath text-gray-400 w-6 text-center text-lg icon-fac"></i>
                                     <span class="text-sm font-semibold text-gray-500 ml-2 text-fac">K. Mandi</span>
                                 </div>
                             </label>
                             <label class="cursor-pointer room-facility">
-                                <input type="checkbox" name="rooms[0][facilities][]" value="AC" class="sr-only peer hidden-checkbox">
+                                <input type="checkbox" name="room_facilities[]" value="AC" class="sr-only peer hidden-checkbox">
                                 <div class="facility-box rounded-xl border-2 border-transparent bg-[#f4f5f7] p-4 flex items-center transition-all peer-checked:border-[#38a38e] peer-checked:bg-teal-50">
                                     <i class="fa-regular fa-snowflake text-gray-400 w-6 text-center text-lg icon-fac"></i>
                                     <span class="text-sm font-semibold text-gray-500 ml-2 text-fac">AC</span>
                                 </div>
                             </label>
                             <label class="cursor-pointer room-facility">
-                                <input type="checkbox" name="rooms[0][facilities][]" value="Lemari" class="sr-only peer hidden-checkbox">
+                                <input type="checkbox" name="room_facilities[]" value="Lemari" class="sr-only peer hidden-checkbox">
                                 <div class="facility-box rounded-xl border-2 border-transparent bg-[#f4f5f7] p-4 flex items-center transition-all peer-checked:border-[#38a38e] peer-checked:bg-teal-50">
                                     <i class="fa-solid fa-door-closed text-gray-400 w-6 text-center text-lg icon-fac"></i>
                                     <span class="text-sm font-semibold text-gray-500 ml-2 text-fac">Lemari</span>
                                 </div>
                             </label>
                             <label class="cursor-pointer room-facility">
-                                <input type="checkbox" name="rooms[0][facilities][]" value="TV" class="sr-only peer hidden-checkbox">
+                                <input type="checkbox" name="room_facilities[]" value="TV" class="sr-only peer hidden-checkbox">
                                 <div class="facility-box rounded-xl border-2 border-transparent bg-[#f4f5f7] p-4 flex items-center transition-all peer-checked:border-[#38a38e] peer-checked:bg-teal-50">
                                     <i class="fa-solid fa-tv text-gray-400 w-6 text-center text-lg icon-fac"></i>
                                     <span class="text-sm font-semibold text-gray-500 ml-2 text-fac">TV</span>
                                 </div>
                             </label>
                             <label class="cursor-pointer room-facility">
-                                <input type="checkbox" name="rooms[0][facilities][]" value="Water Heater" class="sr-only peer hidden-checkbox">
+                                <input type="checkbox" name="room_facilities[]" value="Water Heater" class="sr-only peer hidden-checkbox">
                                 <div class="facility-box rounded-xl border-2 border-transparent bg-[#f4f5f7] p-4 flex items-center transition-all peer-checked:border-[#38a38e] peer-checked:bg-teal-50">
                                     <i class="fa-solid fa-hot-tub-person text-gray-400 w-6 text-center text-lg icon-fac"></i>
                                     <span class="text-sm font-semibold text-gray-500 ml-2 text-fac">Water Heater</span>
@@ -179,7 +174,7 @@
                         </div>
                         <div class="relative w-full sm:w-64">
                             <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-sm">Rp</span>
-                            <input type="text" name="rooms[0][price_monthly]" class="price-input format-rp w-full bg-white border border-gray-300 rounded-lg py-3 pl-12 pr-12 text-right font-bold text-[#1e3a5f] focus:outline-none focus:border-[#38a38e] transition-colors" placeholder="0">
+                            <input type="text" name="price_monthly" class="price-input format-rp w-full bg-white border border-gray-300 rounded-lg py-3 pl-12 pr-12 text-right font-bold text-[#1e3a5f] focus:outline-none focus:border-[#38a38e] transition-colors" placeholder="0">
                             <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-xs">/ bln</span>
                         </div>
                     </div>
@@ -192,7 +187,7 @@
                         </div>
                         <div class="relative w-full sm:w-64 opacity-50 input-wrapper">
                             <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-sm">Rp</span>
-                            <input type="text" name="rooms[0][price_daily]" class="price-input format-rp w-full bg-white border border-gray-300 rounded-lg py-3 pl-12 pr-12 text-right font-bold text-[#1e3a5f] focus:outline-none focus:border-[#38a38e] transition-colors" placeholder="0" disabled>
+                            <input type="text" name="price_daily" class="price-input format-rp w-full bg-white border border-gray-300 rounded-lg py-3 pl-12 pr-12 text-right font-bold text-[#1e3a5f] focus:outline-none focus:border-[#38a38e] transition-colors" placeholder="0" disabled>
                             <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-xs">/ hari</span>
                         </div>
                     </div>
@@ -205,21 +200,14 @@
                         </div>
                         <div class="relative w-full sm:w-64 opacity-50 input-wrapper">
                             <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-sm">Rp</span>
-                            <input type="text" name="rooms[0][price_yearly]" class="price-input format-rp w-full bg-white border border-gray-300 rounded-lg py-3 pl-12 pr-12 text-right font-bold text-[#1e3a5f] focus:outline-none focus:border-[#38a38e] transition-colors" placeholder="0" disabled>
+                            <input type="text" name="price_yearly" class="price-input format-rp w-full bg-white border border-gray-300 rounded-lg py-3 pl-12 pr-12 text-right font-bold text-[#1e3a5f] focus:outline-none focus:border-[#38a38e] transition-colors" placeholder="0" disabled>
                             <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-xs">/ thn</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-                </div>
-</div>
-
-<button type="button" id="add-room-btn" class="w-full py-4 border-2 border-dashed border-[#38a38e] text-[#38a38e] font-bold rounded-2xl hover:bg-teal-50 transition-colors mb-8 shadow-sm flex items-center justify-center text-lg">
-    <i class="fa-solid fa-plus mr-3"></i> Tambah Jenis Kamar Lain
-</button>
-
-<!-- Card 3: Manajemen Tagihan Utilitas -->
+            <!-- Card 3: Manajemen Tagihan Utilitas -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 relative overflow-hidden">
                 <div class="absolute top-0 left-0 w-1.5 h-full bg-orange-400"></div>
                 
@@ -317,81 +305,9 @@
     <!-- LOGIKA JQUERY -->
     <script type="module">
         $(document).ready(function() {
-
-            // 5. Logika Tambah Jenis Kamar
-            $('#add-room-btn').click(function() {
-                let container = $('#rooms-container');
-                let entries = container.find('.room-entry');
-                let index = entries.length; // Index baru
-                
-                // Clone the first entry
-                let newEntry = entries.first().clone();
-                newEntry.attr('data-index', index);
-                
-                // Clear inputs
-                newEntry.find('input[type="text"]').val('');
-                newEntry.find('input[type="number"]').val('1');
-                newEntry.find('input[type="checkbox"]').prop('checked', false);
-                
-                // Reset toggle disabled state
-                newEntry.find('.price-toggle').prop('checked', false);
-                newEntry.find('.price-input').prop('disabled', true).val('');
-                newEntry.find('.input-wrapper').addClass('opacity-50');
-                newEntry.find('.price-row').removeClass('border-[#38a38e] bg-teal-50/50').addClass('border-transparent bg-[#f4f5f7]');
-                newEntry.find('.price-row label').removeClass('text-[#1e3a5f]').addClass('text-gray-500');
-                
-                // Reset facility icons
-                newEntry.find('.icon-fac').removeClass('text-[#38a38e]').addClass('text-gray-400');
-                newEntry.find('.text-fac').removeClass('text-[#38a38e]').addClass('text-gray-500');
-                newEntry.find('.facility-box').removeClass('border-[#38a38e] bg-teal-50');
-                
-                // Show remove button
-                newEntry.find('.remove-room-btn').removeClass('hidden');
-                
-                // Update names
-                newEntry.find('input').each(function() {
-                    let name = $(this).attr('name');
-                    if (name && name.startsWith('rooms[0]')) {
-                        $(this).attr('name', name.replace('rooms[0]', 'rooms[' + index + ']'));
-                    }
-                });
-                
-                container.append(newEntry);
-                updateRoomLabels();
-                
-                $('html, body').animate({
-                    scrollTop: newEntry.offset().top - 100
-                }, 500);
-            });
-            
-            $(document).on('click', '.remove-room-btn', function() {
-                $(this).closest('.room-entry').remove();
-                updateRoomLabels();
-            });
-            
-            function updateRoomLabels() {
-                let entries = $('.room-entry');
-                if(entries.length > 1) {
-                    entries.find('.remove-room-btn').removeClass('hidden');
-                    entries.first().find('.remove-room-btn').addClass('hidden'); // First cannot be removed
-                } else {
-                    entries.find('.remove-room-btn').addClass('hidden');
-                }
-                
-                entries.each(function(idx) {
-                    $(this).attr('data-index', idx);
-                    $(this).find('input').each(function() {
-                        let name = $(this).attr('name');
-                        if (name && name.startsWith('rooms[')) {
-                            $(this).attr('name', name.replace(/rooms\[\d+\]/, 'rooms[' + idx + ']'));
-                        }
-                    });
-                });
-            }
-
             
             // 1. Logika Warna Ikon & Teks Fasilitas (Klik ganda sudah dihilangkan)
-            $(document).on('change', '.room-facility input[type="checkbox"]', function() {
+            $('.room-facility input[type="checkbox"]').change(function() {
                 let box = $(this).siblings('.facility-box');
                 let icon = box.find('.icon-fac');
                 let text = box.find('.text-fac');
@@ -406,7 +322,7 @@
             });
 
             // 2. Logika Disable/Enable Harga Berdasarkan Checkbox
-            $(document).on('change', '.price-toggle', function() {
+            $('.price-toggle').change(function() {
                 let row = $(this).closest('.price-row');
                 let input = row.find('.price-input');
                 let wrapper = row.find('.input-wrapper');
@@ -437,7 +353,7 @@
             });
 
             // 4. Format Rupiah Otomatis saat mengetik
-            $(document).on('input', '.format-rp', function() {
+            $('.format-rp').on('input', function() {
                 let value = $(this).val().replace(/[^,\d]/g, '').toString();
                 let split = value.split(',');
                 let sisa = split[0].length % 3;

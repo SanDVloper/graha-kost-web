@@ -18,6 +18,8 @@ class UserSeeder extends Seeder
                 'email' => 'tuan@graha.com',
                 'password' => '$2y$12$AHiRRejQG/PHmK/ikQwpWO2FFxsxlgrLiRL6FijcnswhSsBj4qAkO', // Password sudah di-hash sesuai database
                 'role' => 'tuan_kos',
+                'is_super_admin' => false,
+                'permissions' => null,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -26,6 +28,18 @@ class UserSeeder extends Seeder
                 'email' => 'admin@graha.com',
                 'password' => '$2y$12$.CWjws1.xaoHBlGr705cue5sdrmqf4vNaZOgmAIyjpwEqjOTU3gZS', //
                 'role' => 'admin',
+                'is_super_admin' => true,
+                'permissions' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Admin Laporan',
+                'email' => 'admin_laporan@graha.com',
+                'password' => '$2y$12$.CWjws1.xaoHBlGr705cue5sdrmqf4vNaZOgmAIyjpwEqjOTU3gZS', // Sama dengan password admin@graha.com (password: password)
+                'role' => 'admin',
+                'is_super_admin' => false,
+                'permissions' => json_encode(['laporan']),
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -34,6 +48,8 @@ class UserSeeder extends Seeder
                 'email' => 'customer@graha.com',
                 'password' => '$2y$12$X/nhowG1qYNMXTAAT/9Dy.s0KJk20z/VV.9d7uRzxP8KHnFg4uMdS', //
                 'role' => 'pencari',
+                'is_super_admin' => false,
+                'permissions' => null,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]

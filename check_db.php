@@ -1,0 +1,1 @@
+<?php require 'vendor/autoload.php'; $app = require_once 'bootstrap/app.php'; $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class); $kernel->bootstrap(); $b = App\Models\Billing::all(); foreach($b as $item) { echo 'ID: ' . $item->id . ' UserID: ' . $item->user_id . ' Status: ' . $item->status . PHP_EOL; }

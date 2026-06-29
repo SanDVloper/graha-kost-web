@@ -28,9 +28,21 @@ Route::get('/detail-kos/{id}', [CustomerController::class, 'show'])->name('custo
 Route::middleware(['auth'])->group(function () {
 
     Route::get('/settings', [AuthController::class, 'globalSettings'])->name('settings.global');
+    Route::post('/settings/profile', [AuthController::class, 'updateProfile'])->name('settings.profile');
+    Route::post('/settings/password', [AuthController::class, 'updatePassword'])->name('settings.password');
+
+    // ==========================================
+    // RUTE KHUSUS LENGKAPI PROFIL LANDLORD
+    // ==========================================
+    Route::post('/landlord/complete-profile', [AuthController::class, 'completeProfileStore'])->name('landlord.profile.store');
 
     Route::get('/dashboard-landlord', [PropertyController::class, 'index'])->name('landlord.dashboard');
 
+    // ==========================================
+    // RUTE LANDLORD DENGAN MIDDLEWARE PROFIL
+    // ==========================================
+    Route::middleware(['landlord.profile'])->group(function () {
+        
     Route::get('/add-property', [PropertyController::class, 'createStep1']);
     Route::post('/add-property', [PropertyController::class, 'storeStep1']);
 
@@ -47,17 +59,22 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/property/{id}/rooms/{room_id}', [PropertyController::class, 'deleteRoom'])->name('property.rooms.destroy');
     Route::get('/property/{id}/occupants', [PropertyController::class, 'occupantList'])->name('property.occupants');
     Route::get('/property/{id}/billing', [PropertyController::class, 'billingList'])->name('property.billing');
+    Route::post('/property/{id}/billing/{billing_id}/verify', [PropertyController::class, 'verifyPayment'])->name('property.billing.verify');
     Route::get('/property/{id}/complains', [PropertyController::class, 'complainList'])->name('property.complains');
     Route::get('/property/{id}/applications', [PropertyController::class, 'applications'])->name('property.applications');
     Route::post('/property/{id}/applications/{billing_id}/accept', [PropertyController::class, 'acceptApplication'])->name('property.applications.accept');
     Route::post('/property/{id}/applications/{billing_id}/reject', [PropertyController::class, 'rejectApplication'])->name('property.applications.reject');
     Route::get('/property/{id}/settings', [PropertyController::class, 'settings'])->name('property.settings');
     Route::post('/property/{id}/settings', [PropertyController::class, 'updateSettings'])->name('property.settings.update');
+    Route::post('/property/{id}/deactivate', [PropertyController::class, 'deactivate'])->name('property.deactivate');
+    Route::delete('/property/{id}', [PropertyController::class, 'destroy'])->name('property.destroy');
+    });
 
     Route::post('/enroll-kos', [CustomerController::class, 'enroll'])->name('customer.enroll');
 
     Route::get('/tagihan-saya', [CustomerController::class, 'billing'])->name('customer.billing');
     Route::post('/bayar-tagihan/{id}', [CustomerController::class, 'pay'])->name('customer.pay');
+    Route::post('/bayar-qris/{id}', [CustomerController::class, 'payQris'])->name('customer.payQris');
 
     Route::get('/kuitansi-saya/{id}', [CustomerController::class, 'invoice'])->name('customer.invoice');
 
@@ -82,13 +99,17 @@ Route::middleware(['auth'])->group(function () {
 // 4. RUTE MIDDLEWARE ADMIN
 // ==========================================
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
-    Route::get('/kost/detail', [AdminController::class, 'kostDetail'])->name('detail');
-    Route::get('/enrollment', [AdminController::class, 'enrollment'])->name('enrollment');
-    Route::get('/tagihan', [AdminController::class, 'tagihan'])->name('tagihan');
-    Route::get('/pembayaran', [AdminController::class, 'pembayaran'])->name('pembayaran');
-    Route::get('/complaints', [AdminController::class, 'complaints'])->name('complaints.index');
-    Route::put('/complaints/{id}', [AdminController::class, 'updateStatus'])->name('complaints.updateStatus');
-    Route::get('/kost/{id}', [KostController::class, 'show'])->name('kost.show');
-    Route::get('/users', [AdminController::class, 'users'])->name('users');
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard')->middleware('admin.permission:dashboard');
+    Route::get('/kost/detail', [AdminController::class, 'kostDetail'])->name('detail')->middleware('admin.permission:detail');
+    Route::get('/enrollment', [AdminController::class, 'enrollment'])->name('enrollment')->middleware('admin.permission:enrollment');
+    Route::get('/tagihan', [AdminController::class, 'tagihan'])->name('tagihan')->middleware('admin.permission:tagihan');
+    Route::get('/pembayaran', [AdminController::class, 'pembayaran'])->name('pembayaran')->middleware('admin.permission:tagihan');
+    Route::get('/complaints', [AdminController::class, 'complaints'])->name('complaints.index')->middleware('admin.permission:complaints');
+    Route::put('/complaints/{id}', [AdminController::class, 'updateStatus'])->name('complaints.updateStatus')->middleware('admin.permission:complaints');
+    // Route::get('/kost/{id}', [KostController::class, 'show'])->name('kost.show'); // Telah dialihkan ke customer.show
+    Route::get('/users', [AdminController::class, 'users'])->name('users')->middleware('admin.permission:users');
+    Route::post('/users/admin', [AdminController::class, 'storeAdmin'])->name('users.admin.store')->middleware('admin.permission:users');
+    Route::put('/users/{id}/permissions', [AdminController::class, 'updatePermissions'])->name('users.permissions')->middleware('admin.permission:users');
+    Route::get('/laporan', [AdminController::class, 'laporan'])->name('laporan')->middleware('admin.permission:laporan');
+    Route::get('/laporan/export', [AdminController::class, 'exportCsv'])->name('laporan.export')->middleware('admin.permission:laporan');
 });

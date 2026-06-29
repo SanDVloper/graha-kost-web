@@ -31,7 +31,7 @@ class CustomerController extends Controller
             $query->where('type', strtolower($request->kategori));
         }
 
-        $properties = $query->latest()->get();
+        $properties = $query->with('rooms')->latest()->get();
 
         return view('customer.index', compact('properties'));
     }
@@ -49,9 +49,19 @@ class CustomerController extends Controller
             ->latest()
             ->first();
 
-        // Jika user belum pernah nge-enroll kosan sama sekali, kembalikan ke welcome catalog dengan parameter bypass agar tidak loop redirect
+        // Jika user belum pernah nge-enroll kosan sama sekali
         if (!$currentBilling) {
             return redirect()->route('customer.index', ['bypass' => true])->with('success', 'Anda belum terdaftar di kos manapun. Silakan pilih salah satu kos di bawah untuk mengajukan sewa!');
+        }
+
+        // Jika tagihan sudah di-ACC landlord tapi belum LUNAS dibayar
+        if ($currentBilling->status === 'unpaid') {
+            return redirect()->route('customer.billing')->with('success', 'Pengajuan sewa Anda telah disetujui! Silakan selesaikan pembayaran tagihan Anda.');
+        }
+
+        // Jika masih pending atau rejected
+        if ($currentBilling->status !== 'paid') {
+            return redirect()->route('customer.index', ['bypass' => true])->with('success', 'Pengajuan sewa Anda saat ini berstatus: ' . $currentBilling->status . '.');
         }
 
         $property = $currentBilling->property;
@@ -77,31 +87,38 @@ class CustomerController extends Controller
      */
     public function enroll(Request $request)
     {
-        $propertyId = $request->input('property_id');
-        $property = Property::with('rooms')->findOrFail($propertyId);
+        $request->validate([
+            'property_id' => 'required|exists:properties,id',
+            'room_id' => 'required|exists:rooms,id',
+            'durasi_sewa' => 'required|in:harian,bulanan,tahunan'
+        ]);
 
-        if ($property->rooms && $property->rooms->count() > 0) {
-            $hargaSewa = $property->rooms->first()->price_monthly;
+        $propertyId = $request->input('property_id');
+        $roomId = $request->input('room_id');
+        $durasi = $request->input('durasi_sewa');
+
+        $property = Property::findOrFail($propertyId);
+        $room = \App\Models\Room::findOrFail($roomId);
+
+        if ($durasi == 'harian') {
+            $hargaSewa = $room->price_daily ?? round($room->price_monthly / 20);
+        } elseif ($durasi == 'tahunan') {
+            $hargaSewa = $room->price_yearly ?? ($room->price_monthly * 11);
         } else {
-            $hargaSewa = 600000;
-            if($property->type == 'putri') $hargaSewa = 850000;
-            if($property->type == 'putra') $hargaSewa = 750000;
-            if(str_contains(strtolower($property->name), 'premium') || str_contains(strtolower($property->name), 'luxury')) {
-                $hargaSewa = 1800000;
-            } elseif($property->type == 'campur' && $hargaSewa == 600000) {
-                $hargaSewa = 1200000;
-            }
+            $hargaSewa = $room->price_monthly;
         }
 
         Billing::create([
             'user_id'     => Auth::id(),
             'property_id' => $propertyId,
+            'room_id'     => $roomId,
+            'duration'    => $durasi,
             'amount'      => $hargaSewa,
-            'status'      => 'unpaid',
+            'status'      => 'pending_approval',
             'due_date'    => Carbon::now()->addDays(3),
         ]);
 
-        return redirect()->route('customer.show', $propertyId)->with('success', 'Pengajuan sewa ' . $property->name . ' berhasil diajukan! Tagihan baru telah dibuat, silakan cek menu Billing untuk melakukan pembayaran.');
+        return redirect()->route('customer.show', $propertyId)->with('success', 'Pengajuan sewa tipe kamar ' . $room->name . ' berhasil diajukan! Menunggu persetujuan dari pemilik kos sebelum Anda dapat melakukan pembayaran.');
     }
 
     /**
@@ -118,20 +135,57 @@ class CustomerController extends Controller
      */
     public function pay(Request $request, $id)
     {
-        $billing = Billing::findOrFail($id);
-        $billing->update(['status' => 'paid']);
+        $request->validate([
+            'bukti_transfer' => 'required|image|mimes:jpeg,png,jpg|max:2048'
+        ]);
 
-        $user = User::find(Auth::id());
-        if ($user && $user->role !== 'admin') {
+        $billing = Billing::findOrFail($id);
+
+        if ($request->hasFile('bukti_transfer')) {
+            $path = $request->file('bukti_transfer')->store('bukti_transfer', 'public');
+            $billing->update([
+                'bukti_transfer' => $path,
+                'status' => 'waiting_verification'
+            ]);
+        }
+
+        return back()->with([
+            'success' => 'Bukti pembayaran berhasil diunggah. Menunggu verifikasi dari pemilik kos.',
+        ]);
+    }
+
+    /**
+     * Fitur 5.1: Proses Bayar Instan via Simulasi QRIS
+     */
+    public function payQris(Request $request, $id)
+    {
+        $billing = Billing::findOrFail($id);
+        
+        // Pastikan tagihan ini milik user yang sedang login
+        if ($billing->user_id !== auth()->id()) {
+            abort(403, 'Akses ditolak.');
+        }
+
+        // Karena QRIS otomatis sukses, langsung ubah status jadi paid
+        $billing->update([
+            'status' => 'paid'
+        ]);
+
+        // Update role menjadi penghuni jika sebelumnya adalah pencari
+        $user = \App\Models\User::find($billing->user_id);
+        if ($user && $user->role !== 'admin' && $user->role !== 'tuan_kos') {
             $user->update(['role' => 'penghuni']);
         }
 
         return back()->with([
-            'success' => 'Pembayaran berhasil dikonfirmasi. Selamat! Status Akun Anda kini aktif sebagai Penghuni Kos.',
-            'invoice_id' => $id
+            'success' => 'Pembayaran QRIS Berhasil! Tagihan Anda telah lunas.',
+            'invoice_id' => $billing->id
         ]);
     }
 
+    /**
+     * Fitur 6: Menampilkan Invoice Kuitansi
+     */
     public function invoice($id)
     {
         $billing = Billing::with('property')->findOrFail($id);
@@ -162,10 +216,15 @@ class CustomerController extends Controller
     public function rate(Request $request)
     {
         $request->validate([
-            'property_id' => 'required',
+            'property_id' => 'required|exists:properties,id',
             'rating'      => 'required|integer|min:1|max:5',
             'ulasan'      => 'nullable|string'
         ]);
+
+        \App\Models\Review::updateOrCreate(
+            ['user_id' => Auth::id(), 'property_id' => $request->property_id],
+            ['rating' => $request->rating, 'comment' => $request->ulasan]
+        );
 
         return back()->with('success', 'Terima kasih atas ulasan Anda!');
     }
@@ -175,7 +234,7 @@ class CustomerController extends Controller
      */
     public function show($id)
     {
-        $property = Property::with('rooms')->findOrFail($id);
+        $property = Property::with(['rooms', 'reviews.user'])->findOrFail($id);
         return view('customer.show', compact('property'));
     }
 }

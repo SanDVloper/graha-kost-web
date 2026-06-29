@@ -31,7 +31,7 @@
 
         <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto overflow-x-hidden">
             <!-- Tombol Kembali ke Dashboard Global -->
-            <a href="{{ url('/') }}" class="flex items-center px-4 py-2.5 text-gray-500 hover:bg-gray-50 hover:text-[#1e3a5f] rounded-lg mb-6 whitespace-nowrap border border-transparent hover:border-gray-200 transition-all">
+            <a href="{{ route('landlord.dashboard') }}" class="flex items-center px-4 py-2.5 text-gray-500 hover:bg-gray-50 hover:text-[#1e3a5f] rounded-lg mb-6 whitespace-nowrap border border-transparent hover:border-gray-200 transition-all">
                 <div class="w-6 shrink-0 flex justify-center"><i class="fa-solid fa-arrow-left"></i></div>
                 <span class="font-bold ml-3 sidebar-text">Global Dashboard</span>
             </a>

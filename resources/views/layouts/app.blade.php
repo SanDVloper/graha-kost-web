@@ -66,7 +66,7 @@
 
     <!-- ==================== MODAL NOTIFIKASI ACC ==================== -->
     @auth
-        <div id="modal-notifikasi-acc" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] hidden items-center justify-center p-4 flex">
+        <div id="modal-notifikasi-acc" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] hidden items-center justify-center p-4">
             <div class="bg-white rounded-3xl p-6 max-w-sm w-full text-center shadow-2xl border border-gray-100 relative">
                 <button onclick="tutupModalNotifikasi()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
 
@@ -80,13 +80,13 @@
                         <span class="bg-emerald-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-md uppercase tracking-wider">Approved</span>
                     </div>
                     <p class="text-[11px] text-emerald-700 leading-relaxed">
-                        Selamat! Pengajuan sewa Anda telah disetujui oleh pemilik kos. Silakan masuk ke halaman kos sewaan Anda untuk mengelola hunian secara penuh.
+                        Selamat! Pengajuan sewa Anda telah disetujui oleh pemilik kos. Silakan selesaikan pembayaran terlebih dahulu untuk masuk ke halaman kos sewaan Anda secara penuh.
                     </p>
                 </div>
 
-                <button type="button" onclick="masukHalamanKosSewa()" class="w-full bg-[#1E3A8A] hover:bg-blue-900 text-white font-bold py-3.5 rounded-xl text-xs transition shadow-md flex items-center justify-center gap-1.5 active:scale-95 animate-pulse">
-                    <i class="fa-solid fa-building-user"></i> Masuk ke Halaman Kos Saya
-                </button>
+                <a href="{{ route('customer.billing') }}" class="w-full bg-[#1E3A8A] hover:bg-blue-900 text-white font-bold py-3.5 rounded-xl text-xs transition shadow-md flex items-center justify-center gap-1.5 active:scale-95 animate-pulse">
+                    <i class="fa-solid fa-credit-card"></i> Selesaikan Pembayaran Tagihan
+                </a>
             </div>
         </div>
     @endauth
@@ -102,17 +102,39 @@
     <script>
         function bukaModalNotifikasi() {
             var modal = document.getElementById('modal-notifikasi-acc');
-            if(modal) modal.classList.remove('hidden');
+            if(modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
         }
         function tutupModalNotifikasi() {
             var modal = document.getElementById('modal-notifikasi-acc');
-            if(modal) modal.classList.add('hidden');
-        }
-        function masukHalamanKosSewa() {
-            tutupModalNotifikasi();
-            window.location.href = "{{ route('customer.myKos') }}";
+            if(modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
         }
     </script>
+
+    @auth
+        @php
+            // Cek apakah ada tagihan unpaid dan role pencari untuk memunculkan notifikasi otomatis
+            $showNotif = false;
+            if (Auth::user()->role === 'pencari') {
+                $showNotif = \App\Models\Billing::where('user_id', Auth::id())
+                    ->where('status', 'unpaid')
+                    ->exists();
+            }
+        @endphp
+
+        @if($showNotif)
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                bukaModalNotifikasi();
+            });
+        </script>
+        @endif
+    @endauth
 
 </body>
 </html>

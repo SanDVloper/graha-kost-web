@@ -21,6 +21,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'is_super_admin',
+        'permissions',
     ];
 
     /**
@@ -41,5 +44,20 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'is_super_admin' => 'boolean',
+        'permissions' => 'array',
     ];
+
+    /**
+     * Check if user has specific permission
+     */
+    public function hasPermission($menu)
+    {
+        if ($this->is_super_admin) {
+            return true;
+        }
+        
+        $perms = $this->permissions ?? [];
+        return in_array($menu, $perms);
+    }
 }

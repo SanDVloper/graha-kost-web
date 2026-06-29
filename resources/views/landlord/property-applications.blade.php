@@ -19,7 +19,7 @@
         </div>
         
         <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-            <a href="{{ url('/') }}" class="flex items-center px-4 py-2.5 text-gray-500 hover:bg-gray-50 rounded-lg mb-4">
+            <a href="{{ route('landlord.dashboard') }}" class="flex items-center px-4 py-2.5 text-gray-500 hover:bg-gray-50 rounded-lg mb-4">
                 <i class="fa-solid fa-arrow-left w-6 text-cente+r"></i><span class="ml-3 sidebar-text">Dashboard Utama</span>
             </a>
             

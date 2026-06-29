@@ -19,7 +19,7 @@
         </div>
         
         <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-            <a href="{{ url('/') }}" class="flex items-center px-4 py-2.5 text-gray-500 hover:bg-gray-50 rounded-lg mb-4">
+            <a href="{{ route('landlord.dashboard') }}" class="flex items-center px-4 py-2.5 text-gray-500 hover:bg-gray-50 rounded-lg mb-4">
                 <i class="fa-solid fa-arrow-left w-6 text-cente+r"></i><span class="ml-3 sidebar-text">Dashboard Utama</span>
             </a>
             
@@ -164,9 +164,10 @@
                         </div>
                     </div>
                 </div>
+            </form>
 
-                <!-- Card 3: Zona Berbahaya (Danger Zone) -->
-                <div class="bg-white rounded-xl border border-red-200 p-8 shadow-sm relative overflow-hidden">
+            <!-- Card 3: Zona Berbahaya (Danger Zone) -->
+            <div class="bg-white rounded-xl border border-red-200 p-8 shadow-sm relative overflow-hidden mt-8">
                     <div class="absolute top-0 left-0 w-1 h-full bg-red-500"></div>
                     <h3 class="text-lg font-bold text-red-600 mb-2 flex items-center">
                         <i class="fa-solid fa-triangle-exclamation mr-3"></i> Danger Zone
@@ -175,10 +176,20 @@
                     
                     <div class="flex items-center justify-between py-4 border-b border-gray-100">
                         <div>
-                            <h4 class="font-bold text-slate-800">Tutup Kos Sementara</h4>
-                            <p class="text-xs text-gray-500 mt-1">Kos tidak akan muncul di pencarian, namun data penghuni tetap aman.</p>
+                            @if($property->is_active)
+                                <h4 class="font-bold text-slate-800">Tutup Kos Sementara</h4>
+                                <p class="text-xs text-gray-500 mt-1">Kos tidak akan muncul di pencarian, namun data penghuni tetap aman.</p>
+                            @else
+                                <h4 class="font-bold text-slate-800">Buka Kembali Kos</h4>
+                                <p class="text-xs text-gray-500 mt-1">Kos akan kembali muncul di pencarian untuk calon penghuni baru.</p>
+                            @endif
                         </div>
-                        <button class="px-4 py-2 border border-gray-300 text-gray-600 font-bold text-sm rounded-lg hover:bg-gray-50 transition-colors">Nonaktifkan</button>
+                        <form action="{{ route('property.deactivate', $property->id) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="px-4 py-2 border border-gray-300 text-gray-600 font-bold text-sm rounded-lg hover:bg-gray-50 transition-colors">
+                                {{ $property->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
+                            </button>
+                        </form>
                     </div>
 
                     <div class="flex items-center justify-between pt-4">
@@ -186,11 +197,14 @@
                             <h4 class="font-bold text-red-600">Hapus Properti Permanen</h4>
                             <p class="text-xs text-gray-500 mt-1">Menghapus seluruh data properti, kamar, tagihan, dan histori penghuni.</p>
                         </div>
-                        <button type="button" class="px-4 py-2 bg-red-50 hover:bg-red-500 text-red-600 hover:text-white font-bold text-sm rounded-lg transition-colors border border-red-200 hover:border-red-500">Hapus Properti</button>
+                        <form action="{{ route('property.destroy', $property->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus properti ini secara permanen?');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="px-4 py-2 bg-red-50 hover:bg-red-500 text-red-600 hover:text-white font-bold text-sm rounded-lg transition-colors border border-red-200 hover:border-red-500">Hapus Properti</button>
+                        </form>
                     </div>
                 </div>
 
-            </form>
         </div>
     </main>
 

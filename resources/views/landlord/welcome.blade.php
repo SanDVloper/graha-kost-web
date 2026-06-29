@@ -30,7 +30,7 @@
         </div>
 
         <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto overflow-x-hidden">
-            <a href="{{ url('/') }}" class="flex items-center px-4 py-3 bg-teal-50 text-teal-600 rounded-lg mb-6 whitespace-nowrap">
+            <a href="{{ route('landlord.dashboard') }}" class="flex items-center px-4 py-3 bg-teal-50 text-teal-600 rounded-lg mb-6 whitespace-nowrap">
                 <div class="w-6 shrink-0 flex justify-center"><i class="fa-solid fa-chart-pie"></i></div>
                 <span class="font-medium ml-3 sidebar-text">Dashboard Utama</span>
             </a>
@@ -86,6 +86,9 @@
 
         <div class="flex-1 overflow-y-auto p-8">
             
+            @if(isset($profileIncomplete) && $profileIncomplete)
+                @include('landlord.complete-profile-form')
+            @else
             <div class="flex justify-between items-end mb-8">
                 <div>
                     <h2 class="text-3xl font-bold text-slate-800 mb-2">Welcome to GRAHA!</h2>
@@ -146,7 +149,15 @@
                                         ? asset('storage/' . $property->photos[0]) 
                                         : 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80';
                                 @endphp
-                                <img src="{{ $coverImage }}" alt="Kos" class="w-full h-full object-cover">
+                                <img src="{{ $coverImage }}" alt="Kos" class="w-full h-full object-cover {{ $property->is_active ? '' : 'grayscale opacity-70' }}">
+                                
+                                @if(!$property->is_active)
+                                <div class="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-[2px]">
+                                    <span class="bg-red-500 text-white font-bold px-3 py-1.5 rounded-lg text-sm shadow-lg flex items-center gap-2">
+                                        <i class="fa-solid fa-ban"></i> DITUTUP
+                                    </span>
+                                </div>
+                                @endif
                                 
                                 <div class="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-md text-xs font-bold text-[#1e3a5f] shadow-sm">
                                     {{ ucfirst($property->type) }}
@@ -169,7 +180,11 @@
                                     </div>
                                     <div class="h-8 w-px bg-gray-200"></div>
                                     <div class="flex flex-col items-center">
-                                        <span class="font-bold text-yellow-500"><i class="fa-solid fa-star text-[10px]"></i> Baru</span>
+                                        @if($property->is_active)
+                                            <span class="font-bold text-green-500"><i class="fa-solid fa-circle-check text-[10px] mr-1"></i>Aktif</span>
+                                        @else
+                                            <span class="font-bold text-red-500"><i class="fa-solid fa-ban text-[10px] mr-1"></i>Nonaktif</span>
+                                        @endif
                                         <span class="text-xs">Status</span>
                                     </div>
                                 </div>
@@ -181,6 +196,8 @@
                         </div>
                     @endforeach
                 </div>
+            @endif
+
             @endif
 
         </div>

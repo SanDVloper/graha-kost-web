@@ -17,8 +17,8 @@
                 <span class="bg-blue-100 text-blue-800 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider">
                     KUITANSI DIGITAL
                 </span>
-                <p class="text-xs text-gray-500 mt-2">No. Invoice: <span class="font-mono font-bold text-gray-800">INV-2026-0041</span></p>
-                <p class="text-[11px] text-gray-400">Tanggal Cetak: 11 Juni 2026</p>
+                <p class="text-xs text-gray-500 mt-2">No. Invoice: <span class="font-mono font-bold text-gray-800">INV-{{ date('Y') }}-{{ str_pad($billing->id, 4, '0', STR_PAD_LEFT) }}</span></p>
+                <p class="text-[11px] text-gray-400">Tanggal Cetak: {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
             </div>
         </div>
 
@@ -31,8 +31,8 @@
             </div>
             <div class="text-right">
                 <h4 class="text-gray-400 font-bold uppercase tracking-wider text-[10px]">Lokasi Properti Sasaran:</h4>
-                <p class="font-bold text-gray-800 mt-1">Kos Graha Dewata</p>
-                <p class="text-gray-500">Panjer, Denpasar Selatan, Bali</p>
+                <p class="font-bold text-gray-800 mt-1">{{ $billing->property->name ?? 'Properti Kos' }}</p>
+                <p class="text-gray-500">{{ $billing->property->location ?? $billing->property->address ?? '-' }}</p>
             </div>
         </div>
 
@@ -49,11 +49,11 @@
                 <tbody>
                     <tr class="text-gray-800 font-medium">
                         <td class="pt-3">
-                            Sewa Kamar Kos (Simulasi Pilihan Paket Harian)<br>
-                            <span class="text-[10px] text-gray-400 font-normal">*Siklus normal operasional kos dihitung per bulan</span>
+                            Sewa Kamar Kos (Paket {{ ucfirst($billing->duration ?? 'Bulanan') }})<br>
+                            <span class="text-[10px] text-gray-400 font-normal">*Siklus operasional kos dihitung berdasarkan paket yang dipilih</span>
                         </td>
-                        <td class="pt-3 text-center">1 Hari</td>
-                        <td class="pt-3 text-right font-bold text-gray-900">Rp 50.000</td>
+                        <td class="pt-3 text-center">1 {{ ucfirst($billing->duration ?? 'Bulan') }}</td>
+                        <td class="pt-3 text-right font-bold text-gray-900">Rp {{ number_format($billing->amount, 0, ',', '.') }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -63,14 +63,19 @@
         <div class="my-6 border-t pt-4 flex justify-between items-center">
             <div>
                 <h4 class="text-gray-400 font-bold uppercase tracking-wider text-[10px]">Keterangan Status Kuitansi:</h4>
-                <!-- Skenario: Menampilkan tanda cicil/belum lunas jika memilih jangka harian pendek -->
-                <span class="inline-block mt-1 bg-amber-100 text-amber-800 font-black text-xs px-3 py-1 rounded-lg uppercase tracking-wide">
-                    ⚠️ BELUM LUNAS (Mencicil Harian)
-                </span>
+                @if($billing->status == 'paid')
+                    <span class="inline-block mt-1 bg-emerald-100 text-emerald-800 font-black text-xs px-3 py-1 rounded-lg uppercase tracking-wide">
+                        <i class="fa-solid fa-circle-check"></i> LUNAS
+                    </span>
+                @else
+                    <span class="inline-block mt-1 bg-amber-100 text-amber-800 font-black text-xs px-3 py-1 rounded-lg uppercase tracking-wide">
+                        ⚠️ BELUM LUNAS
+                    </span>
+                @endif
             </div>
             <div class="text-right">
                 <p class="text-[10px] text-gray-400 font-medium">Total Dana Masuk</p>
-                <p class="text-xl font-black text-teal-600">Rp 50.000</p>
+                <p class="text-xl font-black text-teal-600">Rp {{ number_format($billing->amount, 0, ',', '.') }}</p>
             </div>
         </div>
 

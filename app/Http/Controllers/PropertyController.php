@@ -10,9 +10,17 @@ class PropertyController extends Controller
     // Fungsi untuk menampilkan Dashboard Utama
     public function index()
     {
+        $user = auth()->user();
+        $profileIncomplete = false;
+        
+        if ($user->role === 'tuan_kos') {
+            $profileIncomplete = empty($user->phone_number) || empty($user->gender) || empty($user->pekerjaan) ||
+                                 empty($user->bank_name) || empty($user->bank_account_number) || empty($user->bank_account_name);
+        }
+
         // GANTI angka 1 menjadi auth()->id()
         $properties = Property::with('rooms')->where('user_id', auth()->id())->latest()->get();
-        return view('landlord.welcome', compact('properties'));
+        return view('landlord.welcome', compact('properties', 'profileIncomplete'));
     }
 
     // Fungsi untuk halaman Manajemen Properti Spesifik
@@ -45,6 +53,7 @@ class PropertyController extends Controller
         $property->type = $request->type;
         $property->year_established = $request->year_established;
         $property->description = $request->description;
+        $property->garbage_management = $request->garbage_management;
         $property->facilities = $request->facilities;
         $property->rules = $request->rules;
 
@@ -94,24 +103,33 @@ class PropertyController extends Controller
         $property->save();
 
         // 3. Simpan data kamar ke tabel rooms
-        $room = new \App\Models\Room(); // Panggil model Room
-        $room->property_id = $property->id; // Kaitkan kamar ini dengan properti tersebut
-        $room->name = $request->room_name;
-        $room->size = $request->room_size;
-        $room->quantity = $request->room_quantity;
-        
-        // Cek jika ada input harga sewa (Hapus titiknya juga)
-        if ($request->has('price_monthly')) {
-            $room->price_monthly = (int) str_replace('.', '', $request->price_monthly);
-        }
-        if ($request->has('price_daily')) {
-            $room->price_daily = (int) str_replace('.', '', $request->price_daily);
-        }
-        if ($request->has('price_yearly')) {
-            $room->price_yearly = (int) str_replace('.', '', $request->price_yearly);
-        }
+        if ($request->has('rooms') && is_array($request->rooms)) {
+            foreach ($request->rooms as $roomData) {
+                $room = new \App\Models\Room();
+                $room->property_id = $property->id;
+                $room->name = $roomData['name'] ?? 'Kamar';
+                $room->size = $roomData['size'] ?? '-';
+                $room->quantity = $roomData['quantity'] ?? 1;
+                
+                // Simpan fasilitas (Laravel akan otomatis encode menjadi JSON karena casts di Model)
+                if (isset($roomData['facilities'])) {
+                    $room->facilities = $roomData['facilities'];
+                }
 
-        $room->save();
+                // Cek jika ada input harga sewa (Hapus titiknya juga)
+                if (!empty($roomData['price_monthly'])) {
+                    $room->price_monthly = (int) str_replace('.', '', $roomData['price_monthly']);
+                }
+                if (!empty($roomData['price_daily'])) {
+                    $room->price_daily = (int) str_replace('.', '', $roomData['price_daily']);
+                }
+                if (!empty($roomData['price_yearly'])) {
+                    $room->price_yearly = (int) str_replace('.', '', $roomData['price_yearly']);
+                }
+
+                $room->save();
+            }
+        }
 
         // 4. Lanjut ke Step 3 (Pratinjau) dengan membawa ID properti tersebut
         return redirect('/property-publish/' . $property->id);
@@ -130,9 +148,25 @@ class PropertyController extends Controller
     public function billingList($id)
     {
         // Ambil data properti untuk memastikan ini milik user yang login
-        $property = Property::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+        $property = Property::with(['billings.user', 'billings.room'])->where('id', $id)->where('user_id', auth()->id())->firstOrFail();
         
         return view('landlord.property-billing', compact('property'));
+    }
+
+    public function verifyPayment(Request $request, $id, $billing_id)
+    {
+        $property = Property::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+        $billing = \App\Models\Billing::where('id', $billing_id)->where('property_id', $id)->firstOrFail();
+        
+        $billing->update(['status' => 'paid']);
+
+        // Update role to penghuni
+        $user = \App\Models\User::find($billing->user_id);
+        if ($user && $user->role !== 'admin') {
+            $user->update(['role' => 'penghuni']);
+        }
+        
+        return redirect()->back()->with('success', 'Pembayaran berhasil diverifikasi.');
     }
 
     public function complainList($id)
@@ -163,6 +197,7 @@ class PropertyController extends Controller
         $property->name = $request->name;
         $property->type = $request->type;
         $property->description = $request->description;
+        $property->garbage_management = $request->garbage_management;
         $property->rules = $request->rules;
         
         $property->save();
@@ -256,5 +291,27 @@ class PropertyController extends Controller
         $room->delete();
         
         return redirect()->back()->with('success', 'Tipe kamar berhasil dihapus.');
+    }
+
+    public function deactivate(Request $request, $id)
+    {
+        $property = Property::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+        
+        // Toggle is_active
+        $property->is_active = !$property->is_active;
+        $property->save();
+        
+        $statusStr = $property->is_active ? 'diaktifkan' : 'dinonaktifkan sementara';
+        return redirect()->back()->with('success', 'Properti berhasil ' . $statusStr . '.');
+    }
+
+    public function destroy($id)
+    {
+        $property = Property::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+        
+        // Hapus properti
+        $property->delete();
+        
+        return redirect()->route('landlord.dashboard')->with('success', 'Properti berhasil dihapus permanen.');
     }
 }

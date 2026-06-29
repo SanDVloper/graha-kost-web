@@ -292,7 +292,7 @@
                     btn.removeClass('bg-[#1e3a5f]').addClass('bg-gray-400 cursor-not-allowed pointer-events-none');
                     
                     setTimeout(() => {
-                        window.location.href = "{{ url('/') }}";
+                        window.location.href = "{{ route('landlord.dashboard') }}";
                     }, 1500);
                 }
             });

@@ -20,7 +20,7 @@
         
         <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto overflow-x-hidden">
             <!-- Tombol Kembali ke Dashboard Global -->
-            <a href="{{ url('/') }}" class="flex items-center px-4 py-2.5 text-gray-500 hover:bg-gray-50 hover:text-[#1e3a5f] rounded-lg mb-6 whitespace-nowrap border border-transparent hover:border-gray-200 transition-all">
+            <a href="{{ route('landlord.dashboard') }}" class="flex items-center px-4 py-2.5 text-gray-500 hover:bg-gray-50 hover:text-[#1e3a5f] rounded-lg mb-6 whitespace-nowrap border border-transparent hover:border-gray-200 transition-all">
                 <div class="w-6 shrink-0 flex justify-center"><i class="fa-solid fa-arrow-left"></i></div>
                 <span class="font-bold ml-3 sidebar-text">Global Dashboard</span>
             </a>
@@ -145,88 +145,54 @@
                     </thead>
                     <tbody class="text-sm">
                         
-                        <!-- Data Dummy 1: Menunggu Verifikasi -->
-                        <tr class="border-b border-gray-100 hover:bg-yellow-50/30 transition-colors bg-yellow-50/10">
-                            <td class="py-4 px-6">
-                                <span class="text-xs font-bold text-gray-400">#INV-202605-001</span>
-                                <div class="font-bold text-[#1e3a5f] mt-1">Siti Aminah</div>
-                                <span class="text-xs text-gray-500">Unit No. 3</span>
-                            </td>
-                            <td class="py-4 px-6">
-                                <ul class="text-xs text-gray-600 space-y-1">
-                                    <li class="flex justify-between w-40"><span>Sewa Kamar:</span> <span class="font-medium">1.350.000</span></li>
-                                    <li class="flex justify-between w-40"><span>Listrik & Air:</span> <span class="font-medium">150.000</span></li>
-                                </ul>
-                            </td>
-                            <td class="py-4 px-6">
-                                <span class="font-bold text-[#38a38e] text-base">Rp 1.500.000</span>
-                            </td>
-                            <td class="py-4 px-6 text-center text-gray-600">
-                                05 Mei 2026
-                            </td>
-                            <td class="py-4 px-6 text-center">
-                                <span class="bg-yellow-100 text-yellow-700 font-bold px-3 py-1 rounded-full text-[10px] uppercase tracking-wider">Cek Bukti</span>
-                            </td>
-                            <td class="py-4 px-6 text-center">
-                                <button class="bg-[#38a38e] text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-teal-700 transition-colors shadow-sm">Verifikasi</button>
-                            </td>
-                        </tr>
-
-                        <!-- Data Dummy 2: Tertunggak -->
-                        <tr class="border-b border-gray-100 hover:bg-red-50/30 transition-colors">
-                            <td class="py-4 px-6">
-                                <span class="text-xs font-bold text-gray-400">#INV-202605-002</span>
-                                <div class="font-bold text-[#1e3a5f] mt-1">John Doe</div>
-                                <span class="text-xs text-gray-500">Unit No. 4</span>
-                            </td>
-                            <td class="py-4 px-6">
-                                <ul class="text-xs text-gray-600 space-y-1">
-                                    <li class="flex justify-between w-40"><span>Sewa Kamar:</span> <span class="font-medium">1.500.000</span></li>
-                                    <li class="flex justify-between w-40 text-red-500"><span>Denda Telat:</span> <span class="font-medium">150.000</span></li>
-                                </ul>
-                            </td>
-                            <td class="py-4 px-6">
-                                <span class="font-bold text-red-600 text-base">Rp 1.650.000</span>
-                            </td>
-                            <td class="py-4 px-6 text-center text-red-500 font-medium">
-                                01 Mei 2026
-                            </td>
-                            <td class="py-4 px-6 text-center">
-                                <span class="bg-red-100 text-red-600 font-bold px-3 py-1 rounded-full text-[10px] uppercase tracking-wider">Tertunggak</span>
-                            </td>
-                            <td class="py-4 px-6 text-center">
-                                <button class="text-green-600 border border-green-600 hover:bg-green-50 px-2 py-1.5 rounded-lg text-xs font-bold transition-colors shadow-sm" title="Ingatkan via WA">
-                                    <i class="fa-brands fa-whatsapp"></i> Ingatkan
-                                </button>
-                            </td>
-                        </tr>
-
-                        <!-- Data Dummy 3: Lunas -->
+                        @forelse($property->billings as $billing)
                         <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                             <td class="py-4 px-6">
-                                <span class="text-xs font-bold text-gray-400">#INV-202604-003</span>
-                                <div class="font-bold text-[#1e3a5f] mt-1">Budi Santoso</div>
-                                <span class="text-xs text-gray-500">Unit No. 1</span>
+                                <span class="text-xs font-bold text-gray-400">#INV-{{ str_pad($billing->id, 5, '0', STR_PAD_LEFT) }}</span>
+                                <div class="font-bold text-[#1e3a5f] mt-1">{{ $billing->user->name ?? 'User' }}</div>
+                                <span class="text-xs text-gray-500">Unit: {{ $billing->room->name ?? 'Kamar' }}</span>
                             </td>
                             <td class="py-4 px-6">
                                 <ul class="text-xs text-gray-600 space-y-1">
-                                    <li class="flex justify-between w-40"><span>Sewa Kamar:</span> <span class="font-medium">1.500.000</span></li>
-                                    <li class="flex justify-between w-40"><span>Parkir Mobil:</span> <span class="font-medium">100.000</span></li>
+                                    <li class="flex justify-between w-40"><span>Sewa Kamar:</span> <span class="font-medium">{{ number_format($billing->amount, 0, ',', '.') }}</span></li>
+                                    <li class="flex justify-between w-40"><span>Durasi:</span> <span class="font-medium">{{ ucfirst($billing->duration) }}</span></li>
                                 </ul>
                             </td>
                             <td class="py-4 px-6">
-                                <span class="font-bold text-gray-600 text-base">Rp 1.600.000</span>
+                                <span class="font-bold text-gray-800 text-base">Rp {{ number_format($billing->amount, 0, ',', '.') }}</span>
                             </td>
-                            <td class="py-4 px-6 text-center text-gray-500">
-                                28 Apr 2026
-                            </td>
-                            <td class="py-4 px-6 text-center">
-                                <span class="bg-green-100 text-green-700 font-bold px-3 py-1 rounded-full text-[10px] uppercase tracking-wider">Lunas</span>
+                            <td class="py-4 px-6 text-center text-gray-600">
+                                {{ \Carbon\Carbon::parse($billing->due_date)->format('d M Y') }}
                             </td>
                             <td class="py-4 px-6 text-center">
-                                <button class="text-gray-500 hover:text-[#1e3a5f] mx-2 transition-colors" title="Lihat Kwitansi"><i class="fa-solid fa-file-invoice"></i></button>
+                                @if($billing->status === 'paid')
+                                    <span class="bg-green-100 text-green-700 font-bold px-3 py-1 rounded-full text-[10px] uppercase tracking-wider">Lunas</span>
+                                @elseif($billing->status === 'waiting_verification')
+                                    <span class="bg-yellow-100 text-yellow-700 font-bold px-3 py-1 rounded-full text-[10px] uppercase tracking-wider">Menunggu Verifikasi</span>
+                                @elseif($billing->status === 'pending')
+                                    <span class="bg-amber-100 text-amber-700 font-bold px-3 py-1 rounded-full text-[10px] uppercase tracking-wider">Belum Dibayar</span>
+                                @else
+                                    <span class="bg-gray-100 text-gray-700 font-bold px-3 py-1 rounded-full text-[10px] uppercase tracking-wider">{{ $billing->status }}</span>
+                                @endif
+                            </td>
+                            <td class="py-4 px-6 text-center">
+                                @if($billing->status === 'waiting_verification' && $billing->bukti_transfer)
+                                    <a href="{{ asset('storage/' . $billing->bukti_transfer) }}" target="_blank" class="bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-200 transition-colors shadow-sm mr-2" title="Lihat Bukti Transfer"><i class="fa-solid fa-eye"></i></a>
+                                    <form action="{{ route('property.billing.verify', ['id' => $property->id, 'billing_id' => $billing->id]) }}" method="POST" class="inline-block">
+                                        @csrf
+                                        <button type="submit" class="bg-[#38a38e] text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-teal-700 transition-colors shadow-sm">Verifikasi</button>
+                                    </form>
+                                @endif
                             </td>
                         </tr>
+                        @empty
+                        <tr>
+                            <td colspan="6" class="py-8 text-center text-gray-500">
+                                <i class="fa-solid fa-receipt text-3xl mb-3 block text-gray-300"></i>
+                                Belum ada tagihan sewa.
+                            </td>
+                        </tr>
+                        @endforelse
 
                     </tbody>
                 </table>

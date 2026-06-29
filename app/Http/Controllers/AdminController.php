@@ -11,98 +11,184 @@ class AdminController extends Controller
     public function dashboard() {
         return view('admin.dashboard'); // Mengarah ke file dashboard.blade.php
     }
-  public function kostDetail(Request $request)
-{
-    $kosts = DB::table('kosts')->get();
-
-     
-    return view('admin.detail', compact('kosts'));
-}
+    public function kostDetail(Request $request)
+    {
+        $kosts = \App\Models\Property::with('user')->latest()->get();
+        return view('admin.detail', compact('kosts'));
+    }
 
     public function enrollment() {
-        return view('admin.enrollment');
+        $enrollments = \App\Models\Billing::with(['user', 'property', 'room'])->where('status', 'pending_approval')->latest()->get();
+        return view('admin.enrollment', compact('enrollments'));
     }
 
     public function tagihan() {
-        return view('admin.tagihan');
+        $tagihans = \App\Models\Billing::with(['user', 'property', 'room'])->latest()->get();
+        return view('admin.tagihan', compact('tagihans'));
     }
 
     public function pembayaran() {
-        return view('admin.pembayaran');
+        $pembayarans = \App\Models\Billing::with(['user', 'property', 'room'])->where('status', 'paid')->latest()->get();
+        return view('admin.pembayaran', compact('pembayarans'));
     }
 
-     public function complaints()
-{
-    $complaints = collect([
-        (object)[
-            'id' => 1,
-            'user' => (object)[
-                'name' => 'Budi Santoso',
-                'email' => 'budi@mail.com'
+    public function complaints()
+    {
+        $complaints = \App\Models\Complaint::with('user')->latest()->get();
+        return view('admin.complaints.index', compact('complaints'));
+    }
+
+    public function updateStatus($id)
+    {
+        $complaint = \App\Models\Complaint::findOrFail($id);
+        $complaint->update(['status' => request('status', 'selesai')]);
+        return back()->with('success', 'Status komplain berhasil diupdate');
+    }
+
+    public function users()
+    {
+        $users = \App\Models\User::latest()->get();
+        return view('admin.users', compact('users'));
+    }
+
+    public function storeAdmin(Request $request)
+    {
+        if (!auth()->user()->is_super_admin) {
+            return abort(403, 'Hanya super admin yang dapat menambah admin baru.');
+        }
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8',
+        ]);
+
+        $admin = \App\Models\User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => bcrypt($request->password),
+            'role' => 'admin',
+            'permissions' => $request->input('permissions', []),
+        ]);
+
+        return back()->with('success', 'Admin baru berhasil ditambahkan.');
+    }
+
+    public function updatePermissions(Request $request, $id)
+    {
+        if (!auth()->user()->is_super_admin) {
+            return abort(403, 'Unauthorized action.');
+        }
+
+        $user = \App\Models\User::findOrFail($id);
+        
+        if ($user->role !== 'admin') {
+            return back()->with('error', 'Hanya bisa mengatur hak akses untuk admin.');
+        }
+
+        $permissions = $request->input('permissions', []);
+        $user->permissions = $permissions;
+        $user->save();
+
+        return back()->with('success', 'Hak akses berhasil diperbarui.');
+    }
+
+    public function laporan()
+    {
+        // 1. Finansial
+        $gmv = \App\Models\Billing::where('status', 'paid')->sum('amount');
+        $platformFee = $gmv * 0.05; // Asumsi 5% fee
+        
+        $totalBillings = \App\Models\Billing::count();
+        $paidBillings = \App\Models\Billing::where('status', 'paid')->count();
+        $waitingBillings = \App\Models\Billing::where('status', 'waiting_verification')->count();
+        $pendingBillings = $totalBillings - $paidBillings - $waitingBillings;
+
+        // 2. Pengguna
+        $usersRole = \App\Models\User::select('role', DB::raw('count(*) as total'))
+            ->groupBy('role')
+            ->pluck('total', 'role')->toArray();
+
+        // 3. Okupansi
+        $totalRooms = \App\Models\Room::sum('quantity') ?: 1; // Cegah division by zero
+        $occupiedRooms = \App\Models\User::where('role', 'penghuni')->count();
+        $occupancyRate = min(100, round(($occupiedRooms / $totalRooms) * 100, 2));
+
+        // 4. Komplain
+        $complaints = \App\Models\Complaint::select('status', DB::raw('count(*) as total'))
+            ->groupBy('status')
+            ->pluck('total', 'status')->toArray();
+        
+        // Rata-rata waktu penyelesaian (selisih hari updated_at - created_at untuk status selesai)
+        $avgResolutionTime = \App\Models\Complaint::where('status', 'selesai')
+            ->select(DB::raw('AVG(TIMESTAMPDIFF(HOUR, created_at, updated_at)) as avg_hours'))
+            ->value('avg_hours') ?? 0;
+
+        $stats = [
+            'gmv' => $gmv,
+            'platformFee' => $platformFee,
+            'billings' => [
+                'paid' => $paidBillings,
+                'waiting' => $waitingBillings,
+                'pending' => $pendingBillings,
+                'total' => $totalBillings
             ],
-            'judul' => 'Cara bayar kost gimana?',
-            'status' => 'pending',
-            'priority' => 'high'
-        ],
-        (object)[
-            'id' => 2,
-            'user' => (object)[
-                'name' => 'Siti Aminah',
-                'email' => 'siti@mail.com'
+            'users' => [
+                'pencari' => $usersRole['pencari'] ?? 0,
+                'penghuni' => $usersRole['penghuni'] ?? 0,
+                'tuan_kos' => $usersRole['tuan_kos'] ?? 0,
             ],
-            'judul' => 'Webnya error',
-            'status' => 'proses',
-            'priority' => 'medium'
-        ],
-        (object)[
-            'id' => 3,
-            'user' => (object)[
-                'name' => 'Andi',
-                'email' => 'andi@mail.com'
+            'occupancy' => [
+                'total' => $totalRooms,
+                'occupied' => $occupiedRooms,
+                'rate' => $occupancyRate
             ],
-            'judul' => 'Tidak bisa chat tuan kost',
-            'status' => 'selesai',
-            'priority' => 'low'
-        ],
-    ]);
+            'complaints' => [
+                'pending' => $complaints['pending'] ?? 0,
+                'proses' => $complaints['proses'] ?? 0,
+                'selesai' => $complaints['selesai'] ?? 0,
+                'avg_resolution_hours' => round($avgResolutionTime, 1)
+            ]
+        ];
 
-    return view('admin.complaints.index', compact('complaints'));
-}
+        return view('admin.laporan', compact('stats'));
+    }
 
-public function updateStatus($id)
-{
-    // karena dummy, kita cuma return balik
-    return back()->with('success', 'Status berhasil diupdate (dummy mode)');
-}
+    public function exportCsv()
+    {
+        $billings = \App\Models\Billing::with(['user', 'property', 'room'])->latest()->get();
 
-public function users()
-{
-    $users = collect([
+        $fileName = 'Laporan_Keuangan_GRAHA_' . date('Y-m-d') . '.csv';
 
-        (object)[
-            'name' => 'Guntur Putra',
-            'email' => 'guntur@mail.com',
-            'role' => 'owner',
-            'status' => 'aktif',
-        ],
+        $headers = array(
+            "Content-type"        => "text/csv",
+            "Content-Disposition" => "attachment; filename=$fileName",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        );
 
-        (object)[
-            'name' => 'Siti Aminah',
-            'email' => 'siti@mail.com',
-            'role' => 'penghuni',
-            'status' => 'aktif',
-        ],
+        $columns = array('ID Tagihan', 'Tanggal', 'Penyewa', 'Properti', 'Kamar', 'Status', 'Nominal');
 
-        (object)[
-            'name' => 'Budi Santoso',
-            'email' => 'budi@mail.com',
-            'role' => 'user',
-            'status' => 'pending',
-        ],
+        $callback = function() use($billings, $columns) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns);
 
-    ]);
+            foreach ($billings as $b) {
+                $row['ID Tagihan']  = 'INV-' . str_pad($b->id, 5, '0', STR_PAD_LEFT);
+                $row['Tanggal']     = $b->created_at->format('Y-m-d');
+                $row['Penyewa']     = $b->user->name ?? 'N/A';
+                $row['Properti']    = $b->property->name ?? 'N/A';
+                $row['Kamar']       = $b->room->name ?? 'N/A';
+                $row['Status']      = $b->status;
+                $row['Nominal']     = $b->amount;
 
-    return view('admin.users', compact('users'));
-}
-     
+                fputcsv($file, array($row['ID Tagihan'], $row['Tanggal'], $row['Penyewa'], $row['Properti'], $row['Kamar'], $row['Status'], $row['Nominal']));
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
 }

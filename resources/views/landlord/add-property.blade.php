@@ -21,7 +21,7 @@
 
     <header class="bg-white border-b border-gray-200 px-8 py-5 flex items-center justify-between sticky top-0 z-50 shadow-sm">
         <div class="flex items-center gap-6">
-            <a href="{{ url('/') }}" class="text-gray-500 hover:text-teal-600 transition-colors text-xl">
+            <a href="{{ route('landlord.dashboard') }}" class="text-gray-500 hover:text-teal-600 transition-colors text-xl">
                 <i class="fa-solid fa-arrow-left"></i>
             </a>
             <div>
@@ -29,7 +29,7 @@
                 <p class="text-sm text-gray-500 mt-0.5">Step 1 of 3</p>
             </div>
         </div>
-        <a href="{{ url('/') }}" class="text-slate-500 font-bold text-lg hover:text-red-500 transition-colors">
+        <a href="{{ route('landlord.dashboard') }}" class="text-slate-500 font-bold text-lg hover:text-red-500 transition-colors">
             Cancel
         </a>
     </header>
@@ -197,6 +197,14 @@
                         <p class="text-sm text-gray-400 mt-2">Maximum 5 photos allowed</p>
                         <input type="file" name="photos[]" id="file-input" class="hidden" multiple accept="image/png, image/jpeg">
                     </div>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
+                    <div class="mb-6">
+                        <h2 class="text-xl font-bold text-[#1e3a5f] mb-1">Pengelolaan Sampah</h2>
+                        <p class="text-sm text-gray-500">Jelaskan bagaimana sistem pengelolaan sampah di kos Anda (misal: diurus penghuni, jadwal pengangkutan, biaya tambahan, dll).</p>
+                    </div>
+                    <textarea name="garbage_management" rows="3" class="w-full bg-[#f4f5f7] border-0 text-gray-800 text-sm rounded-xl focus:ring-2 focus:ring-[#38a38e] block p-4 transition placeholder-gray-400" placeholder="Contoh: Sampah dikumpulkan di depan kamar masing-masing, akan diambil petugas setiap pagi jam 07:00. Biaya kebersihan sudah termasuk biaya sewa."></textarea>
                 </div>
 
                 <div class="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">

@@ -42,17 +42,10 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @forelse($properties ?? [] as $property)
                 @php
-                    $hargaTampil = 600000;
-                    if($property->type == 'putri') $hargaTampil = 850000;
-                    if($property->type == 'putra') $hargaTampil = 750000;
-                    if(str_contains(strtolower($property->name), 'premium') || str_contains(strtolower($property->name), 'luxury')) {
-                        $hargaTampil = 1800000;
-                    } elseif($property->type == 'campur' && $hargaTampil == 600000) {
-                        $hargaTampil = 1200000;
-                    }
-
-                    $isFull = ($property->id % 5 == 0);
-                    $sisaKamar = $isFull ? 0 : (($property->id % 3 == 0) ? 2 : 4);
+                    // Hitung harga termurah dan sisa kamar secara dinamis
+                    $hargaTampil = $property->rooms->min('price_monthly') ?? 600000;
+                    $sisaKamar = $property->rooms->sum('quantity'); // Di masa depan bisa dikurangi dengan tagihan aktif
+                    
                     $fotoKos = asset('image/kos' . $property->id . '.jpg');
                 @endphp
 
