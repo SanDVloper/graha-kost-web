@@ -56,8 +56,10 @@
                     <div class="flex items-center">
                         <div class="w-6 shrink-0 flex justify-center"><i class="fa-regular fa-envelope"></i></div>
                         <span class="ml-3 sidebar-text">Keluhan</span>
-                        <!-- Contoh Badge Notifikasi -->
-                        <span class="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-2 sidebar-text">2</span>
+                        @php $pendingComplains = $property->complains()->whereIn('status', ['menunggu', 'diproses'])->count(); @endphp
+                        @if($pendingComplains > 0)
+                            <span class="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-2 sidebar-text">{{ $pendingComplains }}</span>
+                        @endif
                     </div>
                 </a>
                 <a href="{{ route('property.applications', $property->id) }}" class="flex items-center justify-between px-4 py-2.5 text-gray-500 hover:bg-gray-50 hover:text-teal-600 rounded-lg transition-colors whitespace-nowrap mt-1">
@@ -151,11 +153,16 @@
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            @php
+                                $activeBillings = $roomType->billings()->whereIn('status', ['paid', 'waiting_verification'])->with('user')->get();
+                            @endphp
+                            
                             @for($i = 1; $i <= $roomType->quantity; $i++)
                                 @php
-                                    // Simulasi: Anggap saja unit nomor 1 & 3 sudah ada penghuninya
-                                    $isOccupied = ($i == 1 || $i == 3);
-                                    $occupantName = $isOccupied ? ($i == 1 ? "Budi Santoso" : "Siti Aminah") : null;
+                                    $billing = $activeBillings->get($i - 1);
+                                    $isOccupied = $billing !== null;
+                                    $occupantName = $isOccupied ? ($billing->user->name ?? 'Penghuni') : null;
+                                    $occupiedSince = $isOccupied ? \Carbon\Carbon::parse($billing->created_at)->format('d M Y') : null;
                                 @endphp
 
                                 <div class="bg-white rounded-xl border-2 {{ $isOccupied ? 'border-teal-100 bg-white' : 'border-dashed border-gray-200 bg-gray-50/30' }} p-5 shadow-sm hover:shadow-md transition-all relative overflow-hidden group">
@@ -176,7 +183,7 @@
                                         <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Penghuni</p>
                                         @if($isOccupied)
                                             <p class="font-bold text-[#1e3a5f] truncate">{{ $occupantName }}</p>
-                                            <p class="text-[11px] text-gray-500"><i class="fa-regular fa-calendar-check mr-1"></i> Sejak 12 Jan 2024</p>
+                                            <p class="text-[11px] text-gray-500"><i class="fa-regular fa-calendar-check mr-1"></i> Sejak {{ $occupiedSince }}</p>
                                         @else
                                             <p class="text-sm italic text-gray-400">Kosong</p>
                                             <button class="mt-2 text-[#38a38e] text-xs font-bold hover:underline">
@@ -316,7 +323,7 @@
                     @csrf
                     @method('DELETE')
                     <button type="button" onclick="confirmSafeDelete()" class="px-4 py-2 rounded-lg text-sm font-bold text-red-500 hover:bg-red-50 transition-colors border border-transparent hover:border-red-200">
-                        <i class="fa-solid fa-trash mr-1"></i> Hapus Seluruh Tipe Kamar
+                        <i class="fa-solid fa-trash mr-1"></i> Hapus Tipe Kamar Ini
                     </button>
                 </form>
                 
@@ -328,14 +335,36 @@
         </div>
     </div>
 
+    <!-- MODAL KONFIRMASI HAPUS -->
+    <div id="deleteConfirmModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="document.getElementById('deleteConfirmModal').classList.add('hidden')"></div>
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md z-10 relative overflow-hidden flex flex-col transform transition-all">
+            <div class="p-6 text-center">
+                <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+                    <i class="fa-solid fa-triangle-exclamation text-3xl text-red-500"></i>
+                </div>
+                <h3 class="font-bold text-xl text-slate-800 mb-2">Hapus Tipe Kamar?</h3>
+                <p class="text-sm text-slate-500 mb-6">
+                    Tindakan ini akan menghapus permanen tipe kamar ini beserta <strong class="text-slate-700">seluruh unit kamar dan data tagihan</strong> di dalamnya. Tindakan ini tidak dapat dibatalkan.
+                </p>
+                <div class="flex gap-3 justify-center">
+                    <button type="button" onclick="document.getElementById('deleteConfirmModal').classList.add('hidden')" class="px-6 py-2.5 rounded-lg text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">
+                        Batal
+                    </button>
+                    <button type="button" onclick="document.getElementById('formDeleteRoom').submit()" class="px-6 py-2.5 rounded-lg text-sm font-bold text-white bg-red-500 hover:bg-red-600 shadow-lg shadow-red-500/30 transition-all active:scale-95">
+                        Ya, Hapus Sekarang
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         function confirmSafeDelete() {
-            let confirmation = prompt("PERINGATAN: Menghapus tipe kamar ini akan menghapus semua unit dan data tagihan di dalamnya!\n\nKetik 'HAPUS' (tanpa tanda kutip) untuk melanjutkan:");
-            if (confirmation === 'HAPUS') {
-                document.getElementById('formDeleteRoom').submit();
-            } else if (confirmation !== null) {
-                alert("Penghapusan dibatalkan karena kata kunci tidak cocok.");
-            }
+            // Sembunyikan modal edit agar tidak bertumpuk
+            document.getElementById('editRoomModal').classList.add('hidden');
+            // Tampilkan modal konfirmasi hapus
+            document.getElementById('deleteConfirmModal').classList.remove('hidden');
         }
 
         function openEditModal(room) {

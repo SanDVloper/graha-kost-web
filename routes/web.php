@@ -27,8 +27,9 @@ Route::get('/detail-kos/{id}', [CustomerController::class, 'show'])->name('custo
 // ==========================================
 Route::middleware(['auth'])->group(function () {
 
+    Route::get('/profile', [AuthController::class, 'profile'])->name('profile.show');
+    Route::post('/profile/update', [AuthController::class, 'updateProfile'])->name('settings.profile');
     Route::get('/settings', [AuthController::class, 'globalSettings'])->name('settings.global');
-    Route::post('/settings/profile', [AuthController::class, 'updateProfile'])->name('settings.profile');
     Route::post('/settings/password', [AuthController::class, 'updatePassword'])->name('settings.password');
 
     // ==========================================
@@ -46,10 +47,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/add-property', [PropertyController::class, 'createStep1']);
     Route::post('/add-property', [PropertyController::class, 'storeStep1']);
 
-    Route::get('/property-cost/{id}', function ($id) {
-        return view('landlord.property-cost', compact('id'));
+    Route::get('/property-cost', function () {
+        if (!session()->has('property_step1')) {
+            return redirect('/add-property');
+        }
+        return view('landlord.property-cost');
     });
-    Route::post('/property-cost/{id}', [PropertyController::class, 'storeStep2']);
+    Route::post('/property-cost', [PropertyController::class, 'storeStep2']);
     Route::get('/property-publish/{id}', [PropertyController::class, 'publishStep3']);
 
     Route::get('/property/{id}/manage', [PropertyController::class, 'manage'])->name('property.manage');
@@ -58,9 +62,12 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/property/{id}/rooms/{room_id}', [PropertyController::class, 'updateRoom'])->name('property.rooms.update');
     Route::delete('/property/{id}/rooms/{room_id}', [PropertyController::class, 'deleteRoom'])->name('property.rooms.destroy');
     Route::get('/property/{id}/occupants', [PropertyController::class, 'occupantList'])->name('property.occupants');
+    Route::post('/property/{id}/occupants/{billing_id}/evict', [PropertyController::class, 'evictOccupant'])->name('property.occupants.evict');
+    Route::post('/property/{id}/occupants/{billing_id}/move', [PropertyController::class, 'moveOccupant'])->name('property.occupants.move');
     Route::get('/property/{id}/billing', [PropertyController::class, 'billingList'])->name('property.billing');
     Route::post('/property/{id}/billing/{billing_id}/verify', [PropertyController::class, 'verifyPayment'])->name('property.billing.verify');
     Route::get('/property/{id}/complains', [PropertyController::class, 'complainList'])->name('property.complains');
+    Route::post('/property/{id}/complains/broadcast', [PropertyController::class, 'broadcastComplain'])->name('property.complains.broadcast');
     Route::get('/property/{id}/applications', [PropertyController::class, 'applications'])->name('property.applications');
     Route::post('/property/{id}/applications/{billing_id}/accept', [PropertyController::class, 'acceptApplication'])->name('property.applications.accept');
     Route::post('/property/{id}/applications/{billing_id}/reject', [PropertyController::class, 'rejectApplication'])->name('property.applications.reject');

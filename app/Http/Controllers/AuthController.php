@@ -73,6 +73,19 @@ class AuthController extends Controller
         ]);
     }
 
+    public function profile()
+    {
+        $role = auth()->user()->role;
+
+        if ($role === 'admin') {
+            return view('admin.profile'); // Placeholder for admin profile
+        } elseif ($role === 'tuan_kos') {
+            return view('landlord.profile');
+        } else {
+            return view('customer.profile'); // Placeholder for customer profile
+        }
+    }
+
     public function globalSettings()
     {
         $role = auth()->user()->role;
@@ -91,7 +104,7 @@ class AuthController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'phone_number' => 'nullable|string|max:20',
-            'gender' => 'nullable|in:L,P',
+            'gender' => 'nullable|in:Laki-laki,Perempuan',
             'pekerjaan' => 'nullable|string|max:255',
             'bank_name' => 'nullable|string|max:100',
             'bank_account_number' => 'nullable|string|max:100',

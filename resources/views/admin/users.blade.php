@@ -156,15 +156,15 @@
                     <div class="flex items-center gap-3">
 
                         <div class="px-4 py-2 rounded-xl bg-blue-50 text-blue-600 text-sm font-bold">
-                            3 Admin
+                            {{ $users->where('role', 'admin')->count() }} Admin
                         </div>
 
                         <div class="px-4 py-2 rounded-xl bg-green-50 text-green-600 text-sm font-bold">
-                            12 Pengguna
+                            {{ $users->whereIn('role', ['pencari', 'penghuni'])->count() }} Pengguna
                         </div>
 
                         <div class="px-4 py-2 rounded-xl bg-orange-50 text-orange-600 text-sm font-bold">
-                            5 Owner
+                            {{ $users->where('role', 'tuan_kos')->count() }} Owner
                         </div>
 
                     </div>
@@ -231,60 +231,28 @@
 
                     <!-- CONTENT -->
                     <div id="adminSection" class="hidden p-6 bg-white border-t border-gray-100">
-
                         <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
-
+                            @foreach($users->where('role', 'admin') as $user)
                             <!-- CARD -->
                             <div class="border border-gray-100 rounded-2xl p-5 hover:bg-slate-50 transition">
-
                                 <div class="flex items-center justify-between">
-
                                     <div class="flex items-center gap-4">
-
-                                        <div class="w-14 h-14 rounded-full bg-[#1e3a5f]
-                                                    text-white flex items-center justify-center font-bold">
-
-                                            GP
-
+                                        <div class="w-14 h-14 rounded-full bg-[#1e3a5f] text-white flex items-center justify-center font-bold">
+                                            {{ strtoupper(substr($user->name, 0, 2)) }}
                                         </div>
-
                                         <div>
-
-                                            <h4 class="font-bold text-[#1e3a5f] text-lg">
-                                                Guntur Putra
-                                            </h4>
-
-                                            <p class="text-sm text-gray-500">
-                                                guntur@mail.com
-                                            </p>
-
+                                            <h4 class="font-bold text-[#1e3a5f] text-lg">{{ $user->name }}</h4>
+                                            <p class="text-sm text-gray-500">{{ $user->email }}</p>
                                         </div>
-
                                     </div>
-
-                                    <span class="px-3 py-1 rounded-full
-                                                 bg-blue-50 text-blue-600
-                                                 text-xs font-bold">
-
-                                        Admin
-
-                                    </span>
-
+                                    <span class="px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-bold">Admin</span>
                                 </div>
-
-                                <button class="mt-5 w-full border border-[#1e3a5f]
-                                               text-[#1e3a5f] hover:bg-[#1e3a5f]
-                                               hover:text-white transition
-                                               py-2.5 rounded-xl text-sm font-semibold">
-
+                                <button onclick="openUserDetailModal('{{ addslashes($user->name) }}', '{{ addslashes($user->email) }}', 'Admin', '{{ $user->created_at->format('d M Y') }}', '{{ $user->is_super_admin ? 'Super Admin' : 'Admin Terbatas' }}', '#1e3a5f')" class="mt-5 w-full border border-[#1e3a5f] text-[#1e3a5f] hover:bg-[#1e3a5f] hover:text-white transition py-2.5 rounded-xl text-sm font-semibold">
                                     Lihat Detail
-
                                 </button>
-
                             </div>
-
+                            @endforeach
                         </div>
-
                     </div>
 
                 </div>
@@ -334,68 +302,32 @@
 
                     <!-- CONTENT -->
                     <div id="penggunaSection" class="hidden p-6 bg-white border-t border-gray-100">
-
                         <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
-
+                            @foreach($users->whereIn('role', ['pencari', 'penghuni']) as $user)
                             <!-- USER -->
                             <div class="border border-gray-100 rounded-2xl p-5 hover:bg-slate-50 transition">
-
                                 <div class="flex items-start justify-between">
-
                                     <div class="flex items-center gap-4">
-
-                                        <div class="w-14 h-14 rounded-full bg-[#38a38e]
-                                                    text-white flex items-center justify-center font-bold">
-
-                                            SA
-
+                                        <div class="w-14 h-14 rounded-full bg-[#38a38e] text-white flex items-center justify-center font-bold">
+                                            {{ strtoupper(substr($user->name, 0, 2)) }}
                                         </div>
-
                                         <div>
-
-                                            <h4 class="font-bold text-[#1e3a5f] text-lg">
-                                                Siti Aminah
-                                            </h4>
-
-                                            <p class="text-sm text-gray-500">
-                                                siti@mail.com
-                                            </p>
-
+                                            <h4 class="font-bold text-[#1e3a5f] text-lg">{{ $user->name }}</h4>
+                                            <p class="text-sm text-gray-500">{{ $user->email }}</p>
                                             <div class="flex items-center gap-2 mt-3">
-
-                                                <span class="px-3 py-1 rounded-full
-                                                             bg-green-50 text-green-600
-                                                             text-xs font-bold">
-
-                                                    Penghuni
-
+                                                <span class="px-3 py-1 rounded-full bg-green-50 text-green-600 text-xs font-bold">
+                                                    {{ ucfirst($user->role) }}
                                                 </span>
-
-                                                <span class="px-3 py-1 rounded-full
-                                                             bg-blue-50 text-blue-600
-                                                             text-xs font-bold">
-
-                                                    Kost Graha Asri
-
-                                                </span>
-
                                             </div>
-
                                         </div>
-
                                     </div>
-
-                                    <button onclick="openUserDetailModal('Siti Aminah', 'siti@mail.com', 'Penghuni', '01 Jan 2026', 'Tinggal di Kost Graha Asri', '#38a38e')" 
-        class="bg-[#38a38e] hover:bg-teal-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition">
-    Detail
-</button>
-
+                                    <button onclick="openUserDetailModal('{{ addslashes($user->name) }}', '{{ addslashes($user->email) }}', '{{ ucfirst($user->role) }}', '{{ $user->created_at->format('d M Y') }}', '-', '#38a38e')" class="bg-[#38a38e] hover:bg-teal-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition">
+                                        Detail
+                                    </button>
                                 </div>
-
                             </div>
-
+                            @endforeach
                         </div>
-
                     </div>
 
                 </div>
@@ -445,83 +377,39 @@
 
                     <!-- CONTENT -->
                     <div id="ownerSection" class="hidden p-6 bg-orange border-t border-gray-100">
-
                         <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
-
+                            @foreach($users->where('role', 'tuan_kos') as $user)
                             <!-- OWNER -->
                             <div class="border border-orange-100 rounded-2xl p-5 hover:bg-slate-50 transition">
-
                                 <div class="flex items-center justify-between">
-
                                     <div class="flex items-center gap-4">
-
-                                        <div class="w-14 h-14 rounded-full bg-orange-500
-                                                    text-white flex items-center justify-center font-bold">
-
-                                            BS
-
+                                        <div class="w-14 h-14 rounded-full bg-orange-500 text-white flex items-center justify-center font-bold">
+                                            {{ strtoupper(substr($user->name, 0, 2)) }}
                                         </div>
-
                                         <div>
-
-                                            <h4 class="font-bold text-[#1e3a5f] text-lg">
-                                                Budi Santoso
-                                            </h4>
-
-                                            <p class="text-sm text-gray-500">
-                                                budi@mail.com
-                                            </p>
-
+                                            <h4 class="font-bold text-[#1e3a5f] text-lg">{{ $user->name }}</h4>
+                                            <p class="text-sm text-gray-500">{{ $user->email }}</p>
                                         </div>
-
                                     </div>
-
-                                    <span class="px-3 py-1 rounded-full
-                                                 bg-orange-50 text-orange-600
-                                                 text-xs font-bold">
-
-                                        Owner
-
-                                    </span>
-
+                                    <span class="px-3 py-1 rounded-full bg-orange-50 text-orange-600 text-xs font-bold">Owner</span>
                                 </div>
-
-                                <!-- PROPERTY -->
                                 <div class="mt-5">
-
-                                    <p class="text-sm text-gray-500 font-semibold mb-3">
-                                        Property Dimiliki
-                                    </p>
-
+                                    <p class="text-sm text-gray-500 font-semibold mb-3">Property Dimiliki</p>
                                     <div class="flex flex-wrap gap-2">
-
-                                        <span class="px-3 py-1 rounded-full border
-                                                     border-gray-300 text-xs font-semibold">
-
-                                            Kost Graha Asri
-
-                                        </span>
-
-                                        <span class="px-3 py-1 rounded-full border
-                                                     border-gray-300 text-xs font-semibold">
-
-                                            Kost Melati Indah
-
-                                        </span>
-
+                                        @foreach(\App\Models\Property::where('user_id', $user->id)->take(3)->get() as $prop)
+                                        <span class="px-3 py-1 rounded-full border border-gray-300 text-xs font-semibold">{{ $prop->name }}</span>
+                                        @endforeach
+                                        @if(\App\Models\Property::where('user_id', $user->id)->count() > 3)
+                                            <span class="px-3 py-1 rounded-full border border-gray-300 text-xs font-semibold">+ Lainnya</span>
+                                        @endif
                                     </div>
-
                                 </div>
-
-                                <button onclick="openUserDetailModal('Budi Santoso', 'budi@mail.com', 'Owner', '15 Feb 2025', 'Memiliki 2 Properti', '#f97316')" 
-        class="mt-5 w-full bg-orange-500 hover:bg-orange-600 text-white py-2.5 rounded-xl text-sm font-semibold transition">
-    Lihat Detail
-</button>
-
+                                <button onclick="openUserDetailModal('{{ addslashes($user->name) }}', '{{ addslashes($user->email) }}', 'Owner', '{{ $user->created_at->format('d M Y') }}', 'Memiliki {{ \App\Models\Property::where('user_id', $user->id)->count() }} Properti', '#f97316')" class="mt-5 w-full bg-orange-500 hover:bg-orange-600 text-white py-2.5 rounded-xl text-sm font-semibold transition">
+                                    Lihat Detail
+                                </button>
                             </div>
-
+                            @endforeach
                         </div>
-
                     </div>
 
                 </div>

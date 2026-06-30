@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Property;
 use App\Models\Billing;
 use App\Models\Complaint;
+use App\Models\Complain;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -79,7 +80,15 @@ class CustomerController extends Controller
             ->get()
             ->unique('user_id');
 
-        return view('customer.my-kos', compact('property', 'myBillings', 'neighbors', 'currentBilling'));
+        // Fetch public complaints (Papan Pengumuman) for this property
+        $publicComplains = Complain::where('property_id', $property->id)
+            ->where('visibility', 'public')
+            ->with('user')
+            ->latest()
+            ->take(5)
+            ->get();
+
+        return view('customer.my-kos', compact('property', 'myBillings', 'neighbors', 'currentBilling', 'publicComplains'));
     }
 
     /**
@@ -198,16 +207,38 @@ class CustomerController extends Controller
     public function complain(Request $request)
     {
         $request->validate([
+            'title' => 'required|string|max:255',
+            'category' => 'required|string|max:255',
             'pesan' => 'required|string|min:10',
+            'visibility' => 'required|in:landlord_only,public'
         ]);
 
-        Complaint::create([
-            'user_id'      => Auth::id(),
-            'judul'        => 'Komplain Penghuni - ' . Auth::user()->name,
-            'isi_komplain' => $request->pesan,
+        $userId = Auth::id();
+        
+        // Find the user's active billing to associate the complaint with the property and room
+        $currentBilling = Billing::where('user_id', $userId)
+            ->whereIn('status', ['paid', 'waiting_verification', 'pending'])
+            ->latest()
+            ->first();
+
+        if (!$currentBilling) {
+            return back()->withErrors(['pesan' => 'Anda harus menjadi penghuni aktif untuk mengajukan komplain.']);
+        }
+
+        Complain::create([
+            'user_id'      => $userId,
+            'property_id'  => $currentBilling->property_id,
+            'room_id'      => $currentBilling->room_id,
+            'title'        => $request->title,
+            'category'     => $request->category,
+            'description'  => $request->pesan,
+            'priority'     => 'sedang',
+            'status'       => 'menunggu',
+            'is_anonymous' => $request->has('is_anonymous'),
+            'visibility'   => $request->visibility
         ]);
 
-        return back()->with('success', 'Keluhan Anda telah diterima dan akan segera diproses.');
+        return back()->with('success', 'Keluhan Anda telah diterima dan diteruskan ke Tuan Kos.');
     }
 
     /**

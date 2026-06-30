@@ -58,8 +58,10 @@
                     <div class="flex items-center">
                         <div class="w-6 shrink-0 flex justify-center"><i class="fa-regular fa-envelope"></i></div>
                         <span class="ml-3 sidebar-text">Keluhan</span>
-                        <!-- Contoh Badge Notifikasi -->
-                        <span class="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-2 sidebar-text">2</span>
+                        @php $pendingComplains = $property->complains()->whereIn('status', ['menunggu', 'diproses'])->count(); @endphp
+                        @if($pendingComplains > 0)
+                            <span class="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-2 sidebar-text">{{ $pendingComplains }}</span>
+                        @endif
                     </div>
                 </a>
                 <a href="{{ route('property.applications', $property->id) }}" class="flex items-center justify-between px-4 py-2.5 text-gray-500 hover:bg-gray-50 hover:text-teal-600 rounded-lg transition-colors whitespace-nowrap mt-1">
@@ -97,37 +99,41 @@
             <!-- REKAP KEUANGAN (Financial Summary) -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm border-l-4 border-l-green-500">
-                    <p class="text-sm text-gray-500 font-semibold mb-1">Pendapatan Bulan Ini</p>
-                    <h3 class="text-2xl font-bold text-slate-800">Rp 4.500.000</h3>
-                    <p class="text-xs text-green-600 mt-2"><i class="fa-solid fa-arrow-trend-up mr-1"></i> 3 Tagihan Lunas</p>
+                    <p class="text-sm text-gray-500 font-semibold mb-1">Pendapatan Keseluruhan</p>
+                    <h3 class="text-2xl font-bold text-slate-800">Rp {{ number_format($totalPendapatan ?? 0, 0, ',', '.') }}</h3>
+                    <p class="text-xs text-green-600 mt-2"><i class="fa-solid fa-arrow-trend-up mr-1"></i> {{ $totalLunas ?? 0 }} Tagihan Lunas</p>
                 </div>
                 
                 <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm border-l-4 border-l-yellow-400 relative">
+                    @if(($countMenunggu ?? 0) > 0)
                     <span class="absolute top-4 right-4 flex h-3 w-3">
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-3 w-3 bg-yellow-500"></span>
                     </span>
+                    @endif
                     <p class="text-sm text-gray-500 font-semibold mb-1">Menunggu Verifikasi</p>
-                    <h3 class="text-2xl font-bold text-slate-800">Rp 1.500.000</h3>
-                    <p class="text-xs text-yellow-600 mt-2"><i class="fa-regular fa-clock mr-1"></i> 1 Tagihan perlu diulas</p>
+                    <h3 class="text-2xl font-bold text-slate-800">Rp {{ number_format($totalMenunggu ?? 0, 0, ',', '.') }}</h3>
+                    <p class="text-xs text-yellow-600 mt-2"><i class="fa-regular fa-clock mr-1"></i> {{ $countMenunggu ?? 0 }} Tagihan perlu diulas</p>
                 </div>
 
                 <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm border-l-4 border-l-red-500">
                     <p class="text-sm text-gray-500 font-semibold mb-1">Tagihan Tertunggak</p>
-                    <h3 class="text-2xl font-bold text-slate-800">Rp 1.650.000</h3>
-                    <p class="text-xs text-red-500 mt-2"><i class="fa-solid fa-triangle-exclamation mr-1"></i> 1 Tagihan melewati tenggat</p>
+                    <h3 class="text-2xl font-bold text-slate-800">Rp {{ number_format($totalTertunggak ?? 0, 0, ',', '.') }}</h3>
+                    <p class="text-xs text-red-500 mt-2"><i class="fa-solid fa-triangle-exclamation mr-1"></i> {{ $countTertunggak ?? 0 }} Tagihan melewati tenggat</p>
                 </div>
             </div>
 
             <!-- TAB NAVIGASI INVOICE -->
             <div class="flex border-b border-gray-200 mb-6">
-                <button class="px-6 py-3 font-bold text-[#38a38e] border-b-2 border-[#38a38e]">Semua Tagihan</button>
-                <button class="px-6 py-3 font-medium text-gray-500 hover:text-gray-700 transition-colors">Belum Dibayar (1)</button>
+                <button class="px-6 py-3 font-bold text-[#38a38e] border-b-2 border-[#38a38e]">Semua Tagihan ({{ $countSemua ?? 0 }})</button>
+                <button class="px-6 py-3 font-medium text-gray-500 hover:text-gray-700 transition-colors">Belum Dibayar ({{ $countBelumDibayar ?? 0 }})</button>
                 <button class="px-6 py-3 font-medium text-gray-500 hover:text-gray-700 transition-colors relative">
                     Menunggu Verifikasi 
-                    <span class="bg-yellow-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-1">1</span>
+                    @if(($countMenunggu ?? 0) > 0)
+                    <span class="bg-yellow-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-1">{{ $countMenunggu }}</span>
+                    @endif
                 </button>
-                <button class="px-6 py-3 font-medium text-gray-500 hover:text-gray-700 transition-colors">Lunas</button>
+                <button class="px-6 py-3 font-medium text-gray-500 hover:text-gray-700 transition-colors">Lunas ({{ $totalLunas ?? 0 }})</button>
             </div>
 
             <!-- TABEL TAGIHAN -->

@@ -7,6 +7,16 @@ use App\Models\Property; // Memanggil model Property
 
 class PropertyController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            if (auth()->check() && auth()->user()->role !== 'tuan_kos') {
+                return redirect('/');
+            }
+            return $next($request);
+        });
+    }
+
     // Fungsi untuk menampilkan Dashboard Utama
     public function index()
     {
@@ -47,29 +57,42 @@ class PropertyController extends Controller
         'photos.*' => 'image|mimes:jpeg,png,jpg|max:2048' // Validasi gambar
         ]);
 
-        $property = new Property();
-        $property->user_id = auth()->id();
-        $property->name = $request->name;
-        $property->type = $request->type;
-        $property->year_established = $request->year_established;
-        $property->description = $request->description;
-        $property->garbage_management = $request->garbage_management;
-        $property->facilities = $request->facilities;
-        $property->rules = $request->rules;
-
         // LOGIKA UNGGAH FOTO
+        $paths = [];
         if ($request->hasFile('photos')) {
-            $paths = [];
             foreach ($request->file('photos') as $photo) {
                 // Simpan ke folder: storage/app/public/property_photos
                 $path = $photo->store('property_photos', 'public');
                 $paths[] = $path;
             }
-            $property->photos = $paths; // Simpan array path ke database
+        }
+        
+        $time_str = '';
+        if ($request->filled('garbage_time_start') && $request->filled('garbage_time_end')) {
+            $time_str = $request->garbage_time_start . ' - ' . $request->garbage_time_end . ' WITA';
+        } elseif ($request->filled('garbage_time_start')) {
+            $time_str = $request->garbage_time_start . ' WITA';
         }
 
-        $property->save();
-        return redirect('/property-cost/' . $property->id);
+        $propertyData = [
+            'name' => $request->name,
+            'type' => $request->type,
+            'year_established' => $request->year_established,
+            'description' => $request->description,
+            'garbage_management' => [
+                'is_scheduled' => $request->has('garbage_is_scheduled'),
+                'days' => $request->input('garbage_days', []),
+                'time' => $time_str,
+                'message' => $request->garbage_message,
+            ],
+            'facilities' => $request->facilities,
+            'rules' => $request->rules,
+            'photos' => $paths,
+        ];
+
+        session(['property_step1' => $propertyData]);
+
+        return redirect('/property-cost');
     }
 
     public function roomList($id)
@@ -82,25 +105,77 @@ class PropertyController extends Controller
     
     public function occupantList($id)
     {
-        // Ambil data properti untuk memastikan ini milik user yang login
-        $property = Property::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+        $property = Property::with(['rooms', 'billings.user', 'billings.room'])->where('id', $id)->where('user_id', auth()->id())->firstOrFail();
         
-        return view('landlord.property-occupants', compact('property'));
+        // Asumsi penghuni aktif adalah user yang memiliki billing dengan status paid / waiting
+        $activeOccupants = $property->billings->whereIn('status', ['paid', 'waiting_verification'])->unique('user_id');
+        // Mantan penghuni adalah user dengan tagihan berstatus 'ended'
+        $inactiveOccupants = $property->billings->where('status', 'ended')->unique('user_id');
+        
+        return view('landlord.property-occupants', compact('property', 'activeOccupants', 'inactiveOccupants'));
+    }
+    
+    public function evictOccupant(Request $request, $id, $billing_id)
+    {
+        $property = Property::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+        $billing = \App\Models\Billing::where('id', $billing_id)->where('property_id', $property->id)->firstOrFail();
+        
+        $billing->status = 'ended';
+        $billing->save();
+
+        return redirect()->back()->with('success', 'Penghuni berhasil dihapus dan dipindahkan ke histori Mantan Penghuni.');
+    }
+
+    public function moveOccupant(Request $request, $id, $billing_id)
+    {
+        $request->validate([
+            'room_id' => 'required|exists:rooms,id',
+            'assigned_room_number' => 'required|string|max:255'
+        ]);
+
+        $property = Property::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+        $billing = \App\Models\Billing::where('id', $billing_id)->where('property_id', $property->id)->firstOrFail();
+        
+        // Verifikasi bahwa room_id baru memang milik properti ini
+        $newRoom = \App\Models\Room::where('id', $request->room_id)->where('property_id', $property->id)->firstOrFail();
+
+        $billing->room_id = $newRoom->id;
+        $billing->assigned_room_number = $request->assigned_room_number;
+        $billing->save();
+
+        return redirect()->back()->with('success', 'Penghuni berhasil dipindahkan ke kamar baru.');
     }
     
     // Fungsi untuk memproses data dari Step 2
-    public function storeStep2(Request $request, $id)
+    public function storeStep2(Request $request)
     {
-        // 1. Cari properti yang baru saja dibuat di Step 1 berdasarkan ID
-        $property = Property::findOrFail($id);
+        $step1Data = session('property_step1');
+        if (!$step1Data) {
+            return redirect('/add-property')->with('error', 'Silakan isi data properti terlebih dahulu.');
+        }
 
-        // 2. Update data utilitas (listrik, air, deposit) ke tabel properties
+        // 1. Buat properti baru dari data Step 1
+        $property = new Property();
+        $property->user_id = auth()->id();
+        $property->name = $step1Data['name'];
+        $property->type = $step1Data['type'];
+        $property->year_established = $step1Data['year_established'];
+        $property->description = $step1Data['description'];
+        $property->garbage_management = $step1Data['garbage_management'];
+        $property->facilities = $step1Data['facilities'];
+        $property->rules = $step1Data['rules'];
+        $property->photos = $step1Data['photos'];
+
+        // 2. Update data utilitas (listrik, air, deposit) dari Step 2
         $property->electricity_rule = $request->listrik;
         $property->water_rule = $request->air;
         // Kita hilangkan titik (misal 1.500.000 jadi 1500000) agar aman masuk database
         $property->water_price = $request->water_price ? (int) str_replace('.', '', $request->water_price) : null;
         $property->deposit = $request->deposit ? (int) str_replace('.', '', $request->deposit) : 0;
+        
         $property->save();
+
+        session()->forget('property_step1');
 
         // 3. Simpan data kamar ke tabel rooms
         if ($request->has('rooms') && is_array($request->rooms)) {
@@ -147,10 +222,26 @@ class PropertyController extends Controller
     
     public function billingList($id)
     {
-        // Ambil data properti untuk memastikan ini milik user yang login
         $property = Property::with(['billings.user', 'billings.room'])->where('id', $id)->where('user_id', auth()->id())->firstOrFail();
         
-        return view('landlord.property-billing', compact('property'));
+        $totalPendapatan = $property->billings->where('status', 'paid')->sum('amount');
+        $totalLunas = $property->billings->where('status', 'paid')->count();
+        
+        $totalMenunggu = $property->billings->where('status', 'waiting_verification')->sum('amount');
+        $countMenunggu = $property->billings->where('status', 'waiting_verification')->count();
+        
+        $totalTertunggak = $property->billings->where('status', 'pending')->where('due_date', '<', now())->sum('amount');
+        $countTertunggak = $property->billings->where('status', 'pending')->where('due_date', '<', now())->count();
+        
+        $countBelumDibayar = $property->billings->where('status', 'pending')->count();
+        $countSemua = $property->billings->count();
+
+        return view('landlord.property-billing', compact(
+            'property', 'totalPendapatan', 'totalLunas', 
+            'totalMenunggu', 'countMenunggu', 
+            'totalTertunggak', 'countTertunggak',
+            'countBelumDibayar', 'countSemua'
+        ));
     }
 
     public function verifyPayment(Request $request, $id, $billing_id)
@@ -171,10 +262,39 @@ class PropertyController extends Controller
 
     public function complainList($id)
     {
-        // Ambil data properti untuk memastikan ini milik user yang login
-        $property = Property::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+        $property = Property::with(['complains.user', 'complains.room'])->where('id', $id)->where('user_id', auth()->id())->firstOrFail();
         
-        return view('landlord.property-complains', compact('property'));
+        $complains = $property->complains()->latest()->get();
+        $countMenunggu = $complains->where('status', 'menunggu')->count();
+        $countDiproses = $complains->where('status', 'diproses')->count();
+        $countSelesai = $complains->where('status', 'selesai')->count();
+        $countTotal = $complains->count();
+        
+        return view('landlord.property-complains', compact('property', 'complains', 'countMenunggu', 'countDiproses', 'countSelesai', 'countTotal'));
+    }
+
+    public function broadcastComplain(Request $request, $id)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string'
+        ]);
+
+        $property = Property::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+
+        \App\Models\Complain::create([
+            'property_id' => $property->id,
+            'user_id' => auth()->id(), // Tuan kos
+            'title' => $request->title,
+            'category' => 'Pengumuman',
+            'description' => $request->description,
+            'priority' => 'sedang',
+            'status' => 'selesai',
+            'visibility' => 'public',
+            'is_anonymous' => false
+        ]);
+
+        return redirect()->back()->with('success', 'Pengumuman berhasil di-broadcast ke seluruh penghuni.');
     }
 
     public function settings($id)
@@ -197,8 +317,23 @@ class PropertyController extends Controller
         $property->name = $request->name;
         $property->type = $request->type;
         $property->description = $request->description;
-        $property->garbage_management = $request->garbage_management;
+        
+        $time_str = '';
+        if ($request->filled('garbage_time_start') && $request->filled('garbage_time_end')) {
+            $time_str = $request->garbage_time_start . ' - ' . $request->garbage_time_end . ' WITA';
+        } elseif ($request->filled('garbage_time_start')) {
+            $time_str = $request->garbage_time_start . ' WITA';
+        }
+
+        $property->garbage_management = [
+            'is_scheduled' => $request->has('garbage_is_scheduled'),
+            'days' => $request->input('garbage_days', []),
+            'time' => $time_str,
+            'message' => $request->garbage_message,
+        ];
+        
         $property->rules = $request->rules;
+        $property->facilities = $request->facilities;
         
         $property->save();
 
@@ -208,31 +343,53 @@ class PropertyController extends Controller
     {
         $property = Property::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
         
-        $applications = \App\Models\Billing::with('user')
+        // Kita menggunakan tabel applications yang baru dibuat
+        $applications = \App\Models\Application::with(['user', 'room'])
             ->where('property_id', $id)
-            ->where('status', 'pending_approval')
             ->latest()
             ->get();
             
         return view('landlord.property-applications', compact('property', 'applications'));
     }
 
-    public function acceptApplication(Request $request, $id, $billing_id)
+    public function acceptApplication(Request $request, $id, $application_id)
     {
         $property = Property::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
-        $billing = \App\Models\Billing::where('id', $billing_id)->where('property_id', $id)->firstOrFail();
+        $application = \App\Models\Application::where('id', $application_id)->where('property_id', $id)->firstOrFail();
         
-        $billing->update(['status' => 'unpaid']);
+        $request->validate([
+            'assigned_room_number' => 'required|string|max:255'
+        ]);
+
+        $application->update(['status' => 'disetujui']);
         
-        return redirect()->back()->with('success', 'Pengajuan sewa berhasil diterima! Tagihan telah diteruskan ke calon tenant.');
+        // Buat tagihan baru
+        $room = \App\Models\Room::find($application->room_id);
+        $amount = $room ? $room->price_monthly : 0;
+        
+        \App\Models\Billing::create([
+            'property_id' => $property->id,
+            'room_id' => $application->room_id,
+            'user_id' => $application->user_id,
+            'amount' => $amount,
+            'status' => 'pending', // unpaid/pending
+            'due_date' => now()->addDays(3),
+            'duration' => $application->duration,
+            'payment_method' => null,
+            'payment_proof' => null,
+            'verified_at' => null,
+            'assigned_room_number' => $request->assigned_room_number
+        ]);
+        
+        return redirect()->back()->with('success', 'Pengajuan sewa berhasil diterima! Tagihan awal telah dibuat.');
     }
 
-    public function rejectApplication(Request $request, $id, $billing_id)
+    public function rejectApplication(Request $request, $id, $application_id)
     {
         $property = Property::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
-        $billing = \App\Models\Billing::where('id', $billing_id)->where('property_id', $id)->firstOrFail();
+        $application = \App\Models\Application::where('id', $application_id)->where('property_id', $id)->firstOrFail();
         
-        $billing->update(['status' => 'rejected']);
+        $application->update(['status' => 'ditolak']);
         
         return redirect()->back()->with('success', 'Pengajuan sewa telah ditolak.');
     }

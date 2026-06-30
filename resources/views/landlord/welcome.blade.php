@@ -35,6 +35,8 @@
                 <span class="font-medium ml-3 sidebar-text">Dashboard Utama</span>
             </a>
 
+
+        
             <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-4 sidebar-text whitespace-nowrap">System</div>
             
             <a href="{{ route('settings.global') }}" class="flex items-center px-4 py-2.5 text-gray-500 hover:bg-gray-50 hover:text-teal-600 rounded-lg transition-colors whitespace-nowrap">
@@ -69,18 +71,17 @@
                     <span class="absolute top-0 right-0 w-2 h-2 bg-teal-500 rounded-full border border-white"></span>
                 </button>
                 
-                <div class="flex items-center cursor-pointer">
+                <a href="{{ route('profile.show') }}" class="flex items-center cursor-pointer hover:bg-gray-100 p-2 rounded-lg transition-colors">
                     <div class="w-10 h-10 rounded-full bg-teal-200 text-teal-700 flex items-center justify-center font-bold mr-3 uppercase drop-shadow-sm">
                         {{ substr(auth()->user()->name, 0, 2) }}
                     </div>
                     <div class="flex flex-col mr-2">
                         <span class="font-bold text-slate-800 text-sm">{{ auth()->user()->name }}</span>
                         <span class="text-xs text-teal-600 font-medium">
-                            {{ auth()->user()->role == 'tuan_kos' ? 'Pemilik Kos' : 'Pencari Kos' }}
+                            Profil Saya
                         </span>
                     </div>
-                    <i class="fa-solid fa-chevron-down text-xs text-gray-400 ml-2"></i>
-                </div>
+                </a>
             </div>
         </header>
 

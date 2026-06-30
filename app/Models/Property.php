@@ -11,11 +11,11 @@ class Property extends Model
 
     protected $guarded = [];
 
-    // INI BAGIAN PALING PENTINGNYA, TUANKU:
     protected $casts = [
         'facilities' => 'array',
         'photos' => 'array',
         'rules' => 'array',
+        'garbage_management' => 'array',
     ];
 
     public function rooms()
@@ -31,5 +31,20 @@ class Property extends Model
     public function reviews()
     {
         return $this->hasMany(Review::class);
+    }
+
+    public function billings()
+    {
+        return $this->hasMany(Billing::class);
+    }
+
+    public function complains()
+    {
+        return $this->hasMany(Complain::class);
+    }
+
+    public function applications()
+    {
+        return $this->hasMany(Application::class);
     }
 }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pengaturan Akun - GRAHA</title>
+    <title>Settings - GRAHA</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -28,7 +28,9 @@
                 <span class="font-medium ml-3 sidebar-text">Dashboard Utama</span>
             </a>
 
-            <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 mt-6 px-4 sidebar-text whitespace-nowrap">System</div>
+
+        
+            <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-4 sidebar-text whitespace-nowrap">System</div>
             
             <a href="{{ route('settings.global') }}" class="flex items-center px-4 py-3 bg-teal-50 text-teal-600 rounded-lg transition-colors whitespace-nowrap">
                 <div class="w-6 shrink-0 flex justify-center"><i class="fa-solid fa-gear"></i></div>
@@ -51,11 +53,11 @@
         
         <header class="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-8 shrink-0">
             <div class="flex items-center font-bold text-xl text-[#1e3a5f]">
-                <i class="fa-solid fa-user-gear mr-3 text-[#38a38e]"></i> Pengaturan Akun Global
+                <i class="fa-solid fa-gear mr-3 text-[#38a38e]"></i> Settings
             </div>
 
             <div class="flex items-center space-x-6">
-                <div class="flex items-center">
+                <a href="{{ route('profile.show') }}" class="flex items-center cursor-pointer hover:bg-gray-100 p-2 rounded-lg transition-colors">
                     <div class="w-10 h-10 rounded-full bg-teal-200 text-teal-700 flex items-center justify-center font-bold mr-3 uppercase drop-shadow-sm">
                         {{ substr(auth()->user()->name, 0, 2) }}
                     </div>
@@ -63,7 +65,7 @@
                         <span class="font-bold text-slate-800 text-sm">{{ auth()->user()->name }}</span>
                         <span class="text-xs text-teal-600 font-medium">{{ auth()->user()->role == 'tuan_kos' ? 'Pemilik Kos' : 'Pencari Kos' }}</span>
                     </div>
-                </div>
+                </a>
             </div>
         </header>
 
@@ -76,80 +78,8 @@
                     </div>
                 @endif
 
-                <div class="bg-white rounded-xl border border-gray-200 p-8 shadow-sm">
-                    <h3 class="text-lg font-bold text-[#1e3a5f] mb-6 flex items-center border-b border-gray-100 pb-3">
-                        <i class="fa-regular fa-id-badge text-teal-600 mr-3"></i> Profil Pengguna
-                    </h3>
-                    
-                    <form action="{{ route('settings.profile') }}" method="POST" class="flex flex-col md:flex-row gap-8 items-start">
-                        @csrf
-                        <div class="flex flex-col items-center space-y-3">
-                            <div class="w-24 h-24 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center text-3xl font-bold uppercase border-4 border-white shadow-md relative group cursor-pointer overflow-hidden">
-                                {{ substr(auth()->user()->name, 0, 2) }}
-                                <div class="absolute inset-0 bg-black/50 hidden group-hover:flex items-center justify-center transition-all">
-                                    <i class="fa-solid fa-camera text-white text-xl"></i>
-                                </div>
-                            </div>
-                            <button type="button" class="text-xs font-bold text-[#38a38e] hover:underline">Ubah Foto</button>
-                        </div>
-
-                        <div class="flex-1 w-full grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-sm font-bold text-gray-700 mb-2">Nama Lengkap</label>
-                                <input type="text" name="name" value="{{ auth()->user()->name }}" class="w-full bg-slate-50 border border-gray-200 rounded-lg px-4 py-2.5 text-slate-700 focus:outline-none focus:border-[#38a38e] focus:bg-white transition-colors" required>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-bold text-gray-700 mb-2">Email Address</label>
-                                <input type="email" value="{{ auth()->user()->email }}" class="w-full bg-slate-50 border border-gray-200 rounded-lg px-4 py-2.5 text-slate-700 focus:outline-none focus:border-[#38a38e] focus:bg-white transition-colors" readonly>
-                                <p class="text-[10px] text-gray-400 mt-1">*Email digunakan untuk login, hubungi admin untuk mengubah.</p>
-                            </div>
-                            <div class="col-span-2 md:col-span-1">
-                                <label class="block text-sm font-bold text-gray-700 mb-2">Nomor WhatsApp</label>
-                                <div class="flex">
-                                    <span class="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-200 bg-gray-50 text-gray-500 text-sm font-bold">+62</span>
-                                    <input type="text" name="phone_number" value="{{ auth()->user()->phone_number ?? '' }}" placeholder="81234567890" class="flex-1 bg-slate-50 border border-gray-200 rounded-r-lg px-4 py-2.5 text-slate-700 focus:outline-none focus:border-[#38a38e] focus:bg-white transition-colors">
-                                </div>
-                            </div>
-                            <div class="col-span-2 md:col-span-1">
-                                <label class="block text-sm font-bold text-gray-700 mb-2">Jenis Kelamin</label>
-                                <select name="gender" class="w-full bg-slate-50 border border-gray-200 rounded-lg px-4 py-2.5 text-slate-700 focus:outline-none focus:border-[#38a38e] focus:bg-white transition-colors appearance-none">
-                                    <option value="L" {{ auth()->user()->gender == 'L' ? 'selected' : '' }}>Laki-laki</option>
-                                    <option value="P" {{ auth()->user()->gender == 'P' ? 'selected' : '' }}>Perempuan</option>
-                                </select>
-                            </div>
-                            <div class="col-span-2">
-                                <label class="block text-sm font-bold text-gray-700 mb-2">Pekerjaan</label>
-                                <input type="text" name="pekerjaan" value="{{ auth()->user()->pekerjaan ?? '' }}" class="w-full bg-slate-50 border border-gray-200 rounded-lg px-4 py-2.5 text-slate-700 focus:outline-none focus:border-[#38a38e] focus:bg-white transition-colors">
-                            </div>
-                            
-                            <div class="col-span-2 mt-4 pt-4 border-t border-gray-100">
-                                <h4 class="font-bold text-slate-800 mb-4 flex items-center"><i class="fa-solid fa-building-columns mr-2 text-teal-600"></i> Informasi Rekening / E-Wallet</h4>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label class="block text-sm font-bold text-gray-700 mb-2">Nama Bank</label>
-                                        <input type="text" name="bank_name" placeholder="Misal: BCA, Mandiri, GoPay" value="{{ auth()->user()->bank_name ?? '' }}" class="w-full bg-slate-50 border border-gray-200 rounded-lg px-4 py-2.5 text-slate-700 focus:outline-none focus:border-[#38a38e] focus:bg-white transition-colors">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-bold text-gray-700 mb-2">Nomor Rekening</label>
-                                        <input type="text" name="bank_account_number" value="{{ auth()->user()->bank_account_number ?? '' }}" class="w-full bg-slate-50 border border-gray-200 rounded-lg px-4 py-2.5 text-slate-700 focus:outline-none focus:border-[#38a38e] focus:bg-white transition-colors">
-                                    </div>
-                                    <div class="col-span-2">
-                                        <label class="block text-sm font-bold text-gray-700 mb-2">Atas Nama (Pemilik Rekening)</label>
-                                        <input type="text" name="bank_account_name" value="{{ auth()->user()->bank_account_name ?? '' }}" class="w-full bg-slate-50 border border-gray-200 rounded-lg px-4 py-2.5 text-slate-700 focus:outline-none focus:border-[#38a38e] focus:bg-white transition-colors">
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="col-span-2 mt-2">
-                                <button type="submit" class="bg-[#1e3a5f] text-white px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-blue-900 transition-colors shadow-sm mt-2">
-                                    Simpan Profil
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="bg-white rounded-xl border border-gray-200 p-8 shadow-sm">
+                
+                                <div class="bg-white rounded-xl border border-gray-200 p-8 shadow-sm">
                     <h3 class="text-lg font-bold text-[#1e3a5f] mb-6 flex items-center border-b border-gray-100 pb-3">
                         <i class="fa-solid fa-shield-halved text-teal-600 mr-3"></i> Keamanan & Password
                     </h3>
@@ -178,7 +108,59 @@
                     </form>
                 </div>
 
-            </div>
+
+
+                <div class="bg-white rounded-xl border border-gray-200 p-8 shadow-sm">
+                    <h3 class="text-lg font-bold text-[#1e3a5f] mb-6 flex items-center border-b border-gray-100 pb-3">
+                        <i class="fa-solid fa-headset text-teal-600 mr-3"></i> Pusat Bantuan & Kebijakan
+                    </h3>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <a href="https://wa.me/6281234567890?text=Halo%20Admin%20GRAHA,%20saya%20butuh%20bantuan" target="_blank" class="flex-1 border border-gray-200 rounded-lg p-4 flex items-center justify-center hover:bg-green-50 hover:text-green-600 transition-colors text-sm font-bold text-gray-700">
+                            <i class="fa-brands fa-whatsapp text-green-500 mr-2 text-xl"></i> Hubungi Admin GRAHA
+                        </a>
+                        <button onclick="document.getElementById('terms-modal').classList.remove('hidden')" class="flex-1 border border-gray-200 rounded-lg p-4 flex items-center justify-center hover:bg-blue-50 hover:text-blue-600 transition-colors text-sm font-bold text-gray-700">
+                            <i class="fa-solid fa-file-contract text-blue-500 mr-2 text-xl"></i> Syarat & Ketentuan
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Terms Modal -->
+                <div id="terms-modal" class="hidden fixed inset-0 z-50 overflow-y-auto">
+                    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+                        <div class="fixed inset-0 transition-opacity" aria-hidden="true" onclick="document.getElementById('terms-modal').classList.add('hidden')">
+                            <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+                        </div>
+                        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+                            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                <div class="sm:flex sm:items-start">
+                                    <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                                        <h3 class="text-xl leading-6 font-bold text-gray-900 mb-4" id="modal-title">
+                                            Syarat & Ketentuan GRAHA
+                                        </h3>
+                                        <div class="mt-2 text-sm text-gray-500 h-64 overflow-y-auto pr-2 space-y-4">
+                                            <p>Selamat datang di platform GRAHA. Dengan menggunakan layanan kami, Anda menyetujui syarat dan ketentuan berikut:</p>
+                                            <h4 class="font-bold text-gray-700">1. Tanggung Jawab Pemilik Kos</h4>
+                                            <p>Pemilik kos bertanggung jawab penuh atas keakuratan data properti, harga, dan ketersediaan kamar yang ditampilkan di platform GRAHA.</p>
+                                            <h4 class="font-bold text-gray-700">2. Transaksi dan Pembayaran</h4>
+                                            <p>Semua transaksi pembayaran sewa yang dilakukan melalui GRAHA akan diverifikasi secara otomatis. GRAHA tidak bertanggung jawab atas transaksi yang dilakukan di luar platform.</p>
+                                            <h4 class="font-bold text-gray-700">3. Privasi Data</h4>
+                                            <p>Data pribadi Anda dan penghuni akan dijaga kerahasiaannya dan hanya digunakan untuk keperluan operasional sistem manajemen kos.</p>
+                                            <h4 class="font-bold text-gray-700">4. Penonaktifan Akun</h4>
+                                            <p>GRAHA berhak menonaktifkan akun pemilik kos jika ditemukan pelanggaran, penipuan, atau laporan berulang dari penghuni terkait fasilitas yang tidak sesuai.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                                <button type="button" onclick="document.getElementById('terms-modal').classList.add('hidden')" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-teal-600 text-base font-medium text-white hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 sm:ml-3 sm:w-auto sm:text-sm">
+                                    Saya Mengerti
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+</div>
         </div>
     </main>
 

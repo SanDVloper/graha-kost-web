@@ -105,6 +105,77 @@
                             <label class="block text-sm font-bold text-gray-700 mb-2">Deskripsi Properti</label>
                             <textarea name="description" rows="3" class="w-full bg-slate-50 border border-gray-200 rounded-lg px-4 py-2.5 text-slate-700 focus:outline-none focus:border-[#38a38e] focus:bg-white transition-colors">{{ $property->description }}</textarea>
                         </div>
+
+                        <div class="col-span-2">
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Manajemen Sampah & Kebersihan</label>
+                            <div class="bg-slate-50 border border-gray-200 rounded-xl p-5 space-y-4">
+                                @php
+                                    $garbage = is_array($property->garbage_management) ? $property->garbage_management : [];
+                                    $is_scheduled = $garbage['is_scheduled'] ?? false;
+                                    $selectedDays = is_array($garbage['days'] ?? null) ? $garbage['days'] : [];
+                                    $timeArr = explode(' - ', $garbage['time'] ?? '');
+                                    $startTime = str_replace(' WITA', '', $timeArr[0] ?? '');
+                                    $endTime = str_replace(' WITA', '', $timeArr[1] ?? '');
+                                @endphp
+                                
+                                <!-- Toggle Penjadwalan -->
+                                <label class="flex items-center cursor-pointer">
+                                    <div class="relative">
+                                        <input type="checkbox" name="garbage_is_scheduled" id="garbage_is_scheduled_settings" class="sr-only" {{ $is_scheduled ? 'checked' : '' }}>
+                                        <div class="block {{ $is_scheduled ? 'bg-[#38a38e]' : 'bg-gray-300' }} w-12 h-7 rounded-full transition-colors" id="garbage_toggle_bg_settings"></div>
+                                        <div class="dot absolute left-1 top-1 bg-white w-5 h-5 rounded-full transition-transform" id="garbage_toggle_dot_settings" style="transform: {{ $is_scheduled ? 'translateX(100%)' : 'translateX(0)' }}"></div>
+                                    </div>
+                                    <div class="ml-3 text-sm font-semibold text-gray-700">Ada Penjadwalan Sampah Khusus</div>
+                                </label>
+
+                                <!-- Detail Jadwal -->
+                                <div id="garbage_schedule_details_settings" class="pt-3 border-t border-gray-200 {{ $is_scheduled ? '' : 'hidden' }}">
+                                    <div class="mb-4">
+                                        <label class="block text-xs font-bold text-gray-600 mb-2">Hari Pengambilan</label>
+                                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                            @foreach(['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'] as $day)
+                                            <label class="flex items-center space-x-2 bg-white border border-gray-200 px-3 py-2 rounded-lg cursor-pointer hover:bg-emerald-50 transition">
+                                                <input type="checkbox" name="garbage_days[]" value="{{ $day }}" class="text-[#38a38e] focus:ring-[#38a38e]" {{ in_array($day, $selectedDays) ? 'checked' : '' }}>
+                                                <span class="text-sm font-medium text-gray-700">{{ $day }}</span>
+                                            </label>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-600 mb-2">Jam Pengambilan (WITA)</label>
+                                        <div class="flex items-center space-x-3 w-full md:w-1/2">
+                                            <input type="time" name="garbage_time_start" value="{{ $startTime }}" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-[#38a38e]">
+                                            <span class="text-gray-500 font-bold text-sm">s/d</span>
+                                            <input type="time" name="garbage_time_end" value="{{ $endTime }}" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-[#38a38e]">
+                                        </div>
+                                    </div>
+                                    <div class="pt-4 mt-2">
+                                        <label class="block text-xs font-bold text-gray-600 mb-1">Pesan Tambahan Untuk Penghuni (Opsional)</label>
+                                        <textarea name="garbage_message" rows="2" placeholder="Contoh: Tolong ikat plastik sampah dengan rapat..." class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-[#38a38e]">{{ $garbage['message'] ?? '' }}</textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <script>
+                                document.getElementById('garbage_is_scheduled_settings').addEventListener('change', function() {
+                                    const details = document.getElementById('garbage_schedule_details_settings');
+                                    const bg = document.getElementById('garbage_toggle_bg_settings');
+                                    const dot = document.getElementById('garbage_toggle_dot_settings');
+                                    
+                                    if(this.checked) {
+                                        details.classList.remove('hidden');
+                                        bg.classList.remove('bg-gray-300');
+                                        bg.classList.add('bg-[#38a38e]');
+                                        dot.style.transform = 'translateX(100%)';
+                                    } else {
+                                        details.classList.add('hidden');
+                                        bg.classList.remove('bg-[#38a38e]');
+                                        bg.classList.add('bg-gray-300');
+                                        dot.style.transform = 'translateX(0)';
+                                    }
+                                });
+                            </script>
+                        </div>
                     </div>
                 </div>
 
@@ -131,6 +202,37 @@
                             <input type="checkbox" name="rules[]" value="{{ $rule }}" class="hidden peer" {{ in_array($rule, $activeRules) ? 'checked' : '' }} onchange="this.parentElement.classList.toggle('border-[#38a38e]'); this.parentElement.classList.toggle('bg-teal-50'); this.parentElement.classList.toggle('border-gray-200'); this.parentElement.classList.toggle('bg-slate-50'); this.nextElementSibling.classList.toggle('text-[#38a38e]'); this.nextElementSibling.classList.toggle('text-gray-400'); this.nextElementSibling.nextElementSibling.classList.toggle('text-[#38a38e]'); this.nextElementSibling.nextElementSibling.classList.toggle('text-gray-700');">
                             <i class="fa-solid {{ $icon }} text-xl {{ in_array($rule, $activeRules) ? 'text-[#38a38e]' : 'text-gray-400' }}"></i>
                             <span class="text-sm font-semibold {{ in_array($rule, $activeRules) ? 'text-[#38a38e]' : 'text-gray-700' }}">{{ $rule === 'Dilarang Bawa Lawan Jenis' ? 'Bukan Muhrim Dilarang Ke Kamar' : $rule }}</span>
+                        </label>
+                        @endforeach
+                    </div>
+                </div>
+
+                <!-- Card 1.75: Fasilitas Umum Properti -->
+                <div class="bg-white rounded-xl border border-gray-200 p-8 shadow-sm">
+                    <h3 class="text-lg font-bold text-[#1e3a5f] mb-6 flex items-center border-b border-gray-100 pb-3">
+                        <i class="fa-solid fa-wifi text-teal-600 mr-3"></i> Fasilitas Umum
+                    </h3>
+                    
+                    @php
+                        $activeFacilities = $property->facilities ?? [];
+                    @endphp
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        @foreach([
+                            'WiFi' => 'fa-wifi',
+                            'Dapur Umum' => 'fa-kitchen-set',
+                            'Parkir Motor' => 'fa-motorcycle',
+                            'Parkir Mobil' => 'fa-car',
+                            'Ruang Jemur' => 'fa-shirt',
+                            'Mesin Cuci' => 'fa-jug-detergent',
+                            'Kulkas Umum' => 'fa-snowflake',
+                            'Ruang Santai' => 'fa-couch',
+                            'CCTV' => 'fa-video'
+                        ] as $fac => $icon)
+                        <label class="cursor-pointer border-2 {{ in_array($fac, $activeFacilities) ? 'border-[#38a38e] bg-teal-50' : 'border-gray-200 bg-slate-50' }} hover:border-[#38a38e] rounded-xl p-4 flex flex-col items-center gap-3 transition-all text-center">
+                            <input type="checkbox" name="facilities[]" value="{{ $fac }}" class="hidden peer" {{ in_array($fac, $activeFacilities) ? 'checked' : '' }} onchange="this.parentElement.classList.toggle('border-[#38a38e]'); this.parentElement.classList.toggle('bg-teal-50'); this.parentElement.classList.toggle('border-gray-200'); this.parentElement.classList.toggle('bg-slate-50'); this.nextElementSibling.classList.toggle('text-[#38a38e]'); this.nextElementSibling.classList.toggle('text-gray-400'); this.nextElementSibling.nextElementSibling.classList.toggle('text-[#38a38e]'); this.nextElementSibling.nextElementSibling.classList.toggle('text-gray-700');">
+                            <i class="fa-solid {{ $icon }} text-2xl {{ in_array($fac, $activeFacilities) ? 'text-[#38a38e]' : 'text-gray-400' }}"></i>
+                            <span class="text-sm font-semibold {{ in_array($fac, $activeFacilities) ? 'text-[#38a38e]' : 'text-gray-700' }}">{{ $fac }}</span>
                         </label>
                         @endforeach
                     </div>
@@ -197,16 +299,40 @@
                             <h4 class="font-bold text-red-600">Hapus Properti Permanen</h4>
                             <p class="text-xs text-gray-500 mt-1">Menghapus seluruh data properti, kamar, tagihan, dan histori penghuni.</p>
                         </div>
-                        <form action="{{ route('property.destroy', $property->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus properti ini secara permanen?');">
+                        <form id="formDeleteProperty" action="{{ route('property.destroy', $property->id) }}" method="POST">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="px-4 py-2 bg-red-50 hover:bg-red-500 text-red-600 hover:text-white font-bold text-sm rounded-lg transition-colors border border-red-200 hover:border-red-500">Hapus Properti</button>
+                            <button type="button" onclick="document.getElementById('deletePropertyModal').classList.remove('hidden')" class="px-4 py-2 bg-red-50 hover:bg-red-500 text-red-600 hover:text-white font-bold text-sm rounded-lg transition-colors border border-red-200 hover:border-red-500">Hapus Properti</button>
                         </form>
                     </div>
                 </div>
 
         </div>
     </main>
+
+    <!-- MODAL KONFIRMASI HAPUS PROPERTI -->
+    <div id="deletePropertyModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="document.getElementById('deletePropertyModal').classList.add('hidden')"></div>
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md z-10 relative overflow-hidden flex flex-col transform transition-all">
+            <div class="p-6 text-center">
+                <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+                    <i class="fa-solid fa-triangle-exclamation text-3xl text-red-500"></i>
+                </div>
+                <h3 class="font-bold text-xl text-slate-800 mb-2">Hapus Properti?</h3>
+                <p class="text-sm text-slate-500 mb-6">
+                    Tindakan ini akan menghapus permanen properti <strong class="text-slate-700">{{ $property->name }}</strong> beserta seluruh tipe kamar, unit, tagihan, dan histori penghuni. Tindakan ini <strong>tidak dapat dibatalkan</strong>.
+                </p>
+                <div class="flex gap-3 justify-center">
+                    <button type="button" onclick="document.getElementById('deletePropertyModal').classList.add('hidden')" class="px-6 py-2.5 rounded-lg text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">
+                        Batal
+                    </button>
+                    <button type="button" onclick="document.getElementById('formDeleteProperty').submit()" class="px-6 py-2.5 rounded-lg text-sm font-bold text-white bg-red-500 hover:bg-red-600 shadow-lg shadow-red-500/30 transition-all active:scale-95">
+                        Ya, Hapus Sekarang
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </body>
 </html>

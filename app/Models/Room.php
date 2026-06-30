@@ -28,4 +28,19 @@ class Room extends Model
     {
         return $this->belongsTo(Property::class);
     }
+
+    public function billings()
+    {
+        return $this->hasMany(Billing::class);
+    }
+
+    public function complains()
+    {
+        return $this->hasMany(Complain::class);
+    }
+
+    public function applications()
+    {
+        return $this->hasMany(Application::class);
+    }
 }

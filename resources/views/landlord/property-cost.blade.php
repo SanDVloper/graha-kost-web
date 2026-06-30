@@ -72,7 +72,7 @@
         </div>
 
         <!-- FORM DIMULAI DI SINI -->
-        <form action="{{ url('/property-cost/' . $id) }}" method="POST">
+        <form action="{{ url('/property-cost') }}" method="POST">
             @csrf <!-- Wajib -->
 
             <div id="rooms-container">

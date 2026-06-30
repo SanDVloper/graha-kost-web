@@ -201,10 +201,70 @@
 
                 <div class="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
                     <div class="mb-6">
-                        <h2 class="text-xl font-bold text-[#1e3a5f] mb-1">Pengelolaan Sampah</h2>
-                        <p class="text-sm text-gray-500">Jelaskan bagaimana sistem pengelolaan sampah di kos Anda (misal: diurus penghuni, jadwal pengangkutan, biaya tambahan, dll).</p>
+                        <h2 class="text-xl font-bold text-[#1e3a5f] mb-1">Manajemen Sampah & Kebersihan</h2>
+                        <p class="text-sm text-gray-500">Atur jadwal pengambilan sampah dan berikan pesan tambahan untuk penghuni kos Anda.</p>
                     </div>
-                    <textarea name="garbage_management" rows="3" class="w-full bg-[#f4f5f7] border-0 text-gray-800 text-sm rounded-xl focus:ring-2 focus:ring-[#38a38e] block p-4 transition placeholder-gray-400" placeholder="Contoh: Sampah dikumpulkan di depan kamar masing-masing, akan diambil petugas setiap pagi jam 07:00. Biaya kebersihan sudah termasuk biaya sewa."></textarea>
+                    <div class="bg-slate-50 border border-gray-200 rounded-xl p-5 space-y-4">
+                        
+                        <!-- Toggle Penjadwalan -->
+                        <label class="flex items-center cursor-pointer">
+                            <div class="relative">
+                                <input type="checkbox" name="garbage_is_scheduled" id="garbage_is_scheduled" class="sr-only">
+                                <div class="block bg-gray-300 w-12 h-7 rounded-full transition-colors" id="garbage_toggle_bg"></div>
+                                <div class="dot absolute left-1 top-1 bg-white w-5 h-5 rounded-full transition-transform" id="garbage_toggle_dot"></div>
+                            </div>
+                            <div class="ml-3 text-sm font-semibold text-gray-700">Ada Penjadwalan Sampah Khusus</div>
+                        </label>
+
+                        <!-- Detail Jadwal (Hidden jika tidak dijadwalkan) -->
+                        <div id="garbage_schedule_details" class="pt-3 border-t border-gray-200 hidden">
+                            <div class="mb-4">
+                                <label class="block text-xs font-bold text-gray-600 mb-2">Hari Pengambilan</label>
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                    @foreach(['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'] as $day)
+                                    <label class="flex items-center space-x-2 bg-white border border-gray-200 px-3 py-2 rounded-lg cursor-pointer hover:bg-emerald-50 transition">
+                                        <input type="checkbox" name="garbage_days[]" value="{{ $day }}" class="text-[#38a38e] focus:ring-[#38a38e]">
+                                        <span class="text-sm font-medium text-gray-700">{{ $day }}</span>
+                                    </label>
+                                    @endforeach
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-2">Jam Pengambilan (WITA)</label>
+                                <div class="flex items-center space-x-3 w-full md:w-1/2">
+                                    <input type="time" name="garbage_time_start" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-[#38a38e]">
+                                    <span class="text-gray-500 font-bold text-sm">s/d</span>
+                                    <input type="time" name="garbage_time_end" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-[#38a38e]">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pesan Tambahan -->
+                        <div class="pt-2">
+                            <label class="block text-xs font-bold text-gray-600 mb-1">Pesan Tambahan Untuk Penghuni (Opsional)</label>
+                            <textarea name="garbage_message" rows="2" placeholder="Contoh: Tolong ikat plastik sampah dengan rapat..." class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-[#38a38e]"></textarea>
+                        </div>
+                    </div>
+
+                    <script>
+                        document.getElementById('garbage_is_scheduled').addEventListener('change', function() {
+                            const details = document.getElementById('garbage_schedule_details');
+                            const bg = document.getElementById('garbage_toggle_bg');
+                            const dot = document.getElementById('garbage_toggle_dot');
+                            
+                            if(this.checked) {
+                                details.classList.remove('hidden');
+                                bg.classList.remove('bg-gray-300');
+                                bg.classList.add('bg-[#38a38e]');
+                                dot.style.transform = 'translateX(100%)';
+                            } else {
+                                details.classList.add('hidden');
+                                bg.classList.remove('bg-[#38a38e]');
+                                bg.classList.add('bg-gray-300');
+                                dot.style.transform = 'translateX(0)';
+                            }
+                        });
+                    </script>
                 </div>
 
                 <div class="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">

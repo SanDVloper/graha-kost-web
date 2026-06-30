@@ -18,6 +18,8 @@ class UserSeeder extends Seeder
                 'email' => 'tuan@graha.com',
                 'password' => '$2y$12$AHiRRejQG/PHmK/ikQwpWO2FFxsxlgrLiRL6FijcnswhSsBj4qAkO', // Password sudah di-hash sesuai database
                 'role' => 'tuan_kos',
+                'phone_number' => '081234567890',
+                'nik' => '3571234567890123',
                 'is_super_admin' => false,
                 'permissions' => null,
                 'created_at' => now(),

@@ -116,20 +116,17 @@
                         <!-- Rent & Action -->
                         <div class="w-full md:w-64 border-t md:border-t-0 md:border-l border-gray-100 pt-4 md:pt-0 md:pl-6 flex flex-col justify-between">
                             <div>
-                                <span class="text-xs font-bold text-gray-400 uppercase block mb-1">Tagihan Awal</span>
-                                <h3 class="text-xl font-black text-[#1e3a5f]">Rp {{ number_format($app->amount, 0, ',', '.') }}</h3>
+                                <span class="text-xs font-bold text-gray-400 uppercase block mb-1">Estimasi Tagihan Awal</span>
+                                <h3 class="text-xl font-black text-[#1e3a5f]">Rp {{ number_format($app->room->price_monthly ?? 0, 0, ',', '.') }}</h3>
                                 <p class="text-xs text-gray-500 mt-1">
                                     <i class="fa-regular fa-clock"></i> Diajukan {{ $app->created_at->diffForHumans() }}
                                 </p>
                             </div>
                             
                             <div class="flex gap-2 mt-6">
-                                <form action="{{ route('property.applications.accept', [$property->id, $app->id]) }}" method="POST" class="flex-1">
-                                    @csrf
-                                    <button type="submit" class="w-full py-2 bg-[#38a38e] hover:bg-teal-700 text-white font-bold rounded-lg transition-colors text-sm">
-                                        <i class="fa-solid fa-check mr-1"></i> Terima
-                                    </button>
-                                </form>
+                                <button type="button" onclick="openAcceptModal({{ $app->id }}, '{{ $app->user->name ?? 'Pemohon' }}')" class="flex-1 w-full py-2 bg-[#38a38e] hover:bg-teal-700 text-white font-bold rounded-lg transition-colors text-sm">
+                                    <i class="fa-solid fa-check mr-1"></i> Terima
+                                </button>
                                 <form action="{{ route('property.applications.reject', [$property->id, $app->id]) }}" method="POST" class="flex-1">
                                     @csrf
                                     <button type="submit" class="w-full py-2 bg-red-50 hover:bg-red-500 text-red-600 hover:text-white font-bold border border-red-200 hover:border-red-500 rounded-lg transition-colors text-sm">
@@ -146,5 +143,38 @@
         </div>
     </main>
 
+    <!-- MODAL TERIMA PENGAJUAN -->
+    <div id="acceptModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="document.getElementById('acceptModal').classList.add('hidden')"></div>
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md z-10 relative overflow-hidden flex flex-col transform transition-all">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-slate-50">
+                <h3 class="font-bold text-lg text-[#1e3a5f]">Terima Pengajuan</h3>
+                <button onclick="document.getElementById('acceptModal').classList.add('hidden')" class="text-gray-400 hover:text-red-500 transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-6">
+                <p class="text-sm text-gray-600 mb-4">Anda akan menerima pengajuan dari <strong id="accept_user_name" class="text-slate-800"></strong>. Silakan tentukan nomor/nama kamar fisik yang akan ditempati:</p>
+                <form id="formAcceptApplication" method="POST">
+                    @csrf
+                    <div class="mb-6">
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Nomor Kamar <span class="text-red-500">*</span></label>
+                        <input type="text" name="assigned_room_number" required placeholder="Contoh: Kamar A1, No. 05" class="w-full bg-slate-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:border-[#38a38e] focus:bg-white outline-none transition-colors">
+                    </div>
+                    
+                    <div class="flex gap-3 justify-end">
+                        <button type="button" onclick="document.getElementById('acceptModal').classList.add('hidden')" class="px-5 py-2 rounded-lg text-sm font-bold text-slate-500 hover:bg-slate-100 transition-colors">Batal</button>
+                        <button type="submit" class="px-5 py-2 rounded-lg text-sm font-bold text-white bg-[#38a38e] hover:bg-teal-700 transition-colors">Terima & Buat Tagihan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openAcceptModal(appId, name) {
+            document.getElementById('accept_user_name').innerText = name;
+            document.getElementById('formAcceptApplication').action = `/property/{{ $property->id }}/applications/${appId}/accept`;
+            document.getElementById('acceptModal').classList.remove('hidden');
+        }
+    </script>
 </body>
 </html>

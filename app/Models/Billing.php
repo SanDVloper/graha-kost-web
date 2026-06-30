@@ -9,7 +9,7 @@ class Billing extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'property_id', 'room_id', 'amount', 'status', 'due_date', 'duration'];
+    protected $fillable = ['user_id', 'property_id', 'room_id', 'amount', 'status', 'due_date', 'duration', 'payment_method', 'payment_proof', 'verified_at', 'assigned_room_number'];
 
     // Relasi balik ke User (Penghuni)
     public function user() {

@@ -128,6 +128,66 @@
                     </div>
                 </div>
 
+                <!-- Papan Pengumuman / Keluhan Publik -->
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 space-y-4">
+                    <div class="flex justify-between items-center border-b pb-3 border-gray-50">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-800">Papan Pengumuman & Suara Penghuni</h3>
+                            <p class="text-xs text-gray-400">Pesan dan keluhan publik dari penghuni kos ini.</p>
+                        </div>
+                        <i class="fa-solid fa-bullhorn text-orange-500 text-xl"></i>
+                    </div>
+
+                    <div class="space-y-3">
+                        @forelse($publicComplains ?? [] as $complain)
+                            @php
+                                $isLandlord = ($complain->user->role ?? '') === 'landlord';
+                            @endphp
+                            <div class="border {{ $isLandlord ? 'border-orange-200 bg-orange-50/30' : 'border-gray-100 bg-gray-50/50' }} rounded-2xl p-4 space-y-2 relative overflow-hidden">
+                                @if($isLandlord)
+                                    <div class="absolute top-0 right-0 bg-orange-500 text-white text-[8px] font-bold px-2 py-1 rounded-bl-lg uppercase tracking-wider">
+                                        <i class="fa-solid fa-star mr-1"></i> Pengumuman Resmi
+                                    </div>
+                                @endif
+                                <div class="flex justify-between items-start">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-8 h-8 rounded-full {{ $isLandlord ? 'bg-orange-100 text-orange-600' : 'bg-blue-50 text-blue-600' }} flex items-center justify-center font-bold text-xs shrink-0">
+                                            @if($complain->is_anonymous)
+                                                <i class="fa-solid fa-user-secret"></i>
+                                            @elseif($isLandlord)
+                                                <i class="fa-solid fa-crown"></i>
+                                            @else
+                                                {{ strtoupper(substr($complain->user->name ?? 'A', 0, 1)) }}
+                                            @endif
+                                        </div>
+                                        <div>
+                                            <h5 class="font-bold {{ $isLandlord ? 'text-orange-700' : 'text-gray-800' }} text-xs flex items-center gap-1">
+                                                {{ $complain->is_anonymous ? 'Penghuni Anonim' : ($isLandlord ? 'Pengelola Kos (Tuan Kos)' : ($complain->user->name ?? 'Penghuni')) }}
+                                                @if($isLandlord)
+                                                    <i class="fa-solid fa-circle-check text-orange-500 text-[10px]"></i>
+                                                @endif
+                                            </h5>
+                                            <span class="text-[9px] text-gray-400">{{ \Carbon\Carbon::parse($complain->created_at)->diffForHumans() }}</span>
+                                        </div>
+                                    </div>
+                                    <span class="{{ $isLandlord ? 'bg-orange-100 text-orange-700' : 'bg-blue-50 text-blue-600' }} text-[9px] font-bold px-2 py-0.5 rounded uppercase mt-1">
+                                        {{ $complain->category }}
+                                    </span>
+                                </div>
+                                <div class="bg-white border {{ $isLandlord ? 'border-orange-100' : 'border-gray-100' }} p-3 rounded-xl mt-2 shadow-sm">
+                                    <h6 class="font-bold text-sm text-gray-800">{{ $complain->title }}</h6>
+                                    <p class="text-xs text-gray-600 mt-1">{{ $complain->description }}</p>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="text-center py-6">
+                                <i class="fa-regular fa-comments text-gray-300 text-3xl mb-2"></i>
+                                <p class="text-xs text-gray-500">Belum ada pengumuman atau keluhan publik.</p>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+
             </div>
 
             <div class="space-y-6">
@@ -136,18 +196,37 @@
                     <h4 class="font-bold text-gray-800 text-xs uppercase tracking-wider border-b pb-2 flex items-center gap-1.5 text-emerald-600">
                         <i class="fa-solid fa-trash-can"></i> Jadwal Pengambilan Sampah
                     </h4>
+                    
+                    @php
+                        $garbage = is_array($property->garbage_management) ? $property->garbage_management : [];
+                        $is_scheduled = $garbage['is_scheduled'] ?? false;
+                        $days = is_array($garbage['days'] ?? null) ? implode(', ', $garbage['days']) : ($garbage['days'] ?? '');
+                        $time = $garbage['time'] ?? '';
+                        $message = $garbage['message'] ?? '';
+                    @endphp
+
                     <div class="bg-emerald-50/50 border border-emerald-100 rounded-xl p-3.5 space-y-2">
-                        <div class="flex justify-between items-center text-xs font-semibold text-gray-700">
-                            <span>Hari Pengambilan:</span>
-                            <span class="text-emerald-700">Selasa & Sabtu</span>
-                        </div>
-                        <div class="flex justify-between items-center text-xs font-semibold text-gray-700">
-                            <span>Waktu Angkut:</span>
-                            <span class="text-emerald-700">08:00 - 10:00 WITA</span>
-                        </div>
-                        <p class="text-[10px] text-gray-400 leading-relaxed pt-1 border-t border-dashed">
-                            * Dimohon menaruh kantong sampah yang sudah diikat rapi di depan pagar luar kamar masing-masing sebelum jam operasional petugas kebersihan tiba.
+                        @if($is_scheduled)
+                            <div class="flex justify-between items-center text-xs font-semibold text-gray-700">
+                                <span>Hari Pengambilan:</span>
+                                <span class="text-emerald-700">{{ $days ?: '-' }}</span>
+                            </div>
+                            <div class="flex justify-between items-center text-xs font-semibold text-gray-700">
+                                <span>Waktu Angkut:</span>
+                                <span class="text-emerald-700">{{ $time ?: '-' }}</span>
+                            </div>
+                        @else
+                            <p class="text-xs font-medium text-emerald-800 leading-relaxed">
+                                Pengelolaan sampah dilakukan secara mandiri oleh penghuni.
+                            </p>
+                        @endif
+
+                        @if(!empty($message))
+                        <p class="text-[10px] text-gray-500 leading-relaxed pt-2 mt-2 border-t border-dashed">
+                            <i class="fa-solid fa-circle-info text-emerald-600 mr-1"></i>
+                            {{ $message }}
                         </p>
+                        @endif
                     </div>
                 </div>
 
@@ -155,24 +234,20 @@
                     <h4 class="font-bold text-gray-800 text-xs uppercase tracking-wider border-b pb-2 flex items-center gap-1.5 text-[#1E3A8A]">
                         <i class="fa-solid fa-gavel"></i> Tata Tertib & Aturan Kos
                     </h4>
+                    @if(!empty($property->rules) && is_array($property->rules) && count($property->rules) > 0)
                     <ul class="text-xs text-gray-600 space-y-3 font-medium">
-                        <li class="flex items-start gap-2">
-                            <i class="fa-solid fa-ban text-red-500 mt-0.5 shrink-0"></i>
-                            <span><strong>Jam Malam Tamu:</strong> Batas kunjungan tamu non-penghuni maksimal pukul 23:00 WITA demi kenyamanan bersama.</span>
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <i class="fa-solid fa-circle-exclamation text-amber-500 mt-0.5 shrink-0"></i>
-                            <span><strong>Penggunaan Listrik:</strong> Alat elektronik berdaya besar (seperti dispenser panas/magic com) harap dikonfirmasikan ke pengelola.</span>
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <i class="fa-solid fa-volume-xmark text-blue-500 mt-0.5 shrink-0"></i>
-                            <span><strong>Ketenangan Hubungan:</strong> Dilarang membuat kegaduhan atau memutar musik terlalu keras di atas pukul 22:00 WITA.</span>
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <i class="fa-solid fa-square-parking text-teal-500 mt-0.5 shrink-0"></i>
-                            <span><strong>Aturan Parkir:</strong> Kendaraan roda dua wajib dikunci stang and diparkir rapi di dalam garis batas kavling koridor bawah.</span>
-                        </li>
+                        @foreach($property->rules as $rule)
+                            <li class="flex items-start gap-2">
+                                <i class="fa-solid fa-circle-check text-teal-500 mt-0.5 shrink-0"></i>
+                                <span>{{ $rule }}</span>
+                            </li>
+                        @endforeach
                     </ul>
+                    @else
+                    <div class="text-center py-4">
+                        <p class="text-xs text-gray-400">Belum ada aturan khusus dari Tuan Kos.</p>
+                    </div>
+                    @endif
                 </div>
 
                 <div class="bg-amber-50 border border-amber-100 p-6 rounded-3xl space-y-3">
