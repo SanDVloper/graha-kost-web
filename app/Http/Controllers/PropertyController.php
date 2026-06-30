@@ -123,6 +123,12 @@ class PropertyController extends Controller
         $billing->status = 'ended';
         $billing->save();
 
+        // Update role kembali menjadi pencari
+        $user = \App\Models\User::find($billing->user_id);
+        if ($user && $user->role === 'penghuni') {
+            $user->update(['role' => 'pencari']);
+        }
+
         return redirect()->back()->with('success', 'Penghuni berhasil dihapus dan dipindahkan ke histori Mantan Penghuni.');
     }
 
@@ -342,14 +348,22 @@ class PropertyController extends Controller
     public function applications($id)
     {
         $property = Property::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
-        
-        // Kita menggunakan tabel applications yang baru dibuat
+
+        // Hanya tampilkan yang masih menunggu persetujuan
         $applications = \App\Models\Application::with(['user', 'room'])
             ->where('property_id', $id)
+            ->where('status', 'menunggu')
             ->latest()
             ->get();
-            
-        return view('landlord.property-applications', compact('property', 'applications'));
+
+        // Ambil juga riwayat yang sudah diproses (untuk tab history jika ada)
+        $historyApplications = \App\Models\Application::with(['user', 'room'])
+            ->where('property_id', $id)
+            ->whereIn('status', ['disetujui', 'ditolak'])
+            ->latest()
+            ->get();
+
+        return view('landlord.property-applications', compact('property', 'applications', 'historyApplications'));
     }
 
     public function acceptApplication(Request $request, $id, $application_id)
@@ -368,20 +382,24 @@ class PropertyController extends Controller
         $amount = $room ? $room->price_monthly : 0;
         
         \App\Models\Billing::create([
-            'property_id' => $property->id,
-            'room_id' => $application->room_id,
-            'user_id' => $application->user_id,
-            'amount' => $amount,
-            'status' => 'pending', // unpaid/pending
-            'due_date' => now()->addDays(3),
-            'duration' => $application->duration,
-            'payment_method' => null,
-            'payment_proof' => null,
-            'verified_at' => null,
-            'assigned_room_number' => $request->assigned_room_number
+            'property_id'          => $property->id,
+            'room_id'              => $application->room_id,
+            'user_id'              => $application->user_id,
+            'amount'               => $amount,
+            'status'               => 'pending',
+            'due_date'             => now()->addDays(3),
+            'duration'             => $application->duration,
+            'assigned_room_number' => $request->assigned_room_number,
         ]);
+
+        // ✅ Upgrade role user dari 'pencari' menjadi 'penghuni'
+        // agar dia bisa mengakses halaman Kos Saya
+        $tenant = \App\Models\User::find($application->user_id);
+        if ($tenant && $tenant->role === 'pencari') {
+            $tenant->update(['role' => 'penghuni']);
+        }
         
-        return redirect()->back()->with('success', 'Pengajuan sewa berhasil diterima! Tagihan awal telah dibuat.');
+        return redirect()->back()->with('success', 'Pengajuan sewa berhasil diterima! Tagihan awal telah dibuat dan akses penghuni telah diaktifkan.');
     }
 
     public function rejectApplication(Request $request, $id, $application_id)

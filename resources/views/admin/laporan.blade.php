@@ -34,13 +34,7 @@
             </a>
             @endif
             
-            @if(auth()->user()->hasPermission('enrollment'))
-            <a href="{{ route('admin.enrollment') }}" class="flex items-center px-4 py-2.5 rounded-lg transition-colors {{ Request::routeIs('admin.enrollment') ? 'bg-teal-50 text-[#38a38e]' : 'text-gray-500 hover:bg-gray-50 hover:text-[#38a38e]' }}">
-                <div class="w-6 shrink-0 flex justify-center"><i class="fa-solid fa-user-check"></i></div>
-                <span class="font-bold ml-3">Enrollment</span>
-            </a>
-            @endif
-
+            
             @if(auth()->user()->hasPermission('users'))
             <a href="{{ route('admin.users') }}" class="flex items-center px-4 py-2.5 rounded-lg transition-colors {{ Request::routeIs('admin.users') ? 'bg-teal-50 text-[#38a38e]' : 'text-gray-500 hover:bg-gray-50 hover:text-[#38a38e]' }}">
                 <div class="w-6 shrink-0 flex justify-center"><i class="fa-solid fa-users"></i></div>
@@ -320,3 +314,5 @@
 
 </body>
 </html>
+
+

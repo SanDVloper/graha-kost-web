@@ -36,13 +36,7 @@
             </a>
             @endif
             
-            @if(auth()->user()->hasPermission('enrollment'))
-            <a href="{{ route('admin.enrollment') }}" class="flex items-center px-4 py-2.5 rounded-lg transition-colors {{ Request::routeIs('admin.enrollment') ? 'bg-teal-50 text-[#38a38e]' : 'text-gray-500 hover:bg-gray-50 hover:text-[#38a38e]' }}">
-                <div class="w-6 shrink-0 flex justify-center"><i class="fa-solid fa-user-check"></i></div>
-                <span class="font-bold ml-3">Enrollment</span>
-            </a>
-            @endif
-
+            
             @if(auth()->user()->hasPermission('users'))
             <a href="{{ route('admin.users') }}" class="flex items-center px-4 py-2.5 rounded-lg transition-colors {{ Request::routeIs('admin.users') ? 'bg-teal-50 text-[#38a38e]' : 'text-gray-500 hover:bg-gray-50 hover:text-[#38a38e]' }}">
                 <div class="w-6 shrink-0 flex justify-center"><i class="fa-solid fa-users"></i></div>
@@ -92,10 +86,10 @@
 
         <div class="p-4 border-t border-gray-200">
             <div class="flex items-center px-4 py-2">
-                <div class="w-8 h-8 rounded-full bg-[#1e3a5f] text-white flex items-center justify-center font-bold mr-3 text-xs">GP</div>
+                <div class="w-8 h-8 rounded-full bg-[#1e3a5f] text-white flex items-center justify-center font-bold mr-3 text-xs">{{ strtoupper(substr(auth()->user()->name, 0, 2)) }}</div>
                 <div>
-                    <p class="font-bold text-sm text-slate-800">Guntur Putra</p>
-                    <p class="text-xs text-gray-400">Super Admin</p>
+                    <p class="font-bold text-sm text-slate-800">{{ auth()->user()->name }}</p>
+                    <p class="text-xs text-gray-400">{{ auth()->user()->is_super_admin ? 'Super Admin' : 'Admin' }}</p>
                 </div>
             </div>
         </div>
@@ -551,3 +545,4 @@ function toggleSection(id)
 }
 
 </script>
+

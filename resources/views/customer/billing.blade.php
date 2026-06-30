@@ -137,7 +137,7 @@
                         <span class="text-xs text-gray-400 font-bold uppercase tracking-wider">Total Belum Dibayar</span>
                         <span class="text-lg font-extrabold text-orange-600">
                             @php
-                                $totalBelumDibayar = $billings ? $billings->where('status', 'unpaid')->sum('amount') : 0;
+                                $totalBelumDibayar = $billings ? $billings->whereIn('status', ['pending', 'waiting_verification'])->sum('amount') : 0;
                             @endphp
                             Rp {{ number_format($totalBelumDibayar, 0, ',', '.') }}
                         </span>

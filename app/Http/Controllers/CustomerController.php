@@ -43,26 +43,30 @@ class CustomerController extends Controller
     public function myKos()
     {
         $userId = Auth::id();
+        $user   = Auth::user();
 
-        // Cari transaksi sewa aktif terakhir milik user
+        // Jika role bukan penghuni, redirect ke cari kos
+        if ($user->role !== 'penghuni') {
+            return redirect()->route('customer.index', ['bypass' => true])
+                ->with('info', 'Anda belum terdaftar sebagai penghuni. Silakan ajukan sewa terlebih dahulu.');
+        }
+
+        // Cari tagihan terbaru user di kos manapun
         $currentBilling = Billing::where('user_id', $userId)
-            ->with('property')
+            ->with(['property', 'room'])
             ->latest()
             ->first();
 
-        // Jika user belum pernah nge-enroll kosan sama sekali
+        // Tidak ada tagihan sama sekali (data tidak konsisten)
         if (!$currentBilling) {
-            return redirect()->route('customer.index', ['bypass' => true])->with('success', 'Anda belum terdaftar di kos manapun. Silakan pilih salah satu kos di bawah untuk mengajukan sewa!');
+            return redirect()->route('customer.index', ['bypass' => true])
+                ->with('info', 'Data tagihan tidak ditemukan. Hubungi pengelola kos Anda.');
         }
 
-        // Jika tagihan sudah di-ACC landlord tapi belum LUNAS dibayar
-        if ($currentBilling->status === 'unpaid') {
-            return redirect()->route('customer.billing')->with('success', 'Pengajuan sewa Anda telah disetujui! Silakan selesaikan pembayaran tagihan Anda.');
-        }
-
-        // Jika masih pending atau rejected
-        if ($currentBilling->status !== 'paid') {
-            return redirect()->route('customer.index', ['bypass' => true])->with('success', 'Pengajuan sewa Anda saat ini berstatus: ' . $currentBilling->status . '.');
+        // Tagihan ada tapi belum dibayar (status pending) → arahkan ke halaman bayar
+        if (in_array($currentBilling->status, ['pending', 'unpaid'])) {
+            return redirect()->route('customer.billing')
+                ->with('info', 'Selamat! Pengajuan sewa Anda telah disetujui. Silakan selesaikan pembayaran tagihan awal Anda.');
         }
 
         $property = $currentBilling->property;
@@ -117,14 +121,13 @@ class CustomerController extends Controller
             $hargaSewa = $room->price_monthly;
         }
 
-        Billing::create([
+        \App\Models\Application::create([
             'user_id'     => Auth::id(),
             'property_id' => $propertyId,
             'room_id'     => $roomId,
             'duration'    => $durasi,
-            'amount'      => $hargaSewa,
-            'status'      => 'pending_approval',
-            'due_date'    => Carbon::now()->addDays(3),
+            'status'      => 'menunggu', // Default status for application
+            'start_date'  => Carbon::now()->addDays(1),
         ]);
 
         return redirect()->route('customer.show', $propertyId)->with('success', 'Pengajuan sewa tipe kamar ' . $room->name . ' berhasil diajukan! Menunggu persetujuan dari pemilik kos sebelum Anda dapat melakukan pembayaran.');

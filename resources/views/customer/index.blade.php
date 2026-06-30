@@ -46,7 +46,12 @@
                     $hargaTampil = $property->rooms->min('price_monthly') ?? 600000;
                     $sisaKamar = $property->rooms->sum('quantity'); // Di masa depan bisa dikurangi dengan tagihan aktif
                     
-                    $fotoKos = asset('image/kos' . $property->id . '.jpg');
+                    $photos = is_string($property->photos) ? json_decode($property->photos, true) : $property->photos;
+                    if (!empty($photos) && is_array($photos)) {
+                        $fotoKos = '/storage/' . $photos[0];
+                    } else {
+                        $fotoKos = asset('image/kos' . $property->id . '.jpg');
+                    }
                 @endphp
 
                 <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-md hover:border-teal-100 transition-all flex flex-col group">

@@ -28,10 +28,16 @@
                 </span>
                 <div class="relative rounded-xl overflow-hidden bg-white/5 h-48 sm:h-64">
                     @php
-                        // Variasi denah otomatis berdasarkan ID agar dinamis saat demo kelompok
-                        $denahUrl = 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=800&q=50';
-                        if ($property->id % 2 === 0) {
-                            $denahUrl = 'https://images.unsplash.com/photo-1545464693-f1798a373343?auto=format&fit=crop&w=800&q=50';
+                        // Cek apakah ada foto properti
+                        $photos = is_string($property->photos) ? json_decode($property->photos, true) : $property->photos;
+                        if (!empty($photos) && is_array($photos)) {
+                            $denahUrl = '/storage/' . $photos[0];
+                        } else {
+                            // Variasi denah otomatis berdasarkan ID jika tidak ada foto
+                            $denahUrl = 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=800&q=50';
+                            if ($property->id % 2 === 0) {
+                                $denahUrl = 'https://images.unsplash.com/photo-1545464693-f1798a373343?auto=format&fit=crop&w=800&q=50';
+                            }
                         }
                     @endphp
                     <img src="{{ $denahUrl }}" alt="Denah Properti Kos" class="w-full h-full object-cover">

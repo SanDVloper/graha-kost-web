@@ -75,14 +75,19 @@
                 </div>
             @endif
 
+            {{-- Daftar Menunggu --}}
             <div class="space-y-6">
                 @if($applications->isEmpty())
                     <div class="bg-white rounded-xl border border-gray-200 p-12 text-center shadow-sm">
                         <i class="fa-solid fa-inbox text-5xl text-gray-300 mb-4"></i>
-                        <h3 class="text-lg font-bold text-gray-700">Belum Ada Pengajuan Masuk</h3>
-                        <p class="text-gray-500 mt-2">Saat ini belum ada calon penghuni yang mengajukan sewa di properti ini.</p>
+                        <h3 class="text-lg font-bold text-gray-700">Tidak Ada Pengajuan Baru</h3>
+                        <p class="text-gray-500 mt-2">Semua pengajuan sudah diproses, atau belum ada calon penghuni yang mengajukan sewa.</p>
                     </div>
                 @else
+                    <div class="flex items-center gap-2 mb-2">
+                        <h2 class="font-bold text-base text-slate-700">Menunggu Keputusan</h2>
+                        <span class="bg-amber-100 text-amber-700 text-xs font-bold px-2 py-0.5 rounded-full">{{ $applications->count() }} baru</span>
+                    </div>
                     @foreach($applications as $app)
                     <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm flex flex-col md:flex-row justify-between gap-6 transition-all hover:shadow-md">
                         <!-- Tenant Info -->
@@ -140,8 +145,40 @@
                 @endif
             </div>
 
+            {{-- Riwayat Pengajuan (Sudah Diproses) --}}
+            @if($historyApplications->isNotEmpty())
+            <div class="mt-10">
+                <h2 class="font-bold text-base text-slate-700 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-history text-gray-400"></i> Riwayat Pengajuan
+                </h2>
+                <div class="space-y-3">
+                    @foreach($historyApplications as $hist)
+                    <div class="bg-white rounded-xl border border-gray-100 p-4 shadow-sm flex items-center justify-between opacity-80">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center font-bold">
+                                {{ substr($hist->user->name, 0, 1) }}
+                            </div>
+                            <div>
+                                <p class="font-semibold text-sm text-slate-700">{{ $hist->user->name }}</p>
+                                <p class="text-xs text-gray-400">{{ $hist->created_at->diffForHumans() }}</p>
+                            </div>
+                        </div>
+                        <div>
+                            @if($hist->status === 'disetujui')
+                                <span class="bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full">✓ Diterima</span>
+                            @else
+                                <span class="bg-red-100 text-red-600 text-xs font-bold px-3 py-1 rounded-full">✗ Ditolak</span>
+                            @endif
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
         </div>
     </main>
+
 
     <!-- MODAL TERIMA PENGAJUAN -->
     <div id="acceptModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center">

@@ -108,7 +108,6 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard')->middleware('admin.permission:dashboard');
     Route::get('/kost/detail', [AdminController::class, 'kostDetail'])->name('detail')->middleware('admin.permission:detail');
-    Route::get('/enrollment', [AdminController::class, 'enrollment'])->name('enrollment')->middleware('admin.permission:enrollment');
     Route::get('/tagihan', [AdminController::class, 'tagihan'])->name('tagihan')->middleware('admin.permission:tagihan');
     Route::get('/pembayaran', [AdminController::class, 'pembayaran'])->name('pembayaran')->middleware('admin.permission:tagihan');
     Route::get('/complaints', [AdminController::class, 'complaints'])->name('complaints.index')->middleware('admin.permission:complaints');

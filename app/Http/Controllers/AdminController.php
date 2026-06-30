@@ -17,11 +17,6 @@ class AdminController extends Controller
         return view('admin.detail', compact('kosts'));
     }
 
-    public function enrollment() {
-        $enrollments = \App\Models\Billing::with(['user', 'property', 'room'])->where('status', 'pending_approval')->latest()->get();
-        return view('admin.enrollment', compact('enrollments'));
-    }
-
     public function tagihan() {
         $tagihans = \App\Models\Billing::with(['user', 'property', 'room'])->latest()->get();
         return view('admin.tagihan', compact('tagihans'));

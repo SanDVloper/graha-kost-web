@@ -2,8 +2,13 @@
 
 @section('content')
 @php
-    // Mengambil foto utama berdasarkan ID kosan
-    $mainPhoto = asset('image/kos' . $property->id . '.jpg');
+    // Mengambil foto utama berdasarkan ID kosan atau dari database jika ada
+    $photos = is_string($property->photos) ? json_decode($property->photos, true) : $property->photos;
+    if (!empty($photos) && is_array($photos)) {
+        $mainPhoto = '/storage/' . $photos[0];
+    } else {
+        $mainPhoto = asset('image/kos' . $property->id . '.jpg');
+    }
 
     $sisaKamar = $property->rooms->sum('quantity');
     $isKosanPenuh = $sisaKamar <= 0;
